@@ -7,7 +7,7 @@ DATA
 UPDATE
 WiiMusicEditor
 
-2. Install Newest Version of Python: https://www.python.org/downloads/
+2. Install The Newest Version of Python: https://www.python.org/downloads/
 (Make sure to say add to path when installing)
 
 3. Make Sure You Have Cheats On in Dolphin Emulator
