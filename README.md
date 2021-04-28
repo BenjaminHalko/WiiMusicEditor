@@ -12,4 +12,4 @@ WiiMusicEditor
 
 3. Make Sure You Have Cheats On in Dolphin Emulator
 
-4. Make Backup of Wii Music Disk and Dolphin Gecko Codes in case something goes wrong
+4. Make A Backup of Wii Music Disk and Dolphin Gecko Codes in case something goes wrong
