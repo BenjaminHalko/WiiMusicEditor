@@ -519,7 +519,8 @@ StyleMemoryOffsets = [
 '0659A737',
 '0659A75B',
 '0659A77F',
-'0659A7A3']
+'0659A7A3',
+'0659A7C7']
 
 InstrumentNames = [
 'Piano',
