@@ -747,7 +747,7 @@ while True:
 			time.sleep(0.005)
 		print("\n//////////////////// Style Selection:")
 		while True:
-			Melody = input("Enter The Instrament Number You Want For Melody: ")
+			Melody = input("Enter The Instrument Number You Want For Melody: ")
 			if(Melody.isnumeric()) and (int(Melody) < 40):
 				Melody = format(int(Melody),'x').upper()
 				Melody = '0'*(2-len(Melody))+Melody
@@ -755,7 +755,7 @@ while True:
 			else:
 				print("\nERROR: Not a Valid Number\n")
 		while True:
-			Harmony = input("\nEnter The Instrament Number You Want For Harmony: ")
+			Harmony = input("\nEnter The Instrument Number You Want For Harmony: ")
 			if(Harmony.isnumeric()) and (int(Harmony) < 40):
 				Harmony = format(int(Harmony),'x').upper()
 				Harmony = '0'*(2-len(Harmony))+Harmony
@@ -763,7 +763,7 @@ while True:
 			else:
 				print("\nERROR: Not a Valid Number")
 		while True:
-			Chord = input("\nEnter The Instrament Number You Want For Chord: ")
+			Chord = input("\nEnter The Instrument Number You Want For Chord: ")
 			if(Chord.isnumeric()) and (int(Chord) < 40):
 				Chord = format(int(Chord),'x').upper()
 				Chord = '0'*(2-len(Chord))+Chord
@@ -771,7 +771,7 @@ while True:
 			else:
 				print("\nERROR: Not a Valid Number")
 		while True:
-			Bass = input("\nEnter The Instrament Number You Want For Bass: ")
+			Bass = input("\nEnter The Instrument Number You Want For Bass: ")
 			if(Bass.isnumeric()) and (int(Bass) < 40):
 				Bass = format(int(Bass),'x').upper()
 				Bass = '0'*(2-len(Bass))+Bass
@@ -783,7 +783,7 @@ while True:
 			print('(#'+str(num-40)+') '+str(InstrumentNames[num]))
 			time.sleep(0.005)
 		while True:
-			Perc1 = input("\nEnter The Instrament Number You Want For Percussion 1: ")
+			Perc1 = input("\nEnter The Instrument Number You Want For Percussion 1: ")
 			if(Perc1.isnumeric()) and (int(Perc1) < len(InstrumentNames)-40):
 				Perc1 = format(int(Perc1)+40,'x').upper()
 				Perc1 = '0'*(2-len(Perc1))+Perc1
@@ -791,7 +791,7 @@ while True:
 			else:
 				print("\nERROR: Not a Valid Number")
 		while True:
-			Perc2 = input("\nEnter The Instrament Number You Want For Percussion 2: ")
+			Perc2 = input("\nEnter The Instrument Number You Want For Percussion 2: ")
 			if(Perc2.isnumeric()) and (int(Perc2) < len(InstrumentNames)-40):
 				Perc2 = format(int(Perc2)+40,'x').upper()
 				Perc2 = '0'*(2-len(Perc2))+Perc2
