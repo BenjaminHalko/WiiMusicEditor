@@ -798,7 +798,7 @@ while True:
 		subprocess.run('\"'+os.path.dirname(__file__)+'\\Helper\\Wiimms\\encode.bat\" '+MessageFolder(),capture_output=True)
 		print("\nEditing Successful!\n")
 	elif(mode == '4'):
-		PrintSectionStyle("Style List")
+		PrintSectionTitle("Style List")
 		for num in range(len(StyleNames)):
 			print('(#'+str(num)+') '+str(StyleNames[num]))
 			time.sleep(0.005)
