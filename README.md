@@ -15,7 +15,7 @@ WiiMusicEditor
 
 5. Click on .bat or drag a .brseq on .bat to run program
 
-Songs That Don't Work Yet:
+## Songs That Don't Work Yet:
 
 Happy Birthday,
 
@@ -34,3 +34,11 @@ Super Mario,
 Turkey in the Straw,
 
 Woman
+
+## Things to Add:
+
+Run Wii Music from Program
+
+Add 100% Save File
+
+Add Loading from .iso
