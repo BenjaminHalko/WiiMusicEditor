@@ -2,17 +2,16 @@ import os
 import sys
 import getpass
 import time
+import subprocess
+import configparser
 
-#Default Paths
-RootDir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))
-BrsarPath = os.path.join(RootDir,'DATA/files/Sound/MusicStatic/rp_Music_sound.brsar')
-codePath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/GameSettings/R64E01.ini"
+time.sleep(0.05)
 
 #Functions
 def AddPatch(PatchName,PatchInfo):
-	global codePath
-	if(os.path.exists(codePath)):
-		codes = open(codePath,'r')
+	global CodePath
+	if(os.path.exists(CodePath)):
+		codes = open(CodePath,'r')
 		lineText = codes.readlines()
 		codes.close()
 		geckoExists = -1
@@ -50,11 +49,11 @@ def AddPatch(PatchName,PatchInfo):
 		elif(songEnabled == -1):
 			lineText.insert(geckoEnabled+1,'$'+PatchName+'\n')
 		
-		codes = open(codePath,'w')
+		codes = open(CodePath,'w')
 		codes.writelines(lineText)
 		codes.close()
 	else:
-		codes = open(codePath,'w')
+		codes = open(CodePath,'w')
 		codes.write('[Gecko]\n')
 		codes.write('$'+PatchName+' [WiiMusicEditor]\n')
 		codes.write(PatchInfo)
@@ -62,21 +61,75 @@ def AddPatch(PatchName,PatchInfo):
 		codes.write('$'+PatchName+'\n')
 		codes.close()
 
-def FindBrsar():
-	global RootDir
+def FindGameFolder():
+	global GamePath
 	global BrsarPath
-	if(not os.path.isfile(BrsarPath)):
-		if(RootDir != '2'):
-			print("\nERROR: Unable to Locate rp_Music_sound.brsar")
+	global MessagePath
+	if(not os.path.isdir(GamePath+'/DATA')):
 		while True:
-			BrsarPath = input("\nPlease Type In Location Of rp_Music_sound.brsar: ")
-			if(os.path.isfile(BrsarPath)):
-				break
-			elif (os.path.isfile(os.path.join(BrsarPath,'rp_Music_sound.brsar'))):
-				BrsarPath = os.path.join(BrsarPath,'rp_Music_sound.brsar')
+			GamePath = input("\nPlease Type In Location Of Your Decompressed Wii Music Directory: ")
+			if(os.path.isdir(GamePath+'/DATA')):
+				GamePath = os.path.dirname(GamePath+'/DATA').replace('\\','/')
+				SaveSetting('Paths','GamePath',GamePath)
+				BrsarPath = GamePath+'/DATA/files/sound/MusicStatic/rp_Music_sound.brsar'
+				MessagePath = GamePath+'/DATA/files/US/Message/message.carc'
 				break
 			else:
-				print("\nERROR: Unable to Locate rp_Music_sound.brsar")
+				print("\nERROR: Unable to Locate Valid Wii Music Directory")
+
+def FindDolphin():
+	global DolphinPath
+	if(not os.path.isfile(DolphinPath)):
+		while True:
+			DolphinPath = input("\nPlease Type In Location Of Your Dolphin Directory: ")
+			if(os.path.isfile(DolphinPath+'/dolphin.exe')):
+				DolphinPath = DolphinPath.replace('\\','/')
+				DolphinPath = DolphinPath+'/dolphin.exe'
+				SaveSetting('Paths','DolphinPath',DolphinPath)
+				break
+			elif (os.path.isfile(DolphinPath)) and (DolphinPath[len(DolphinPath)-11:len(DolphinPath):1] == 'Dolphin.exe'):
+				DolphinPath = DolphinPath.replace('\\','/')
+				SaveSetting('Paths','DolphinPath',DolphinPath)
+				break
+			else:
+				print("\nERROR: Unable to Locate Valid Dolphin Directory")
+
+def ChangeName(songNum,newName,newDescription):
+	FindMessage()
+	subprocess.run('\"'+os.path.dirname(__file__)+'\\Helper\\Wiimms\\decode.bat\" '+MessageFolder(),capture_output=True)
+	subprocess.run('\"'+os.path.dirname(__file__)+'\\Helper\\Wiimms\\encode.bat\" '+MessageFolder(),capture_output=True)
+
+def MessageFolder():
+	return '\"'+(os.path.dirname(MessagePath)).replace('/','\\')+'\"'
+
+def LoadSetting(section,key,default):
+	ini = configparser.ConfigParser()
+	ini.read('settings.ini')
+	if(ini.has_option(section, key)):
+		return ini[section][key]
+	else:
+		return default
+
+def SaveSetting(section,key,value):
+	ini = configparser.ConfigParser()
+	ini.read('settings.ini')
+	if(not ini.has_section(section)):
+		ini.add_section(section)
+	ini.set(section,key,value)
+	print(str(ini))
+	with open('settings.ini', 'w') as inifile:
+		ini.write(inifile)
+
+def PrintSectionTitle(Text):
+	print("\n//////////////////// "+Text+":")
+
+#Default Paths
+GamePath = LoadSetting('Paths','GamePath','~None')
+BrsarPath = GamePath+'/DATA/files/sound/MusicStatic/rp_Music_sound.brsar'
+MessagePath = GamePath+'/DATA/files/US/Message/message.carc'
+CodePath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/GameSettings/R64E01.ini"
+DolphinPath = LoadSetting('Paths','DolphinPath','~None')
+ProgramPath = os.path.dirname(__file__)
 
 #Song Names
 SongNames = [
@@ -591,29 +644,7 @@ InstrumentNames = [
 'Whistle',
 'Beatbox']
 
-#Check For Wii Music Directory
-if(not(os.path.isdir(RootDir+'/DATA'))):
-	print("ERROR: Can't Find Root of Wii Music Disk!\nThis Program's Folder Should Be In The Root Directory of the Wii Music Disk\n(The Directory with DATA and UPDATE)]")
-	while True:
-		print("\n//////////////////// What Would You Like To Do?")
-		print("0: Quit & Move the Program Folder to the Root Directory")
-		print("1: Manually Locate Wii Music Directory")
-		print("2: Locate Individual Wii Music Files")	
-		RootDir = input("\nType Your Selection: ")
-		if(RootDir == '0'):
-			quit()
-			break
-		elif (RootDir == '1'):
-			RootDir = input("\nPlease Type In Path To Wii Music Directory: ")
-			if((os.path.isdir(os.path.join(RootDir,'DATA')))):
-				break
-			else:
-				print("\nERROR: Invalid Directory!\nPlease Point To The Directory With DATA & UPDATE!")
-		elif (RootDir == '2'):
-			break
-		else:
-			print("\nERROR: Unavalible Option")
-
+#Main Loop
 while True:
 	#Options
 	print("//////////////////////////////")
@@ -623,25 +654,30 @@ while True:
 	print("//       Music Editor       //")
 	print("//                          //")
 	print("//////////////////////////////\n")
-	print("//////////////////// Options")
+	PrintSectionTitle('Options')
 	print("(#1) Add Custom Song To Wii Music")
-	print("(#2) Change Song Name (Coming Soon)")
-	print("(#3) Change Style\n")
+	print("(#2) Change Song Names (Not Finished Yet)")
+	print("(#3) Change All Wii Music Text (Advanced)")
+	print("(#4) Edit Styles")
+	print("(#5) Load Wii Music")
+	print("(#6) Change File Paths")
+	print("(#7) Credits")
 	while True:
-		mode = input("Please Select An Option: ")
-		if(mode == '1') or (mode == '2') or (mode == '3'):
+		mode = input("\nPlease Select An Option: ")
+		if(mode == '1') or (mode == '2') or (mode == '3') or (mode == '4') or (mode == '5') or (mode == '6') or (mode == '7'):
 			break
 		else:
-			print("ERROR: Not a Valid Option!\n")
+			print("\nERROR: Not a Valid Option!")
 
 	if(mode == '1'):
 		#Check For Brsar
-		FindBrsar()
+		FindGameFolder()
 
 		#Load Brseq
 		if(len(sys.argv) < 2):
 			BrseqPath = ''
-		else: BrseqPath = sys.argv[1]
+		else:
+			BrseqPath = sys.argv[1]
 		if(not BrseqPath[len(BrseqPath)-6:len(BrseqPath):1].lower() == '.brseq'):
 			while True:
 				BrseqPath = input("\nPlease Enter Path To .Brseq (Or Drag It On The .Bat File): ")
@@ -657,7 +693,7 @@ while True:
 		BrseqLength = format(os.stat(BrseqPath).st_size,'x').upper()
 
 		#Song Selection
-		print("\n//////////////////// Song List:")
+		PrintSectionTitle('Song List')
 		for num in range(len(SongNames)):
 			SongMinLength = min(int(SongFileLengths[num],16),int(ScoreFileLengths[num],16))
 			if(int(BrseqLength,16) > SongMinLength):
@@ -667,19 +703,21 @@ while True:
 			time.sleep(0.005)
 
 		#Brseq Info
-		print("\n//////////////////// File Info:\nBrseq File Size: "+BrseqLength)
+		PrintSectionTitle("File Info")
+		print("Brseq File Size: "+BrseqLength)
 
 		#Song Selection
+		PrintSectionTitle('Song Selection')
 		while True:
-			SongSelected = input("\n//////////////////// Song Selection:\nEnter The Song Number You Want To Replace: ")
+			SongSelected = input("Enter The Song Number You Want To Replace: ")
 			if(SongSelected.isnumeric()) and (int(SongSelected) < len(SongNames)):
 				SongSelected = int(SongSelected)
 				if(int(BrseqLength,16) <= min(int(SongFileLengths[SongSelected],16),int(ScoreFileLengths[SongSelected],16))):
 					break
 				else:
-					print("ERROR: Brseq Filesize is over the maximum filesize for this song!")
+					print("ERROR: Brseq Filesize is over the maximum filesize for this song!\n")
 			else:
-				print("\nERROR: Not a Valid Number")
+				print("\nERROR: Not a Valid Number\n")
 
 		#Brsar Writing
 		brsar = open(BrsarPath, "r+b")
@@ -694,7 +732,7 @@ while True:
 		brsar.close()
 
 		#Length, Tempo, Time Signature Patch
-		print("\n//////////////////// Length, Tempo, Time Signature Patch")
+		PrintSectionTitle("Length, Tempo, Time Signature Patch")
 		while True:
 			Length = input("How Many Measures Does Your Song Have: ")
 			if(Length.isnumeric()): 
@@ -730,23 +768,53 @@ while True:
 			print("")
 		else:
 			print("Aborted...")
+	elif(mode == '2'):
+		FindGameFolder()
+		#Song Selection
+		PrintSectionTitle("Song List")
+		for num in range(len(SongNames)):
+			print('(#'+str(num)+') '+str(SongNames[num]))
+			time.sleep(0.005)
+
+		while True:
+			PrintSectionTitle("Song Selection")
+			SongSelected = input("\nWhich Song Do You Want To Change The Name Of: ")
+			if(SongSelected.isnumeric()) and (int(SongSelected) < len(SongNames)):
+				SongSelected = int(SongSelected)
+				break
+			else:
+				print("\nERROR: Not a Valid Number")
+		
+		Name = input("\nWhat Should The New Name Be: ")
+		Desc = input("\nWhat Should The New Description Be: ")
+		ChangeName(SongSelected,Name,Desc)
+		print("\nEditing Successful!\n")
 	elif(mode == '3'):
-		print("\n//////////////////// Style List:")
+		FindGameFolder()
+		subprocess.run('\"'+os.path.dirname(__file__)+'\\Helper\\Wiimms\\decode.bat\" '+MessageFolder(),capture_output=True)
+		time.sleep(0.5)
+		print("\nWaiting For User to Finish Editing and for Notepad to Close...")
+		subprocess.run('notepad \"'+MessageFolder().replace('\"','')+'\\message.d\\new_music_message.txt\"',capture_output=True)
+		subprocess.run('\"'+os.path.dirname(__file__)+'\\Helper\\Wiimms\\encode.bat\" '+MessageFolder(),capture_output=True)
+		print("\nEditing Successful!\n")
+	elif(mode == '4'):
+		PrintSectionStyle("Style List")
 		for num in range(len(StyleNames)):
 			print('(#'+str(num)+') '+str(StyleNames[num]))
 			time.sleep(0.005)
+		PrintSectionTitle("Style Selection")
 		while True:
-			StyleSelected = input("\n//////////////////// Style Selection:\nEnter The Style Number You Want To Replace: ")
+			StyleSelected = input("\nEnter The Style Number You Want To Replace: ")
 			if(StyleSelected.isnumeric()) and (int(StyleSelected) < len(StyleNames)):
 				StyleSelected = int(StyleSelected)
 				break
 			else:
 				print("\nERROR: Not a Valid Number")
-		print("\n//////////////////// Instrument List:")
+		PrintSectionTitle("Intrument List")
 		for num in range(40):
 			print('(#'+str(num)+') '+str(InstrumentNames[num]))
 			time.sleep(0.005)
-		print("\n//////////////////// Style Selection:")
+		PrintSectionTitle("Instrument Selection")
 		while True:
 			Melody = input("Enter The Instrument Number You Want For Melody: ")
 			if(Melody.isnumeric()) and (int(Melody) < 40):
@@ -779,7 +847,7 @@ while True:
 				break
 			else:
 				print("\nERROR: Not a Valid Number")
-		print("\n//////////////////// Instrument List:")
+		PrintSectionTitle("Intrument List")
 		for num in range(40,len(InstrumentNames)):
 			print('(#'+str(num-40)+') '+str(InstrumentNames[num]))
 			time.sleep(0.005)
@@ -804,3 +872,29 @@ while True:
 		print("\nPatch Complete")
 		time.sleep(0.5)
 		print("")
+	elif(mode == '5'):
+		FindGameFolder()
+		FindDolphin()
+		PrintSectionTitle("Running Dolphin")
+		subprocess.run('\"'+DolphinPath.replace('/','\\')+'\" -e \"'+GamePath.replace('/','\\')+'\\DATA\\sys\\main.dol\"',capture_output=True)
+		print("")
+	elif(mode == '6'):
+		PrintSectionTitle("Path Editor")
+		print("(#0) Back To Main Menu")
+		print("(#1) Game Path (Current Path: "+GamePath+')')
+		print("(#2) Dolphin Path (Current Path: "+DolphinPath+')')
+		while True:
+			PathSelected = input("\nWhich Path Do You Want To Change: ")
+			if(PathSelected.isnumeric()) and (int(PathSelected) < 3):
+				PathSelected = int(PathSelected)
+				break
+			else:
+				print("\nERROR: Not a Valid Number")
+		if(PathSelected == 1):
+			GamePath = ''
+			FindGameFolder()
+			print("")
+		elif(PathSelected == 2):
+			DolphinPath = ''
+			FindDolphin()
+			print("")

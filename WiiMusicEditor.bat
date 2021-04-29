@@ -1,4 +1,6 @@
 @echo off
-python "%~dp0WiiMusicEditor.py" %1
 
-timeout 10
+cd %~dp0"
+python "WiiMusicEditor.py" %1
+
+timeout 30
