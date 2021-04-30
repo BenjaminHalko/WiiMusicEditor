@@ -68,11 +68,14 @@ def FindGameFolder():
 	if(not os.path.isdir(GamePath+'/DATA')):
 		while True:
 			GamePath = input("\nPlease Type In Location Of Your Decompressed Wii Music Directory: ")
-			if(os.path.isdir(GamePath+'/DATA')):
-				GamePath = os.path.dirname(GamePath+'/DATA').replace('\\','/')
+			if(os.path.isdir(GamePath+'/DATA/files')) or (os.path.isdir(GamePath+'/files')):
+				if(os.path.isdir(GamePath+'/DATA')):
+					GamePath = os.path.dirname(GamePath+'/DATA/files').replace('\\','/')
+				else:
+					GamePath = os.path.dirname(GamePath+'/files').replace('\\','/')
 				SaveSetting('Paths','GamePath',GamePath)
-				BrsarPath = GamePath+'/DATA/files/sound/MusicStatic/rp_Music_sound.brsar'
-				MessagePath = GamePath+'/DATA/files/US/Message/message.carc'
+				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
+				MessagePath = GamePath+'/files/US/Message/message.carc'
 				break
 			else:
 				print("\nERROR: Unable to Locate Valid Wii Music Directory")
