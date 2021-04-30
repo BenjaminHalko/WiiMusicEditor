@@ -124,11 +124,12 @@ def PrintSectionTitle(Text):
 	print("\n//////////////////// "+Text+":")
 
 #Default Paths
-GamePath = LoadSetting('Paths','GamePath','~None')
+GamePath = LoadSetting('Paths','GamePath','None')
 BrsarPath = GamePath+'/DATA/files/sound/MusicStatic/rp_Music_sound.brsar'
 MessagePath = GamePath+'/DATA/files/US/Message/message.carc'
 CodePath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/GameSettings/R64E01.ini"
-DolphinPath = LoadSetting('Paths','DolphinPath','~None')
+SaveDataPath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/Wii/title/00010000/52363445/data"
+DolphinPath = LoadSetting('Paths','DolphinPath','None')
 ProgramPath = os.path.dirname(__file__)
 
 #Song Names
@@ -659,9 +660,10 @@ while True:
 	print("(#2) Change Song Names (Not Finished Yet)")
 	print("(#3) Change All Wii Music Text (Advanced)")
 	print("(#4) Edit Styles")
-	print("(#5) Load Wii Music")
-	print("(#6) Change File Paths")
-	print("(#7) Credits")
+	print("(#5) Overwrite Save File With 100% Save")
+	print("(#6) Load Wii Music")
+	print("(#7) Change File Paths")
+	print("(#8) Credits")
 	while True:
 		mode = input("\nPlease Select An Option: ")
 		if(mode == '1') or (mode == '2') or (mode == '3') or (mode == '4') or (mode == '5') or (mode == '6') or (mode == '7'):
@@ -791,11 +793,11 @@ while True:
 		print("\nEditing Successful!\n")
 	elif(mode == '3'):
 		FindGameFolder()
-		subprocess.run('\"'+os.path.dirname(__file__)+'\\Helper\\Wiimms\\decode.bat\" '+MessageFolder(),capture_output=True)
+		subprocess.run('\"'+os.path.dirname(__file__)+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
 		time.sleep(0.5)
 		print("\nWaiting For User to Finish Editing and for Notepad to Close...")
-		subprocess.run('notepad \"'+MessageFolder().replace('\"','')+'\\message.d\\new_music_message.txt\"',capture_output=True)
-		subprocess.run('\"'+os.path.dirname(__file__)+'\\Helper\\Wiimms\\encode.bat\" '+MessageFolder(),capture_output=True)
+		subprocess.run('notepad \"'+MessageFolder().replace('\"','')+'/message.d/new_music_message.txt\"',capture_output=True)
+		subprocess.run('\"'+os.path.dirname(__file__)+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 		print("\nEditing Successful!\n")
 	elif(mode == '4'):
 		PrintSectionTitle("Style List")
@@ -873,12 +875,18 @@ while True:
 		time.sleep(0.5)
 		print("")
 	elif(mode == '5'):
+		if(input("\nAre You Sure You Want To Overwrite Your Save Data? [y/n] ") == 'y'):
+			subprocess.run('robocopy \"'+ProgramPath+'/Helper/WiiMusicSave\" \"'+SaveDataPath+'\" /MIR /E',capture_output=True)
+			print("\nOverwrite Successfull\n")
+		else:
+			print("\nAborted...\n")
+	elif(mode == '6'):
 		FindGameFolder()
 		FindDolphin()
 		PrintSectionTitle("Running Dolphin")
-		subprocess.run('\"'+DolphinPath.replace('/','\\')+'\" -e \"'+GamePath.replace('/','\\')+'\\DATA\\sys\\main.dol\"',capture_output=True)
+		subprocess.run('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/DATA/sys/main.dol\"',capture_output=True)
 		print("")
-	elif(mode == '6'):
+	elif(mode == '7'):
 		PrintSectionTitle("Path Editor")
 		print("(#0) Back To Main Menu")
 		print("(#1) Game Path (Current Path: "+GamePath+')')
