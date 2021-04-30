@@ -30,6 +30,4 @@ Woman
 
 ## Things to Add:
 
-Add 100% Save File
-
 Add Loading from .iso
