@@ -65,7 +65,7 @@ def FindGameFolder():
 	global GamePath
 	global BrsarPath
 	global MessagePath
-	if(not os.path.isdir(GamePath+'/DATA')):
+	if(not os.path.isdir(GamePath+'/files')):
 		while True:
 			GamePath = input("\nPlease Type In Location Of Your Decompressed Wii Music Directory: ")
 			if(os.path.isdir(GamePath+'/DATA/files')) or (os.path.isdir(GamePath+'/files')):
@@ -128,8 +128,8 @@ def PrintSectionTitle(Text):
 
 #Default Paths
 GamePath = LoadSetting('Paths','GamePath','None')
-BrsarPath = GamePath+'/DATA/files/sound/MusicStatic/rp_Music_sound.brsar'
-MessagePath = GamePath+'/DATA/files/US/Message/message.carc'
+BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
+MessagePath = GamePath+'/files/US/Message/message.carc'
 CodePath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/GameSettings/R64E01.ini"
 SaveDataPath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/Wii/title/00010000/52363445/data"
 DolphinPath = LoadSetting('Paths','DolphinPath','None')
