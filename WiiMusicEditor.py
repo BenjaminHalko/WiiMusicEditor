@@ -396,112 +396,7 @@ ScoreFileLengths = [
 '1940',
 '1240',
 '1880']
-
-LengthMemoryOffsets = [
-'025a08ae',
-'025a0c5a',
-'025a2786',
-'025a175e',
-'025a0502',
-'025a067a',
-'025a1dfa',
-'025a1c82',
-'025a0ae2',
-'025a1d3e',
-'025a2842',
-'025a146e',
-'025a181a',
-'025a1006',
-'', #happybirthday
-'', #illbethere
-'025a2496',
-'025a231e',
-'025a10c2',
-'025a1992',
-'025a16a2',
-'025a123a',
-'025a202e',
-'025a096a',
-'025a0f4a',
-'025a15e6',
-'', #odetojoy
-'025a0e8e',
-'', #overthewaves
-'025a1f72',
-'', #sakurasakura
-'', #scarbouroghfair
-'025a1eb6',
-'025a1bc6',
-'', #supermariobros
-'025a13b2',
-'025a05be',
-'025a07f2',
-'025a0b9e',
-'025a152a',
-'025a260e',
-'025a20ea',
-'025a18d6',
-'', #turkeystraw
-'025a12f6',
-'025a23da',
-'025a0736',
-'025a26ca',
-'',
-'025a0dd2']
-
-TempoMemoryOffsets = [
-'025a08b3',
-'025a0c5e',
-'025a278a',
-'025a1763',
-'025a0506',
-'025a067e',
-'025a1dfe',
-'025a1c86',
-'025a0ae6',
-'025a1d42',
-'025a2846',
-'025a1472',
-'025a181e',
-'025a100a',
-'',
-'',
-'025a249a',
-'025a2322',
-'025a10c6',
-'025a1996',
-'025a16a6',
-'025a123e',
-'025a2032',
-'025a096e',
-'025a0f4e',
-'025a15ea',
-'',
-'025a0e92',
-'',
-'025a1f76',
-'',
-'',
-'025a1eba',
-'025a1bca',
-'',
-'025a13b6',
-'025a05c2',
-'025a07f6',
-'025a0ba2',
-'025a152e',
-'025a2612',
-'025a20ee',
-'025a18da',
-'',
-'025a12fa',
-'025a23de',
-'025a073a',
-'025a26ce',
-'',
-'025a0dd6']
-
-TimeSignatureMemoryOffsets = [
+SongMemoryOffsets = [
 '025a08a8',
 '025a0c54',
 '025a2780',
@@ -515,9 +410,9 @@ TimeSignatureMemoryOffsets = [
 '025a283c',
 '025a1468',
 '025a1814',
-'025a1000',
-'',
-'',
+'025a1000', 
+'025a0a20',
+'025a21a0',
 '025a2490',
 '025a2318',
 '025a10bc',
@@ -530,13 +425,13 @@ TimeSignatureMemoryOffsets = [
 '025a15e0',
 '',
 '025a0e88',
-'',
+'025a1a48',
 '025a1f6c',
-'',
-'',
+'025a1b04',
+'025a1178',
 '025a1eb0',
 '025a1bc0',
-'',
+'025a254c',
 '025a13ac',
 '025a05b8',
 '025a07ec',
@@ -545,12 +440,12 @@ TimeSignatureMemoryOffsets = [
 '025a2608',
 '025a20e4',
 '025a18d0',
-'',
+'025a0d10',
 '025a12f0',
 '025a23d4',
 '025a0730',
 '025a26c4',
-'',
+'025a23d4',
 '025a0dcc']
 
 StyleNames = [
@@ -679,10 +574,11 @@ while True:
 		FindGameFolder()
 
 		#Load Brseq
-		if(len(sys.argv) < 2):
-			BrseqPath = ''
-		else:
-			BrseqPath = sys.argv[1]
+		BrseqPath = 'd:/Benjaminz/Projects/Custom Wii Music/Songs/Once Upon a Time - Ode to Joy/Z.brseq'
+		#if(len(sys.argv) < 2):
+			#BrseqPath = ''
+		#else:
+			#BrseqPath = sys.argv[1]
 		if(not BrseqPath[len(BrseqPath)-6:len(BrseqPath):1].lower() == '.brseq'):
 			while True:
 				BrseqPath = input("\nPlease Enter Path To .Brseq (Or Drag It On The .Bat File): ")
@@ -724,18 +620,6 @@ while True:
 			else:
 				print("\nERROR: Not a Valid Number\n")
 
-		#Brsar Writing
-		brsar = open(BrsarPath, "r+b")
-		brsar.seek(int(SongOffsets[SongSelected],16))
-		brsar.write(bytes(int(SongFileLengths[SongSelected],16)))
-		brsar.seek(int(ScoreOffsets[SongSelected],16))
-		brsar.write(bytes(int(ScoreFileLengths[SongSelected],16)))
-		brsar.seek(int(SongOffsets[SongSelected],16))
-		brsar.write(BrseqInfo)
-		brsar.seek(int(ScoreOffsets[SongSelected],16))
-		brsar.write(BrseqInfo)
-		brsar.close()
-
 		#Length, Tempo, Time Signature Patch
 		PrintSectionTitle("Length, Tempo, Time Signature Patch")
 		while True:
@@ -761,18 +645,34 @@ while True:
 			else:
 				print("\nERROR: Please Press Ether 4 or 3")
 
+		#Final Writting
+		SongSelected = 0
+		while (SongSelected < len(SongNames)):
+			if(SongOffsets[SongSelected] != '0') and (SongMemoryOffsets[SongSelected] != ''):
+				LengthCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+6,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
+				TempoCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
+				TimeCode = SongMemoryOffsets[SongSelected]+' 00000'+TimeSignature+'00\n'
 
-		LengthCode = LengthMemoryOffsets[SongSelected]+' '+'0'*(8-len(Length))+Length+'\n'
-		TempoCode = TempoMemoryOffsets[SongSelected]+' '+'0'*(8-len(Tempo))+Tempo+'\n'
-		TimeCode = TimeSignatureMemoryOffsets[SongSelected]+' 00000'+TimeSignature+'00\n'
-
-		if(input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou Will NOT Be Able to Restore the Song Unless You Have Made a Backup! [y/n] ') == 'y'):
-			AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
-			print("\nPatch Complete")
-			time.sleep(0.5)
-			print("")
-		else:
-			print("Aborted...")
+				if(1 == 1): #(input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou Will NOT Be Able to Restore the Song Unless You Have Made a Backup! [y/n] ') == 'y'):
+					#Brsar Writing
+					brsar = open(BrsarPath, "r+b")
+					brsar.seek(int(SongOffsets[SongSelected],16))
+					brsar.write(bytes(int(SongFileLengths[SongSelected],16)))
+					brsar.seek(int(ScoreOffsets[SongSelected],16))
+					brsar.write(bytes(int(ScoreFileLengths[SongSelected],16)))
+					brsar.seek(int(SongOffsets[SongSelected],16))
+					brsar.write(BrseqInfo)
+					brsar.seek(int(ScoreOffsets[SongSelected],16))
+					brsar.write(BrseqInfo)
+					brsar.close()
+					
+					AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
+					#print("\nPatch Complete")
+					#time.sleep(0.5)
+					#print("")
+				else:
+					print("Aborted...")
+			SongSelected += 1
 	elif(mode == '2'):
 		FindGameFolder()
 		#Song Selection
@@ -887,7 +787,7 @@ while True:
 		FindGameFolder()
 		FindDolphin()
 		PrintSectionTitle("Running Dolphin")
-		subprocess.run('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/DATA/sys/main.dol\"',capture_output=True)
+		subprocess.run('\"'+DolphinPath+'\" -e \"'+GamePath+'/sys/main.dol\"',capture_output=True)
 		print("")
 	elif(mode == '7'):
 		PrintSectionTitle("Path Editor")
