@@ -574,11 +574,10 @@ while True:
 		FindGameFolder()
 
 		#Load Brseq
-		BrseqPath = 'd:/Benjaminz/Projects/Custom Wii Music/Songs/Once Upon a Time - Ode to Joy/Z.brseq'
-		#if(len(sys.argv) < 2):
-			#BrseqPath = ''
-		#else:
-			#BrseqPath = sys.argv[1]
+		if(len(sys.argv) < 2):
+			BrseqPath = ''
+		else:
+			BrseqPath = sys.argv[1]
 		if(not BrseqPath[len(BrseqPath)-6:len(BrseqPath):1].lower() == '.brseq'):
 			while True:
 				BrseqPath = input("\nPlease Enter Path To .Brseq (Or Drag It On The .Bat File): ")
@@ -646,33 +645,29 @@ while True:
 				print("\nERROR: Please Press Ether 4 or 3")
 
 		#Final Writting
-		SongSelected = 0
-		while (SongSelected < len(SongNames)):
-			if(SongOffsets[SongSelected] != '0') and (SongMemoryOffsets[SongSelected] != ''):
-				LengthCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+6,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
-				TempoCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
-				TimeCode = SongMemoryOffsets[SongSelected]+' 00000'+TimeSignature+'00\n'
+		LengthCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+6,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
+		TempoCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
+		TimeCode = SongMemoryOffsets[SongSelected]+' 00000'+TimeSignature+'00\n'
 
-				if(1 == 1): #(input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou Will NOT Be Able to Restore the Song Unless You Have Made a Backup! [y/n] ') == 'y'):
-					#Brsar Writing
-					brsar = open(BrsarPath, "r+b")
-					brsar.seek(int(SongOffsets[SongSelected],16))
-					brsar.write(bytes(int(SongFileLengths[SongSelected],16)))
-					brsar.seek(int(ScoreOffsets[SongSelected],16))
-					brsar.write(bytes(int(ScoreFileLengths[SongSelected],16)))
-					brsar.seek(int(SongOffsets[SongSelected],16))
-					brsar.write(BrseqInfo)
-					brsar.seek(int(ScoreOffsets[SongSelected],16))
-					brsar.write(BrseqInfo)
-					brsar.close()
-					
-					AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
-					#print("\nPatch Complete")
-					#time.sleep(0.5)
-					#print("")
-				else:
-					print("Aborted...")
-			SongSelected += 1
+		if(input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou Will NOT Be Able to Restore the Song Unless You Have Made a Backup! [y/n] ') == 'y'):
+			#Brsar Writing
+			brsar = open(BrsarPath, "r+b")
+			brsar.seek(int(SongOffsets[SongSelected],16))
+			brsar.write(bytes(int(SongFileLengths[SongSelected],16)))
+			brsar.seek(int(ScoreOffsets[SongSelected],16))
+			brsar.write(bytes(int(ScoreFileLengths[SongSelected],16)))
+			brsar.seek(int(SongOffsets[SongSelected],16))
+			brsar.write(BrseqInfo)
+			brsar.seek(int(ScoreOffsets[SongSelected],16))
+			brsar.write(BrseqInfo)
+			brsar.close()
+			
+			AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
+			print("\nPatch Complete")
+			time.sleep(0.5)
+			print("")
+		else:
+			print("Aborted...")
 	elif(mode == '2'):
 		FindGameFolder()
 		#Song Selection
