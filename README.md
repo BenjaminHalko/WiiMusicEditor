@@ -8,7 +8,7 @@
 
 - Wii Music Text Editor
 
-- Automatic Conversion of .midi or .rseq when creating Custom Song
+- Automatic Conversion of .midi or .rseq when creating Custom Songs
 
 - 100% Wii Music Save File
 
