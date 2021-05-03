@@ -4,136 +4,13 @@ import getpass
 import time
 import subprocess
 import configparser
+import pathlib
+from shutil import copyfile
+import tempfile
+import mido
+from math import floor
 
 time.sleep(0.05)
-
-#Functions
-def AddPatch(PatchName,PatchInfo):
-	global CodePath
-	if(os.path.exists(CodePath)):
-		codes = open(CodePath,'r')
-		lineText = codes.readlines()
-		codes.close()
-		geckoExists = -1
-		songExists = -1
-		geckoEnabled = -1
-		songEnabled = -1
-		for num in range(len(lineText)):
-			if(lineText[num].rstrip() == '[Gecko]'):
-				geckoExists = num
-			if(lineText[num].rstrip() == '$'+PatchName+' [WiiMusicEditor]'):
-				songExists = num
-
-		if(geckoExists == -1):
-			lineText.insert(0,'[Gecko]\n'+'$'+PatchName+' [WiiMusicEditor]\n'+PatchInfo)
-		elif(songExists == -1):
-			lineText.insert(geckoExists+1,'$'+PatchName+' [WiiMusicEditor]\n'+PatchInfo)
-		else:
-			while True:
-				if(len(lineText) <= songExists+1):
-					break
-				elif(not lineText[songExists+1][0].isnumeric()):
-					break
-				else:
-					lineText.pop(songExists+1)
-			lineText.insert(songExists+1,PatchInfo)
-		
-		for num in range(len(lineText)):
-			if(lineText[num].rstrip() == '[Gecko_Enabled]'):
-				geckoEnabled = num
-			if(lineText[num].rstrip() == '$'+PatchName):
-				songEnabled = num
-
-		if(geckoEnabled == -1):
-			lineText.insert(len(lineText),'[Gecko_Enabled]\n'+'$'+PatchName+'\n')
-		elif(songEnabled == -1):
-			lineText.insert(geckoEnabled+1,'$'+PatchName+'\n')
-		
-		codes = open(CodePath,'w')
-		codes.writelines(lineText)
-		codes.close()
-	else:
-		codes = open(CodePath,'w')
-		codes.write('[Gecko]\n')
-		codes.write('$'+PatchName+' [WiiMusicEditor]\n')
-		codes.write(PatchInfo)
-		codes.write('[Gecko_Enabled]\n')
-		codes.write('$'+PatchName+'\n')
-		codes.close()
-
-def FindGameFolder():
-	global GamePath
-	global BrsarPath
-	global MessagePath
-	if(not os.path.isdir(GamePath+'/files')):
-		while True:
-			GamePath = input("\nPlease Type In Location Of Your Decompressed Wii Music Directory: ")
-			if(os.path.isdir(GamePath+'/DATA/files')) or (os.path.isdir(GamePath+'/files')):
-				if(os.path.isdir(GamePath+'/DATA')):
-					GamePath = os.path.dirname(GamePath+'/DATA/files').replace('\\','/')
-				else:
-					GamePath = os.path.dirname(GamePath+'/files').replace('\\','/')
-				SaveSetting('Paths','GamePath',GamePath)
-				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
-				MessagePath = GamePath+'/files/US/Message/message.carc'
-				break
-			else:
-				print("\nERROR: Unable to Locate Valid Wii Music Directory")
-
-def FindDolphin():
-	global DolphinPath
-	if(not os.path.isfile(DolphinPath)):
-		while True:
-			DolphinPath = input("\nPlease Type In Location Of Your Dolphin Directory: ")
-			if(os.path.isfile(DolphinPath+'/dolphin.exe')):
-				DolphinPath = DolphinPath.replace('\\','/')
-				DolphinPath = DolphinPath+'/dolphin.exe'
-				SaveSetting('Paths','DolphinPath',DolphinPath)
-				break
-			elif (os.path.isfile(DolphinPath)) and (DolphinPath[len(DolphinPath)-11:len(DolphinPath):1] == 'Dolphin.exe'):
-				DolphinPath = DolphinPath.replace('\\','/')
-				SaveSetting('Paths','DolphinPath',DolphinPath)
-				break
-			else:
-				print("\nERROR: Unable to Locate Valid Dolphin Directory")
-
-def ChangeName(songNum,newName,newDescription):
-	FindMessage()
-	subprocess.run('\"'+os.path.dirname(__file__)+'\\Helper\\Wiimms\\decode.bat\" '+MessageFolder(),capture_output=True)
-	subprocess.run('\"'+os.path.dirname(__file__)+'\\Helper\\Wiimms\\encode.bat\" '+MessageFolder(),capture_output=True)
-
-def MessageFolder():
-	return '\"'+(os.path.dirname(MessagePath)).replace('/','\\')+'\"'
-
-def LoadSetting(section,key,default):
-	ini = configparser.ConfigParser()
-	ini.read('settings.ini')
-	if(ini.has_option(section, key)):
-		return ini[section][key]
-	else:
-		return default
-
-def SaveSetting(section,key,value):
-	ini = configparser.ConfigParser()
-	ini.read('settings.ini')
-	if(not ini.has_section(section)):
-		ini.add_section(section)
-	ini.set(section,key,value)
-	print(str(ini))
-	with open('settings.ini', 'w') as inifile:
-		ini.write(inifile)
-
-def PrintSectionTitle(Text):
-	print("\n//////////////////// "+Text+":")
-
-#Default Paths
-GamePath = LoadSetting('Paths','GamePath','None')
-BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
-MessagePath = GamePath+'/files/US/Message/message.carc'
-CodePath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/GameSettings/R64E01.ini"
-SaveDataPath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/Wii/title/00010000/52363445/data"
-DolphinPath = LoadSetting('Paths','DolphinPath','None')
-ProgramPath = os.path.dirname(__file__)
 
 #Song Names
 SongNames = [
@@ -396,6 +273,7 @@ ScoreFileLengths = [
 '1940',
 '1240',
 '1880']
+
 SongMemoryOffsets = [
 '025a08a8',
 '025a0c54',
@@ -543,6 +421,182 @@ InstrumentNames = [
 'Whistle',
 'Beatbox']
 
+#Functions
+def AddPatch(PatchName,PatchInfo):
+	global CodePath
+	if(os.path.exists(CodePath)):
+		codes = open(CodePath,'r')
+		lineText = codes.readlines()
+		codes.close()
+		geckoExists = -1
+		songExists = -1
+		geckoEnabled = -1
+		songEnabled = -1
+		for num in range(len(lineText)):
+			if(lineText[num].rstrip() == '[Gecko]'):
+				geckoExists = num
+			if(lineText[num].rstrip() == '$'+PatchName+' [WiiMusicEditor]'):
+				songExists = num
+
+		if(geckoExists == -1):
+			lineText.insert(0,'[Gecko]\n'+'$'+PatchName+' [WiiMusicEditor]\n'+PatchInfo)
+		elif(songExists == -1):
+			lineText.insert(geckoExists+1,'$'+PatchName+' [WiiMusicEditor]\n'+PatchInfo)
+		else:
+			while True:
+				if(len(lineText) <= songExists+1):
+					break
+				elif(not lineText[songExists+1][0].isnumeric()):
+					break
+				else:
+					lineText.pop(songExists+1)
+			lineText.insert(songExists+1,PatchInfo)
+		
+		for num in range(len(lineText)):
+			if(lineText[num].rstrip() == '[Gecko_Enabled]'):
+				geckoEnabled = num
+			if(lineText[num].rstrip() == '$'+PatchName):
+				songEnabled = num
+
+		if(geckoEnabled == -1):
+			lineText.insert(len(lineText),'[Gecko_Enabled]\n'+'$'+PatchName+'\n')
+		elif(songEnabled == -1):
+			lineText.insert(geckoEnabled+1,'$'+PatchName+'\n')
+		
+		codes = open(CodePath,'w')
+		codes.writelines(lineText)
+		codes.close()
+	else:
+		codes = open(CodePath,'w')
+		codes.write('[Gecko]\n')
+		codes.write('$'+PatchName+' [WiiMusicEditor]\n')
+		codes.write(PatchInfo)
+		codes.write('[Gecko_Enabled]\n')
+		codes.write('$'+PatchName+'\n')
+		codes.close()
+
+def FindGameFolder():
+	global GamePath
+	global BrsarPath
+	global MessagePath
+	if(not os.path.isdir(GamePath+'/files')):
+		while True:
+			GamePath = input("\nDrag Decompressed Wii Music Directory: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			if(os.path.isdir(GamePath+'/DATA/files')) or (os.path.isdir(GamePath+'/files')):
+				if(os.path.isdir(GamePath+'/DATA')):
+					GamePath = os.path.dirname(GamePath+'/DATA/files').replace('\\','/')
+				else:
+					GamePath = os.path.dirname(GamePath+'/files').replace('\\','/')
+				SaveSetting('Paths','GamePath',GamePath)
+				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
+				MessagePath = GamePath+'/files/US/Message/message.carc'
+				break
+			else:
+				print("\nERROR: Unable to Locate Valid Wii Music Directory")
+
+def FindDolphin():
+	global DolphinPath
+	if(not os.path.isfile(DolphinPath)):
+		while True:
+			DolphinPath = input("\nDrag Dolphin.exe Over Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			if(os.path.isfile(DolphinPath+'/dolphin.exe')):
+				DolphinPath = DolphinPath.replace('\\','/')
+				DolphinPath = DolphinPath+'/dolphin.exe'
+				SaveSetting('Paths','DolphinPath',DolphinPath)
+				break
+			elif (os.path.isfile(DolphinPath)) and (DolphinPath[len(DolphinPath)-11:len(DolphinPath):1] == 'Dolphin.exe'):
+				DolphinPath = DolphinPath.replace('\\','/')
+				SaveSetting('Paths','DolphinPath',DolphinPath)
+				break
+			else:
+				print("\nERROR: Unable to Locate Valid Dolphin Directory")
+
+def InitializeBrseq():
+	global BrseqPath
+	global BrseqInfo
+	global BrseqLength
+	global ProgramPath
+	global Tempo
+	global MidiBeats
+	global MidiBeatsString
+	ExceptedSongExtensions = ['.midi','.mid','.brseq','.rseq']
+	if(len(sys.argv) < 2):
+		BrseqPath = ''
+	else:
+		BrseqPath = sys.argv[1]
+	if(not os.path.isfile(BrseqPath)) or (not pathlib.Path(BrseqPath).suffix in ExceptedSongExtensions):
+		while True:
+			BrseqPath = input("\nDrag Song File Over Window [.midi, .mid, .brseq, .rseq] (Or Drag It On The .Bat File): ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			if(os.path.isfile(BrseqPath)) and (pathlib.Path(BrseqPath).suffix in ExceptedSongExtensions):
+				break
+			else:
+				print("\nERROR: Not A Valid File!")
+
+	with tempfile.TemporaryDirectory() as directory:
+		prefix = pathlib.Path(BrseqPath).suffix
+		if(prefix == '.mid'): prefix = '.midi'
+		copyfile(BrseqPath,directory+'/z'+prefix)
+		if(os.path.isfile(directory+'/z.rseq')):
+			subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" assemble \"'+directory+'/z.rseq\"')
+		if(os.path.isfile(directory+'/z.brseq')):
+			subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" to_midi \"'+directory+'/z.brseq\"')
+		else:
+			subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" from_midi \"'+directory+'/z.midi\"')
+		mid = mido.MidiFile(directory+"/z.midi")
+		Tempo = 'Could Not Locate'
+		MidiBeats = 0
+		for msg in mid.tracks[0]:
+			if(msg.type == 'set_tempo'):
+				Tempo = floor(mido.tempo2bpm(msg.tempo))
+		MidiBeats = mid.length*Tempo/60
+		MidiBeatsString = str(floor(MidiBeats))
+		Tempo = str(Tempo)
+		Brseq = open(directory+"/z.brseq","rb")
+		Brseq.seek(0)
+		BrseqInfo = Brseq.read()
+		Brseq.close()
+		BrseqLength = format(os.stat(directory+"/z.brseq").st_size,'x').upper()
+
+
+def ChangeName(songNum,newName,newDescription):
+	global ProgramPath
+	FindMessage()
+	subprocess.run('\"'+ProgramPath+'\\Helper\\Wiimms\\decode.bat\" '+MessageFolder(),capture_output=True)
+	subprocess.run('\"'+ProgramPath+'\\Helper\\Wiimms\\encode.bat\" '+MessageFolder(),capture_output=True)
+
+def MessageFolder():
+	return '\"'+(os.path.dirname(MessagePath)).replace('/','\\')+'\"'
+
+def LoadSetting(section,key,default):
+	ini = configparser.ConfigParser()
+	ini.read('settings.ini')
+	if(ini.has_option(section, key)):
+		return ini[section][key]
+	else:
+		return default
+
+def SaveSetting(section,key,value):
+	ini = configparser.ConfigParser()
+	ini.read('settings.ini')
+	if(not ini.has_section(section)):
+		ini.add_section(section)
+	ini.set(section,key,value)
+	print(str(ini))
+	with open('settings.ini', 'w') as inifile:
+		ini.write(inifile)
+
+def PrintSectionTitle(Text):
+	print("\n//////////////////// "+Text+":")
+
+#Default Paths
+GamePath = LoadSetting('Paths','GamePath','None')
+BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
+MessagePath = GamePath+'/files/US/Message/message.carc'
+CodePath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/GameSettings/R64E01.ini"
+SaveDataPath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/Wii/title/00010000/52363445/data"
+DolphinPath = LoadSetting('Paths','DolphinPath','None')
+ProgramPath = os.path.dirname(__file__)
+
 #Main Loop
 while True:
 	#Options
@@ -564,7 +618,7 @@ while True:
 	print("(#8) Credits")
 	while True:
 		mode = input("\nPlease Select An Option: ")
-		if(mode == '1') or (mode == '2') or (mode == '3') or (mode == '4') or (mode == '5') or (mode == '6') or (mode == '7'):
+		if(mode == '1') or (mode == '2') or (mode == '3') or (mode == '4') or (mode == '5') or (mode == '6') or (mode == '7') or (mode == '8'):
 			break
 		else:
 			print("\nERROR: Not a Valid Option!")
@@ -574,23 +628,7 @@ while True:
 		FindGameFolder()
 
 		#Load Brseq
-		if(len(sys.argv) < 2):
-			BrseqPath = ''
-		else:
-			BrseqPath = sys.argv[1]
-		if(not BrseqPath[len(BrseqPath)-6:len(BrseqPath):1].lower() == '.brseq'):
-			while True:
-				BrseqPath = input("\nPlease Enter Path To .Brseq (Or Drag It On The .Bat File): ")
-				if(os.path.isfile(BrseqPath)) and (BrseqPath[len(BrseqPath)-6:len(BrseqPath):1] == '.brseq'):
-					break
-				else:
-					print("\nERROR: Not A Valid File!")
-			
-		Brseq = open(BrseqPath,"rb")
-		Brseq.seek(0)
-		BrseqInfo = Brseq.read()
-		Brseq.close()
-		BrseqLength = format(os.stat(BrseqPath).st_size,'x').upper()
+		InitializeBrseq()
 
 		#Song Selection
 		PrintSectionTitle('Song List')
@@ -604,7 +642,9 @@ while True:
 
 		#Brseq Info
 		PrintSectionTitle("File Info")
-		print("Brseq File Size: "+BrseqLength)
+		print("Number of Beats: "+MidiBeatsString)
+		print("Tempo: "+Tempo)
+		print("File Size: "+BrseqLength)
 
 		#Song Selection
 		PrintSectionTitle('Song Selection')
@@ -621,28 +661,45 @@ while True:
 
 		#Length, Tempo, Time Signature Patch
 		PrintSectionTitle("Length, Tempo, Time Signature Patch")
-		while True:
-			Length = input("How Many Measures Does Your Song Have: ")
-			if(Length.isnumeric()): 
-				break
-			else:
-				print("\nERROR: Not a Valid Number\n")
+		AutoFill = 'n'
+		if(Tempo != 'Could Not Locate') or (MidiBeats != 0):
+			MetaDataFound = ''
+			if(MidiBeats != 0): MetaDataFound = 'Length'
+			if(Tempo != 'Could Not Locate'):
+				if(MetaDataFound == ''): MetaDataFound = 'Tempo'
+				else: MetaDataFound = MetaDataFound+', Tempo'
+			print('Meta Data Found: '+MetaDataFound)
+			AutoFill = input("\nWe Have Automatically Located Some Meta Data! Would You Like To Autofill It: [y/n] ")
+		
+		if(AutoFill != 'y') or (MidiBeats == 0):
+			while True:
+				Length = input("\nHow Many Measures Does Your Song Have: ")
+				if(Length.isnumeric()): 
+					break
+				else:
+					print("\nERROR: Not a Valid Number\n")
 
-		while True:
-			Tempo = input("\nWhat is the Tempo of Your Song: ")
-			if(Tempo.isnumeric()):
-				Tempo = format(int(Tempo),'x').upper()
-				break
-			else:
-				print("\nERROR: Not a Valid Number")
+		if(AutoFill != 'y') or (not Tempo.isnumeric()):
+			while True:
+				Tempo = input("\nWhat is the Tempo of Your Song: ")
+				if(Tempo.isnumeric()):
+					break
+				else:
+					print("\nERROR: Not a Valid Number")
+
+		Tempo = format(int(Tempo),'x').upper()
 
 		while True:
 			TimeSignature = input("\nWhat Time Signature is Your Song? (4 = 4/4, 3 = 3/4): ")
 			if(TimeSignature == '3') or (TimeSignature == '4'):
-				Length = format(int(Length) * int(TimeSignature),'x').upper()
 				break
 			else:
 				print("\nERROR: Please Press Ether 4 or 3")
+
+		if(AutoFill == 'y') and (MidiBeats != 0):
+			Length = str(round(MidiBeats/int(TimeSignature)))
+		else:	
+			Length = format(int(Length) * int(TimeSignature),'x').upper()
 
 		#Final Writting
 		LengthCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+6,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
@@ -804,3 +861,19 @@ while True:
 			DolphinPath = ''
 			FindDolphin()
 			print("")
+	elif(mode == '8'):
+		PrintSectionTitle('Credits')
+		print('\n-----Created By:-----')
+		print('- Benjamin Halko')
+		print('\n-----Tested By:-----')
+		print('- FasterHumans')
+		print('- RainbowKappa')
+		print('\n-----Song File Offsets Discovered By:-----')
+		print('- JimmyKaz')
+		print('\n-----Song Memory Offsets Discovered By:-----')
+		print('- Checker Mii Out Channel')
+		print('\n-----Brsar Conversion Made Possible By:-----')
+		print('- GotaSequenceCmd')
+		print('\n-----Text Extraction Made Possible By:-----')
+		print('- WiiMMS')
+		input('')
