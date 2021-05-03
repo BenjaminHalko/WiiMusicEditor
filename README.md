@@ -4,6 +4,8 @@
 
 - Automatically Applying .brseq to .brsar and Creating Length/Tempo/Time Signature Patch
 
+- Rename Songs Directly After Applying .brseq
+
 - Custom Style Creator
 
 - Wii Music Text Editor
@@ -35,3 +37,5 @@ Sakura Sakura
 ## Things to Add:
 
 Add Loading from .iso
+
+Rapper Crash Fix

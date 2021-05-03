@@ -18,7 +18,7 @@ SongNames = [
 'American Patrol',
 'Animal Crossing',
 'Animal Crossing K.K. Blues',
-'Bridal Chrous',
+'Bridal Chorus',
 'Carmen',
 'Chariots of Fire',
 'Daydream Believer',
@@ -30,7 +30,7 @@ SongNames = [
 'From the New World',
 'Happy Birthday to You',
 'Ill Be There',
-'Ive Never Been To Me',
+'Ive Never Been to Me',
 'Jingle Bell Rock',
 'La Bamba',
 'La Cucaracha',
@@ -43,7 +43,7 @@ SongNames = [
 'Ode To Joy',
 'Oh My Darling Clementine',
 'Over the Waves',
-'Please Mr.Postman',
+'Please Mr. Postman',
 'Sakura Sakura',
 'Scarborough Fair',
 'September',
@@ -421,6 +421,113 @@ InstrumentNames = [
 'Whistle',
 'Beatbox']
 
+SongMemoryOrder = [
+'Ode To Joy',
+'Bridal Chorus',
+'Swan Lake',
+'Carmen',
+'Wii Music',
+'The Blue Danube',
+'A Little Night Music',
+'Minuet in G Major',
+'Happy Birthday to You',
+'Do-Re-Mi',
+'The Entertainer',
+'American Patrol',
+'Turkey in the Straw',
+'Yankee Doodle',
+'Oh My Darling Clementine',
+'My Grandfathers Clock',
+'From the New World',
+'La Bamba',
+'Scarborough Fair',
+'Long Long Ago',
+'Twinkle Twinkle Little Star',
+'Sur le Pont d Avignon',
+'Frere Jacques',
+'The Flea Waltz',
+'O-Christmas Tree',
+'Little Hans',
+'Animal Crossing K.K. Blues',
+'From Santurtzi to Bilbao',
+'Troika',
+'La Cucaracha',
+'Over the Waves',
+'Sakura Sakura',
+'Sukiyaki',
+'Daydream Believer',
+'Every Breath You Take',
+'Chariots of Fire',
+'September',
+'Please Mr. Postman',
+'Material Girl',
+'The Loco Motion',
+'Ill Be There',
+'Jingle Bell Rock',
+'Wake Me Up Before You Go-Go',
+'Woman',
+'Ive Never Been to Me',
+'Super Mario Bros',
+'The Legend of Zelda',
+'Wii Sports',
+'Animal Crossing',
+'F-Zero']
+
+SongTextOffsets = [
+'ce00 @0191',
+'d300 @0196',
+'f800 @01bb',
+'e200 @01a5',
+'c900 @018c',
+'cb00 @018e',
+'eb00 @01ae',
+'e900 @01ac',
+'d100 @0194',
+'ea00 @01ad',
+'f900 @01bc',
+'de00 @01a1',
+'e300 @01a6',
+'d800 @019b',
+'d000 @0193',
+'f000 @01b3',
+'f400 @01b7',
+'f100 @01b4',
+'d900 @019c',
+'e500 @01a8',
+'e100 @01a4',
+'db00 @019e',
+'ee00 @01b1',
+'cf00 @0192',
+'d700 @019a',
+'e000 @01a3',
+'c800 @018b',
+'d600 @0199',
+'e600 @01a9',
+'ed00 @01b0',
+'e700 @01aa',
+'da00 @019d',
+'ec00 @01af',
+'e800 @01ab',
+'f500 @01b8',
+'dd00 @01a0',
+'ca00 @018d',
+'cd00 @0190',
+'d200 @0195',
+'df00 @01a2',
+'f600 @01b9',
+'ef00 @01b2',
+'e400 @01a7',
+'d400 @0197',
+'dc00 @019f',
+'f200 @01b5',
+'cc00 @018f',
+'f700 @01ba',
+'f300 @01b6',
+'d500 @0198']
+
+TextType = ['Song','Desc','Genre']
+TextOffset = ['c8','190','12c']
+
 #Functions
 def AddPatch(PatchName,PatchInfo):
 	global CodePath
@@ -558,10 +665,23 @@ def InitializeBrseq():
 		BrseqLength = format(os.stat(directory+"/z.brseq").st_size,'x').upper()
 
 
-def ChangeName(songNum,newName,newDescription):
+def ChangeName(SongToChange,newText,TypeOfText):
 	global ProgramPath
-	FindMessage()
 	subprocess.run('\"'+ProgramPath+'\\Helper\\Wiimms\\decode.bat\" '+MessageFolder(),capture_output=True)
+	message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
+	textlines = message.readlines()
+	message.close()
+	offset = format(int(TextOffset[TextType.index(TypeOfText)],16)+SongMemoryOrder.index(SongNames[SongToChange]),'x').lower()
+	offset = ' ' * (4-len(offset))+offset+'00 @'
+	for num in range(len(textlines)):
+		if offset in str(textlines[num]):
+			while bytes('@','utf-8') not in textlines[num+1]:
+				textlines.pop(num+1)
+			textlines[num] = bytes(offset+str(textlines[num])[10:24:1]+newText+'\r\n','utf-8')
+			break
+	message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','wb')
+	message.writelines(textlines)
+	message.close()
 	subprocess.run('\"'+ProgramPath+'\\Helper\\Wiimms\\encode.bat\" '+MessageFolder(),capture_output=True)
 
 def MessageFolder():
@@ -609,7 +729,7 @@ while True:
 	print("//////////////////////////////\n")
 	PrintSectionTitle('Options')
 	print("(#1) Add Custom Song To Wii Music")
-	print("(#2) Change Song Names (Not Finished Yet)")
+	print("(#2) Change Song Names")
 	print("(#3) Change All Wii Music Text (Advanced)")
 	print("(#4) Edit Styles")
 	print("(#5) Overwrite Save File With 100% Save")
@@ -722,7 +842,12 @@ while True:
 			AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
 			print("\nPatch Complete")
 			time.sleep(0.5)
-			print("")
+			if(input('\nWould Like to Change the Song Text? [y/n] ') == 'y'):
+				ChangeName(SongSelected,input('\nPlease Input the New Song Title: '),'Song')
+				ChangeName(SongSelected,input('\nPlease Input the New Song Description: (Use \\n For New Line) '),'Desc')
+				ChangeName(SongSelected,input('\nPlease Input the New Song Genre: '),'Genre')
+				print("\nEditing Successful!\n")
+			else: print('')
 		else:
 			print("Aborted...")
 	elif(mode == '2'):
@@ -742,9 +867,9 @@ while True:
 			else:
 				print("\nERROR: Not a Valid Number")
 		
-		Name = input("\nWhat Should The New Name Be: ")
-		Desc = input("\nWhat Should The New Description Be: ")
-		ChangeName(SongSelected,Name,Desc)
+		ChangeName(SongSelected,input('\nPlease Input the New Song Title: '),'Song')
+		ChangeName(SongSelected,input('\nPlease Input the New Song Description: (Use \\n For New Line) '),'Desc')
+		ChangeName(SongSelected,input('\nPlease Input the New Song Genre: '),'Genre')
 		print("\nEditing Successful!\n")
 	elif(mode == '3'):
 		FindGameFolder()
