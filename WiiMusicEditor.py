@@ -756,11 +756,12 @@ def CheckForUpdates():
 	version = open(ProgramPath+'/Helper/Update/Version.txt')
 	currentVersion = version.read()
 	version.close()
-	print(requests.get(updateUrl[beta]))
-	if (requests.get(updateUrl[beta]) != currentVersion):
+	if (requests.get(updateUrl[beta]).text != currentVersion):
 		if(input("\nNew Update Avalible!\nWould you Like to Download it? [y/n] ") == 'y'):
-			newZip = open('WiiMusicEditor.zip','w')
-			newZip.write(requests.get(updateDownload[beta]))
+			print('\nDownloading...')
+			newZip = open('WiiMusicEditor.zip','wb')
+			newZip.write(requests.get(updateDownload[beta]).content)
+			newZip.close()
 			print('\nExtracting...')
 			subprocess.run('tar -xf WiiMusicEditor.zip')
 			newPath = '/WiiMusicEditor-main'
@@ -785,7 +786,7 @@ ProgramPath = os.path.dirname(__file__)
 beta = True
 uptodate = False
 updateUrl = ['https://raw.githubuser.com/BenjaminHalko/WiiMusicEditor/main/Version.txt',
-'https://raw.github.com/BenjaminHalko/WiiMusicEditor/beta/Version.txt']
+'https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/beta/Helper/Update/Version.txt']
 updateDownload = ['https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/main.zip',
 'https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/beta.zip']
 
