@@ -5,6 +5,6 @@ cd..
 cd..
 cd..
 
-robocopy "%CD%%1" "%CD%" /E /MIR /XF settings.ini /XD .git
+echo robocopy "%CD%%1" "%CD%" /MIR /XF settings.ini /XD .git "%CD%%1"
 
-python WiiMusicEditor.py
+timeout 30
