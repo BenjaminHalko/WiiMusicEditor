@@ -757,10 +757,10 @@ def CheckForUpdates():
 	version.close()
 	if not AutoUpdate.is_up_to_date():
 		if(input("\nNew Update Avalible!\nWould you Like to Download it? [y/n] ") == 'y'):
-			#print('\nDownloading...')
-			#AutoUpdate.download('WiiMusicEditor.zip')
-			#print('\nExtracting...')
-			#subprocess.run('tar -xf WiiMusicEditor.zip')
+			print('\nDownloading...')
+			AutoUpdate.download('WiiMusicEditor.zip')
+			print('\nExtracting...')
+			subprocess.run('tar -xf WiiMusicEditor.zip')
 			newPath = '/WiiMusicEditor-main'
 			if(not os.path.isdir(ProgramPath+newPath)):
 				newPath = '/WiiMusicEditor-beta'
