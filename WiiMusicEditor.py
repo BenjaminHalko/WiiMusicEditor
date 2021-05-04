@@ -7,10 +7,19 @@ import configparser
 import pathlib
 from shutil import copyfile
 import tempfile
-import mido
 from math import ceil
 from math import floor
-import requests
+
+#Special Imports
+while True:
+	try:
+		import requests
+		import mido
+		break
+	except ImportError:
+		subprocess.run('python -m pip install --upgrade pip')
+		subprocess.run('pip install mido')
+		subprocess.run('pip install requests')
 
 time.sleep(0.05)
 
@@ -746,35 +755,42 @@ def SaveSetting(section,key,value):
 def PrintSectionTitle(Text):
 	print("\n//////////////////// "+Text+":")
 
-def CheckForUpdates():
+def CheckForUpdates(PrintMessages):
 	global ProgramPath
 	global beta
 	global updateUrl
-	print('Checking for Updates...')
+	if(PrintMessages): print('Checking for Updates...')
 	version = open(ProgramPath+'/Helper/Update/Version.txt')
 	currentVersion = version.read()
 	version.close()
-	if (requests.get(updateUrl[beta]).text != currentVersion):
-		if(input("\nNew Update Avalible!\nWould you Like to Download it? [y/n] ") == 'y'):
-			DownloadUpdate()
-
-	else:
-		print('\nUp to Date!')
+	try:
+		newVersion = requests.get(updateUrl[beta])
+		if (newVersion.text != currentVersion):
+			if(input("\nNew Update Avalible!\nWould you Like to Download it? [y/n] ") == 'y'):
+				DownloadUpdate()
+		else:
+			if(PrintMessages): print('\nUp to Date!')
+	except (requests.ConnectionError, requests.Timeout) as exception:
+		if(PrintMessages): print('\nFailed to Find Updates...')
 
 def DownloadUpdate():
 	global beta
 	global updateDownload
 	print('\nDownloading...')
-	newZip = open('WiiMusicEditor.zip','wb')
-	newZip.write(requests.get(updateDownload[beta]).content)
-	newZip.close()
-	print('\nExtracting...\n')
-	subprocess.run('tar -xf WiiMusicEditor.zip')
-	newPath = '/WiiMusicEditor-main'
-	if(not os.path.isdir(ProgramPath+newPath)):
-		newPath = '/WiiMusicEditor-beta'
-	subprocess.Popen(ProgramPath+newPath+'/Helper/Update/Update.bat '+newPath.replace('/',''))
-	quit()
+	try:
+		zipContent = requests.get(updateDownload[beta])
+		newZip = open('WiiMusicEditor.zip','wb')
+		newZip.write(zipContent.content)
+		newZip.close()
+		print('\nExtracting...\n')
+		subprocess.run('tar -xf WiiMusicEditor.zip')
+		newPath = '/WiiMusicEditor-main'
+		if(not os.path.isdir(ProgramPath+newPath)):
+			newPath = '/WiiMusicEditor-beta'
+		subprocess.Popen(ProgramPath+newPath+'/Helper/Update/Update.bat '+newPath.replace('/',''))
+		quit()
+	except (requests.ConnectionError, requests.Timeout) as exception:
+		print('\nFailed to Download File...\n')
 
 #Default Paths
 GamePath = LoadSetting('Paths','GamePath','None')
@@ -813,7 +829,7 @@ while True:
 		subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-beta\"')
 	elif(AutoUpdate == 1) and (not uptodate):
 		uptodate = True
-		CheckForUpdates()
+		CheckForUpdates(False)
 
 	PrintSectionTitle('Options')
 	print("(#1) Add Custom Song To Wii Music")
@@ -1129,7 +1145,9 @@ while True:
 				else:
 					print("\nERROR: Not a Valid Number")
 			if(UpdateSelected == 1):
-				CheckForUpdates()
+				print('')
+				CheckForUpdates(True)
+				print('')
 			elif(UpdateSelected == 2):
 				if(AutoUpdate == 0): AutoUpdate = 1
 				else: AutoUpdate = 0
