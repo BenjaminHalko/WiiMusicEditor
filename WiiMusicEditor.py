@@ -9,7 +9,7 @@ from shutil import copyfile
 import tempfile
 import mido
 from math import floor
-import AutoUpdate
+import requests
 
 time.sleep(0.05)
 
@@ -753,15 +753,14 @@ def CheckForUpdates():
 	global updateUrl
 	global updateDownload
 	print('Checking for Updates...')
-	AutoUpdate.set_url(updateUrl[beta])
-	AutoUpdate.set_download_link(updateDownload[beta])
 	version = open(ProgramPath+'/Helper/Update/Version.txt')
-	AutoUpdate.set_current_version(version.read())
+	currentVersion = version.read()
 	version.close()
-	if not AutoUpdate.is_up_to_date():
+	print(requests.get(updateUrl[beta]))
+	if (requests.get(updateUrl[beta]) != currentVersion):
 		if(input("\nNew Update Avalible!\nWould you Like to Download it? [y/n] ") == 'y'):
-			print('\nDownloading...')
-			AutoUpdate.download('WiiMusicEditor.zip')
+			newZip = open('WiiMusicEditor.zip','w')
+			newZip.write(requests.get(updateDownload[beta]))
 			print('\nExtracting...')
 			subprocess.run('tar -xf WiiMusicEditor.zip')
 			newPath = '/WiiMusicEditor-main'
@@ -785,8 +784,8 @@ ProgramPath = os.path.dirname(__file__)
 #Update
 beta = True
 uptodate = False
-updateUrl = ['https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/main/Helper/Update/Version.txt',
-'https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/beta/Helper/Update/Version.txt']
+updateUrl = ['https://raw.githubuser.com/BenjaminHalko/WiiMusicEditor/main/Version.txt',
+'https://raw.github.com/BenjaminHalko/WiiMusicEditor/beta/Version.txt']
 updateDownload = ['https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/main.zip',
 'https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/beta.zip']
 
