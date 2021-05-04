@@ -762,7 +762,7 @@ def CheckForUpdates():
 			newZip = open('WiiMusicEditor.zip','wb')
 			newZip.write(requests.get(updateDownload[beta]).content)
 			newZip.close()
-			print('\nExtracting...')
+			print('\nExtracting...\n')
 			subprocess.run('tar -xf WiiMusicEditor.zip')
 			newPath = '/WiiMusicEditor-main'
 			if(not os.path.isdir(ProgramPath+newPath)):
