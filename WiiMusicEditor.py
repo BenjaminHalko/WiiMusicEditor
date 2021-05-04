@@ -790,7 +790,7 @@ ProgramPath = os.path.dirname(__file__)
 beta = int(LoadSetting('Updates', 'Branch', '0'))
 AutoUpdate = int((LoadSetting('Updates', 'AutoUpdates', '1')))
 uptodate = not AutoUpdate
-updateUrl = ['https://raw.githubuser.com/BenjaminHalko/WiiMusicEditor/main/Version.txt',
+updateUrl = ['https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/main/Helper/Update/Version.txt',
 'https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/beta/Helper/Update/Version.txt']
 updateDownload = ['https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/main.zip',
 'https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/beta.zip']
