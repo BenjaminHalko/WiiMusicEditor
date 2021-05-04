@@ -8,6 +8,7 @@ import pathlib
 from shutil import copyfile
 import tempfile
 import mido
+from math import ceil
 from math import floor
 import requests
 
@@ -663,7 +664,7 @@ def InitializeBrseq():
 	global BrseqLength
 	global ProgramPath
 	global Tempo
-	global MidiBeats
+	global Length
 	ExceptedSongExtensions = ['.midi','.mid','.brseq','.rseq']
 	if(len(sys.argv) < 2):
 		BrseqPath = ''
@@ -689,11 +690,11 @@ def InitializeBrseq():
 			subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" from_midi \"'+directory+'/z.midi\"')
 		mid = mido.MidiFile(directory+"/z.midi")
 		Tempo = 'Could Not Locate'
-		MidiBeats = 0
+		Length = 0
 		for msg in mid.tracks[0]:
 			if(msg.type == 'set_tempo'):
 				Tempo = floor(mido.tempo2bpm(msg.tempo))
-		MidiBeats = mid.length*Tempo/60
+		Length = str(ceil(mid.length*Tempo/60))
 		Tempo = str(Tempo)
 		Brseq = open(directory+"/z.brseq","rb")
 		Brseq.seek(0)
@@ -852,7 +853,7 @@ while True:
 
 		#Brseq Info
 		PrintSectionTitle("File Info")
-		print("Number of Beats: "+str(floor(MidiBeats)))
+		print("Number of Beats: "+Length)
 		print("Tempo: "+Tempo)
 		print("File Size: "+BrseqLength)
 
@@ -877,22 +878,24 @@ while True:
 		if(SongSelected != 50):
 			PrintSectionTitle("Length, Tempo, Time Signature Patch")
 			AutoFill = 'n'
-			if(Tempo != 'Could Not Locate') or (MidiBeats != 0):
+			if(Tempo != 'Could Not Locate') or (Length != '0'):
 				MetaDataFound = ''
-				if(MidiBeats != 0): MetaDataFound = 'Length'
+				if(Length != '0'): MetaDataFound = 'Length'
 				if(Tempo != 'Could Not Locate'):
 					if(MetaDataFound == ''): MetaDataFound = 'Tempo'
 					else: MetaDataFound = MetaDataFound+', Tempo'
 				print('Meta Data Found: '+MetaDataFound)
 				AutoFill = input("\nWe Have Automatically Located Some Meta Data! Would You Like To Autofill It: [y/n] ")
 			
-			if(AutoFill != 'y') or (MidiBeats == 0):
+			if(AutoFill != 'y') or (Length == '0'):
 				while True:
 					Length = input("\nHow Many Measures Does Your Song Have: ")
 					if(Length.isnumeric()): 
 						break
 					else:
 						print("\nERROR: Not a Valid Number\n")
+			else:
+				Length = format(int(Length),'x').upper()
 
 			if(AutoFill != 'y') or (not Tempo.isnumeric()):
 				while True:
@@ -911,9 +914,7 @@ while True:
 				else:
 					print("\nERROR: Please Press Ether 4 or 3")
 
-			if(AutoFill == 'y') and (MidiBeats != 0):
-				Length = format(floor(MidiBeats),'x').upper()
-			else:	
+			if(AutoFill != 'y') or (Length == 0):
 				Length = format(int(Length) * int(TimeSignature),'x').upper()
 
 			#Final Writting
