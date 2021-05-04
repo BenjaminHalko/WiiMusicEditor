@@ -664,7 +664,6 @@ def InitializeBrseq():
 	global ProgramPath
 	global Tempo
 	global MidiBeats
-	global MidiBeatsString
 	ExceptedSongExtensions = ['.midi','.mid','.brseq','.rseq']
 	if(len(sys.argv) < 2):
 		BrseqPath = ''
@@ -695,7 +694,6 @@ def InitializeBrseq():
 			if(msg.type == 'set_tempo'):
 				Tempo = floor(mido.tempo2bpm(msg.tempo))
 		MidiBeats = mid.length*Tempo/60
-		MidiBeatsString = str(floor(MidiBeats))
 		Tempo = str(Tempo)
 		Brseq = open(directory+"/z.brseq","rb")
 		Brseq.seek(0)
@@ -854,7 +852,7 @@ while True:
 
 		#Brseq Info
 		PrintSectionTitle("File Info")
-		print("Number of Beats: "+MidiBeatsString)
+		print("Number of Beats: "+str(floor(MidiBeats)))
 		print("Tempo: "+Tempo)
 		print("File Size: "+BrseqLength)
 
@@ -914,7 +912,7 @@ while True:
 					print("\nERROR: Please Press Ether 4 or 3")
 
 			if(AutoFill == 'y') and (MidiBeats != 0):
-				Length = str(round(MidiBeats/int(TimeSignature)))
+				Length = format(floor(MidiBeats),'x').upper()
 			else:	
 				Length = format(int(Length) * int(TimeSignature),'x').upper()
 
