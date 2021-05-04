@@ -9,6 +9,7 @@ from shutil import copyfile
 import tempfile
 import mido
 from math import floor
+import AutoUpdate
 
 time.sleep(0.05)
 
@@ -63,7 +64,8 @@ SongNames = [
 'Wii Music',
 'Wii Sports',
 'Woman',
-'Yankee Doodle']
+'Yankee Doodle',
+'Menu Song']
 
 #Offsets
 SongOffsets = [
@@ -116,7 +118,8 @@ SongOffsets = [
 '602CE0',
 '67D360',
 '66F780',
-'61F620']
+'61F620',
+'72BA40']
 
 ScoreOffsets = [
 '60C660',
@@ -168,7 +171,8 @@ ScoreOffsets = [
 '605520',
 '67EE40',
 '670FC0',
-'620F60']
+'620F60',
+['72DCA0','730600','732C40','735600','7381C0']]
 
 SongFileLengths = [
 '1F50',
@@ -220,7 +224,8 @@ SongFileLengths = [
 '2840',
 '1AE0',
 '1840',
-'1940']
+'1940',
+'2260']
 
 ScoreFileLengths = [
 '1920',
@@ -272,7 +277,8 @@ ScoreFileLengths = [
 '1E80',
 '1940',
 '1240',
-'1880']
+'1880',
+['2960','2640','29C0','2BC0','29A0']]
 
 SongMemoryOffsets = [
 '025a08a8',
@@ -324,7 +330,8 @@ SongMemoryOffsets = [
 '025a0730',
 '025a26c4',
 '025a23d4',
-'025a0dcc']
+'025a0dcc',
+['8059ACB3','8059ACD7','8059ACFB','8059AD1F']]
 
 StyleNames = [
 'Jazz',
@@ -337,7 +344,38 @@ StyleNames = [
 'Tango',
 'Classical',
 'Hawaiian',
-'Reggae']
+'Reggae',
+'Twinkle Twinkle Little Star',
+'Yankee Doodle',
+'Oh My Darling Clementine',
+'Scarborough Fair',
+'Carmen',
+'O Christmas Tree',
+'Over The Waves',
+'Every Breath You Take',
+'Chariots of Fire',
+'September',
+'Material Girl',
+'Ill Be There',
+'Woman',
+'Ive Never Been to Me',
+'The Legend of Zelda',
+'Wii Sports',
+'Animal Crossing',
+'Minuet in G Major',
+'The Entertainer',
+'Happy Birthday to You',
+'La Cucaracha',
+'From Santurtzi to Bilbao',
+'A Little Night Music',
+'The Blue Danube',
+'Animal Crossing K.K. Blues',
+'Wii Music',
+'Super Mario Bros',
+'Menu Style Main',
+'Menu Style Electronic',
+'Menu Style Japanese',
+'Menu Style March']
 
 StyleMemoryOffsets = [
 '0659A65F',
@@ -350,7 +388,38 @@ StyleMemoryOffsets = [
 '0659A75B',
 '0659A77F',
 '0659A7A3',
-'0659A7C7']
+'0659A7C7',
+'0659A7EB', #Default Styles
+'0659A80F',
+'0659A833',
+'0659A856',
+'0659A87B',
+'0659A89F',
+'0659A8C3',
+'0659A8E7',
+'0659A90B',
+'0659A92F',
+'0659A953',
+'0659A977',
+'0659A99B',
+'0659A9BF',
+'0659A9E3',
+'0659AA07',
+'0659AA2B',
+'0659AA4F',
+'0659AA73',
+'0659AA97',
+'0659AABB',
+'0659AADF',
+'0659AB03',
+'0659AB27',
+'0659AB4B',
+'0659AB6F',
+'8059AC8F',
+'0659ACB3',
+'0659ACD7',
+'0659ACFB',
+'0659AD1F'] 
 
 InstrumentNames = [
 'Piano',
@@ -421,6 +490,28 @@ InstrumentNames = [
 'Whistle',
 'Beatbox']
 
+MenuInstruments = [
+'Saxophone',
+'Violin',
+'Shamisen',
+'Flute',
+'Clairenet',
+'Piano',
+'Vibraphone',
+'Tuba',
+'Electric bass',
+'Galactic Guitar',
+'Galactic Bass',
+'Singer',
+'Another Singer',
+'Basic Drums',
+'Snare Drum',
+'DJ Turntables',
+'Beatbox',
+'Taiko Drum',
+'Galactic Drums']
+
+
 SongMemoryOrder = [
 'Ode To Joy',
 'Bridal Chorus',
@@ -472,58 +563,6 @@ SongMemoryOrder = [
 'Wii Sports',
 'Animal Crossing',
 'F-Zero']
-
-SongTextOffsets = [
-'ce00 @0191',
-'d300 @0196',
-'f800 @01bb',
-'e200 @01a5',
-'c900 @018c',
-'cb00 @018e',
-'eb00 @01ae',
-'e900 @01ac',
-'d100 @0194',
-'ea00 @01ad',
-'f900 @01bc',
-'de00 @01a1',
-'e300 @01a6',
-'d800 @019b',
-'d000 @0193',
-'f000 @01b3',
-'f400 @01b7',
-'f100 @01b4',
-'d900 @019c',
-'e500 @01a8',
-'e100 @01a4',
-'db00 @019e',
-'ee00 @01b1',
-'cf00 @0192',
-'d700 @019a',
-'e000 @01a3',
-'c800 @018b',
-'d600 @0199',
-'e600 @01a9',
-'ed00 @01b0',
-'e700 @01aa',
-'da00 @019d',
-'ec00 @01af',
-'e800 @01ab',
-'f500 @01b8',
-'dd00 @01a0',
-'ca00 @018d',
-'cd00 @0190',
-'d200 @0195',
-'df00 @01a2',
-'f600 @01b9',
-'ef00 @01b2',
-'e400 @01a7',
-'d400 @0197',
-'dc00 @019f',
-'f200 @01b5',
-'cc00 @018f',
-'f700 @01ba',
-'f300 @01b6',
-'d500 @0198']
 
 TextType = ['Song','Desc','Genre']
 TextOffset = ['c8','190','12c']
@@ -708,6 +747,29 @@ def SaveSetting(section,key,value):
 def PrintSectionTitle(Text):
 	print("\n//////////////////// "+Text+":")
 
+def CheckForUpdates():
+	global ProgramPath
+	print('Checking for Updates...')
+	AutoUpdate.set_url(updateUrl[beta])
+	AutoUpdate.set_download_link(updateDownload[beta])
+	version = open(ProgramPath+'/Helper/Update/Version.txt')
+	AutoUpdate.set_current_version(version.read())
+	version.close()
+	if not AutoUpdate.is_up_to_date():
+		if(input("\nNew Update Avalible!\nWould you Like to Download it? [y/n] ") == 'y'):
+			#print('\nDownloading...')
+			#AutoUpdate.download('WiiMusicEditor.zip')
+			#print('\nExtracting...')
+			#subprocess.run('tar -xf WiiMusicEditor.zip')
+			newPath = '/WiiMusicEditor-main'
+			if(not os.path.isdir(ProgramPath+newPath)):
+				newPath = '/WiiMusicEditor-beta'
+			subprocess.Popen(ProgramPath+newPath+'/Helper/Update/Update.bat '+newPath)
+			quit()
+
+	else:
+		print('\nUp to Date!')
+
 #Default Paths
 GamePath = LoadSetting('Paths','GamePath','None')
 BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
@@ -716,6 +778,14 @@ CodePath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/GameSettin
 SaveDataPath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/Wii/title/00010000/52363445/data"
 DolphinPath = LoadSetting('Paths','DolphinPath','None')
 ProgramPath = os.path.dirname(__file__)
+
+#Update
+beta = True
+uptodate = False
+updateUrl = ['https://github.com/BenjaminHalko/WiiMusicEditor',
+'https://github.com/BenjaminHalko/WiiMusicEditor/tree/beta']
+updateDownload = ['https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/main.zip',
+'https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/beta.zip']
 
 #Main Loop
 while True:
@@ -727,6 +797,9 @@ while True:
 	print("//       Music Editor       //")
 	print("//                          //")
 	print("//////////////////////////////\n")
+	if(not uptodate):
+		CheckForUpdates()
+
 	PrintSectionTitle('Options')
 	print("(#1) Add Custom Song To Wii Music")
 	print("(#2) Change Song Names")
@@ -753,7 +826,10 @@ while True:
 		#Song Selection
 		PrintSectionTitle('Song List')
 		for num in range(len(SongNames)):
-			SongMinLength = min(int(SongFileLengths[num],16),int(ScoreFileLengths[num],16))
+			if(num != 50):
+				SongMinLength = min(int(SongFileLengths[num],16),int(ScoreFileLengths[num],16))
+			else:
+				SongMinLength = int(SongFileLengths[num],16)
 			if(int(BrseqLength,16) > SongMinLength):
 				print('~UNAVALIBLE~ '+str(SongNames[num])+' ('+format(SongMinLength,'x').upper()+')')
 			else:
@@ -772,7 +848,11 @@ while True:
 			SongSelected = input("Enter The Song Number You Want To Replace: ")
 			if(SongSelected.isnumeric()) and (int(SongSelected) < len(SongNames)):
 				SongSelected = int(SongSelected)
-				if(int(BrseqLength,16) <= min(int(SongFileLengths[SongSelected],16),int(ScoreFileLengths[SongSelected],16))):
+				if(SongSelected != 50):
+					minLength = min(int(SongFileLengths[SongSelected],16),int(ScoreFileLengths[SongSelected],16))
+				else:
+					minLength = int(SongFileLengths[SongSelected],16)
+				if(int(BrseqLength,16) <= minLength):
 					break
 				else:
 					print("ERROR: Brseq Filesize is over the maximum filesize for this song!\n")
@@ -780,69 +860,76 @@ while True:
 				print("\nERROR: Not a Valid Number\n")
 
 		#Length, Tempo, Time Signature Patch
-		PrintSectionTitle("Length, Tempo, Time Signature Patch")
-		AutoFill = 'n'
-		if(Tempo != 'Could Not Locate') or (MidiBeats != 0):
-			MetaDataFound = ''
-			if(MidiBeats != 0): MetaDataFound = 'Length'
-			if(Tempo != 'Could Not Locate'):
-				if(MetaDataFound == ''): MetaDataFound = 'Tempo'
-				else: MetaDataFound = MetaDataFound+', Tempo'
-			print('Meta Data Found: '+MetaDataFound)
-			AutoFill = input("\nWe Have Automatically Located Some Meta Data! Would You Like To Autofill It: [y/n] ")
-		
-		if(AutoFill != 'y') or (MidiBeats == 0):
+		if(SongSelected != 50):
+			PrintSectionTitle("Length, Tempo, Time Signature Patch")
+			AutoFill = 'n'
+			if(Tempo != 'Could Not Locate') or (MidiBeats != 0):
+				MetaDataFound = ''
+				if(MidiBeats != 0): MetaDataFound = 'Length'
+				if(Tempo != 'Could Not Locate'):
+					if(MetaDataFound == ''): MetaDataFound = 'Tempo'
+					else: MetaDataFound = MetaDataFound+', Tempo'
+				print('Meta Data Found: '+MetaDataFound)
+				AutoFill = input("\nWe Have Automatically Located Some Meta Data! Would You Like To Autofill It: [y/n] ")
+			
+			if(AutoFill != 'y') or (MidiBeats == 0):
+				while True:
+					Length = input("\nHow Many Measures Does Your Song Have: ")
+					if(Length.isnumeric()): 
+						break
+					else:
+						print("\nERROR: Not a Valid Number\n")
+
+			if(AutoFill != 'y') or (not Tempo.isnumeric()):
+				while True:
+					Tempo = input("\nWhat is the Tempo of Your Song: ")
+					if(Tempo.isnumeric()):
+						break
+					else:
+						print("\nERROR: Not a Valid Number")
+
+			Tempo = format(int(Tempo),'x').upper()
+
 			while True:
-				Length = input("\nHow Many Measures Does Your Song Have: ")
-				if(Length.isnumeric()): 
+				TimeSignature = input("\nWhat Time Signature is Your Song? (4 = 4/4, 3 = 3/4): ")
+				if(TimeSignature == '3') or (TimeSignature == '4'):
 					break
 				else:
-					print("\nERROR: Not a Valid Number\n")
+					print("\nERROR: Please Press Ether 4 or 3")
 
-		if(AutoFill != 'y') or (not Tempo.isnumeric()):
-			while True:
-				Tempo = input("\nWhat is the Tempo of Your Song: ")
-				if(Tempo.isnumeric()):
-					break
-				else:
-					print("\nERROR: Not a Valid Number")
+			if(AutoFill == 'y') and (MidiBeats != 0):
+				Length = str(round(MidiBeats/int(TimeSignature)))
+			else:	
+				Length = format(int(Length) * int(TimeSignature),'x').upper()
 
-		Tempo = format(int(Tempo),'x').upper()
-
-		while True:
-			TimeSignature = input("\nWhat Time Signature is Your Song? (4 = 4/4, 3 = 3/4): ")
-			if(TimeSignature == '3') or (TimeSignature == '4'):
-				break
-			else:
-				print("\nERROR: Please Press Ether 4 or 3")
-
-		if(AutoFill == 'y') and (MidiBeats != 0):
-			Length = str(round(MidiBeats/int(TimeSignature)))
-		else:	
-			Length = format(int(Length) * int(TimeSignature),'x').upper()
-
-		#Final Writting
-		LengthCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+6,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
-		TempoCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
-		TimeCode = SongMemoryOffsets[SongSelected]+' 00000'+TimeSignature+'00\n'
+			#Final Writting
+			LengthCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+6,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
+			TempoCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
+			TimeCode = SongMemoryOffsets[SongSelected]+' 00000'+TimeSignature+'00\n'
 
 		if(input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou Will NOT Be Able to Restore the Song Unless You Have Made a Backup! [y/n] ') == 'y'):
 			#Brsar Writing
 			brsar = open(BrsarPath, "r+b")
 			brsar.seek(int(SongOffsets[SongSelected],16))
 			brsar.write(bytes(int(SongFileLengths[SongSelected],16)))
-			brsar.seek(int(ScoreOffsets[SongSelected],16))
-			brsar.write(bytes(int(ScoreFileLengths[SongSelected],16)))
 			brsar.seek(int(SongOffsets[SongSelected],16))
 			brsar.write(BrseqInfo)
-			brsar.seek(int(ScoreOffsets[SongSelected],16))
-			brsar.write(BrseqInfo)
+			if(type(ScoreOffsets[SongSelected]) != str):
+				for num in range(len(ScoreOffsets[SongSelected])):
+					brsar.seek(int(ScoreOffsets[SongSelected][num],16))
+					brsar.write(bytes(int(ScoreFileLengths[SongSelected][num],16)))
+					brsar.seek(int(ScoreOffsets[SongSelected][num],16))
+					brsar.write(BrseqInfo)
+			else:
+				brsar.seek(int(ScoreOffsets[SongSelected],16))
+				brsar.write(bytes(int(ScoreFileLengths[SongSelected],16)))
+				brsar.seek(int(ScoreOffsets[SongSelected],16))
+				brsar.write(BrseqInfo)
 			brsar.close()
-			
-			AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
+			if(SongSelected != 50): AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
 			print("\nPatch Complete")
 			time.sleep(0.5)
-			if(input('\nWould Like to Change the Song Text? [y/n] ') == 'y'):
+			if(SongSelected != 50) and (input('\nWould Like to Change the Song Text? [y/n] ') == 'y'):
 				ChangeName(SongSelected,input('\nPlease Input the New Song Title: '),'Song')
 				ChangeName(SongSelected,input('\nPlease Input the New Song Description: (Use \\n For New Line) '),'Desc')
 				ChangeName(SongSelected,input('\nPlease Input the New Song Genre: '),'Genre')
@@ -894,12 +981,15 @@ while True:
 				print("\nERROR: Not a Valid Number")
 		PrintSectionTitle("Intrument List")
 		for num in range(40):
-			print('(#'+str(num)+') '+str(InstrumentNames[num]))
+			if(StyleSelected < len(StyleNames)-4) or (InstrumentNames[num] in MenuInstruments):
+				print('(#'+str(num)+') '+str(InstrumentNames[num]))
+			else:
+				print('(UNAVALIBLE) '+str(InstrumentNames[num]))
 			time.sleep(0.005)
 		PrintSectionTitle("Instrument Selection")
 		while True:
 			Melody = input("Enter The Instrument Number You Want For Melody: ")
-			if(Melody.isnumeric()) and (int(Melody) < 40):
+			if(Melody.isnumeric()) and (int(Melody) < 40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Melody)] in MenuInstruments)):
 				Melody = format(int(Melody),'x').upper()
 				Melody = '0'*(2-len(Melody))+Melody
 				break
@@ -907,7 +997,7 @@ while True:
 				print("\nERROR: Not a Valid Number\n")
 		while True:
 			Harmony = input("\nEnter The Instrument Number You Want For Harmony: ")
-			if(Harmony.isnumeric()) and (int(Harmony) < 40):
+			if(Harmony.isnumeric()) and (int(Harmony) < 40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Harmony)] in MenuInstruments)):
 				Harmony = format(int(Harmony),'x').upper()
 				Harmony = '0'*(2-len(Harmony))+Harmony
 				break
@@ -915,7 +1005,7 @@ while True:
 				print("\nERROR: Not a Valid Number")
 		while True:
 			Chord = input("\nEnter The Instrument Number You Want For Chord: ")
-			if(Chord.isnumeric()) and (int(Chord) < 40):
+			if(Chord.isnumeric()) and (int(Chord) < 40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Chord)] in MenuInstruments)):
 				Chord = format(int(Chord),'x').upper()
 				Chord = '0'*(2-len(Chord))+Chord
 				break
@@ -923,7 +1013,7 @@ while True:
 				print("\nERROR: Not a Valid Number")
 		while True:
 			Bass = input("\nEnter The Instrument Number You Want For Bass: ")
-			if(Bass.isnumeric()) and (int(Bass) < 40):
+			if(Bass.isnumeric()) and (int(Bass) < 40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Bass)] in MenuInstruments)):
 				Bass = format(int(Bass),'x').upper()
 				Bass = '0'*(2-len(Bass))+Bass
 				break
@@ -931,11 +1021,14 @@ while True:
 				print("\nERROR: Not a Valid Number")
 		PrintSectionTitle("Intrument List")
 		for num in range(40,len(InstrumentNames)):
-			print('(#'+str(num-40)+') '+str(InstrumentNames[num]))
+			if(StyleSelected < len(StyleNames)-4) or (InstrumentNames[num] in MenuInstruments):
+				print('(#'+str(num-40)+') '+str(InstrumentNames[num]))
+			else:
+				print('(UNAVALIBLE) '+str(InstrumentNames[num]))
 			time.sleep(0.005)
 		while True:
 			Perc1 = input("\nEnter The Instrument Number You Want For Percussion 1: ")
-			if(Perc1.isnumeric()) and (int(Perc1) < len(InstrumentNames)-40):
+			if(Perc1.isnumeric()) and (int(Perc1) < len(InstrumentNames)-40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Perc1)+40] in MenuInstruments)):
 				Perc1 = format(int(Perc1)+40,'x').upper()
 				Perc1 = '0'*(2-len(Perc1))+Perc1
 				break
@@ -943,7 +1036,7 @@ while True:
 				print("\nERROR: Not a Valid Number")
 		while True:
 			Perc2 = input("\nEnter The Instrument Number You Want For Percussion 2: ")
-			if(Perc2.isnumeric()) and (int(Perc2) < len(InstrumentNames)-40):
+			if(Perc2.isnumeric()) and (int(Perc2) < len(InstrumentNames)-40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Perc2)+40] in MenuInstruments)):
 				Perc2 = format(int(Perc2)+40,'x').upper()
 				Perc2 = '0'*(2-len(Perc2))+Perc2
 				break
