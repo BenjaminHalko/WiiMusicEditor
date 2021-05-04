@@ -764,7 +764,7 @@ def CheckForUpdates():
 			newPath = '/WiiMusicEditor-main'
 			if(not os.path.isdir(ProgramPath+newPath)):
 				newPath = '/WiiMusicEditor-beta'
-			subprocess.Popen(ProgramPath+newPath+'/Helper/Update/Update.bat '+newPath)
+			subprocess.Popen(ProgramPath+newPath+'/Helper/Update/Update.bat '+newPath.replace('/',''))
 			quit()
 
 	else:
@@ -782,8 +782,8 @@ ProgramPath = os.path.dirname(__file__)
 #Update
 beta = True
 uptodate = False
-updateUrl = ['https://github.com/BenjaminHalko/WiiMusicEditor',
-'https://github.com/BenjaminHalko/WiiMusicEditor/tree/beta']
+updateUrl = ['https://github.com/BenjaminHalko/WiiMusicEditor/blob/main/Helper/Update/Version.txt',
+'https://github.com/BenjaminHalko/WiiMusicEditor/blob/beta/Helper/Update/Version.txt']
 updateDownload = ['https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/main.zip',
 'https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/beta.zip']
 
@@ -797,7 +797,14 @@ while True:
 	print("//       Music Editor       //")
 	print("//                          //")
 	print("//////////////////////////////\n")
-	if(not uptodate):
+
+	if(os.path.isdir(ProgramPath+'/WiiMusicEditor-main')):
+		print('Finishing Up...')
+		subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-main\"')
+	elif(os.path.isdir(ProgramPath+'/WiiMusicEditor-beta')):
+		print('Finishing Up...')
+		subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-beta\"')
+	elif(not uptodate):
 		CheckForUpdates()
 
 	PrintSectionTitle('Options')
