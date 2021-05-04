@@ -1116,7 +1116,7 @@ while True:
 				print("(#2) Turn Off Auto Updates")
 			else:
 				print("(#2) Turn On Auto Updates")
-			if(beta == 'Main'):
+			if(beta == 0):
 				print("(#3) Switch to Beta Branch")
 			else:
 				print("(#3) Switch to Main Branch")
