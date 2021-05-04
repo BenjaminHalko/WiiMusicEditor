@@ -787,8 +787,8 @@ DolphinPath = LoadSetting('Paths','DolphinPath','None')
 ProgramPath = os.path.dirname(__file__)
 
 #Update
-beta = (LoadSetting('Updates', 'Branch', '0') == '1')
-AutoUpdate = (LoadSetting('Updates', 'AutoUpdates', '1') == '1')
+beta = int(LoadSetting('Updates', 'Branch', '0'))
+AutoUpdate = int(LoadSetting('Updates', 'AutoUpdates', '1'))
 uptodate = not AutoUpdate
 updateUrl = ['https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/main/Helper/Update/Version.txt',
 'https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/beta/Helper/Update/Version.txt']
@@ -1134,7 +1134,8 @@ while True:
 				AutoUpdate = not AutoUpdate
 				SaveSetting('Updates', 'AutoUpdate', str(AutoUpdate))
 			elif(UpdateSelected == 3):
-				beta = not beta
+				if(beta == 0): beta = 1
+				else: beta = 0
 				SaveSetting('Updates', 'Branch', str(beta))
 				DownloadUpdate()
 
