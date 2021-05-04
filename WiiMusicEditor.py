@@ -789,7 +789,7 @@ ProgramPath = os.path.dirname(__file__)
 #Update
 beta = int(LoadSetting('Updates', 'Branch', '0'))
 AutoUpdate = int(LoadSetting('Updates', 'AutoUpdates', '1'))
-uptodate = not AutoUpdate
+uptodate = False
 updateUrl = ['https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/main/Helper/Update/Version.txt',
 'https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/beta/Helper/Update/Version.txt']
 updateDownload = ['https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/main.zip',
@@ -812,7 +812,7 @@ while True:
 	elif(os.path.isdir(ProgramPath+'/WiiMusicEditor-beta')):
 		print('Finishing Up...')
 		subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-beta\"')
-	elif(not uptodate):
+	elif(AutoUpdate == 0) and (not uptodate):
 		CheckForUpdates()
 
 	PrintSectionTitle('Options')
@@ -1131,7 +1131,8 @@ while True:
 			if(UpdateSelected == 1):
 				CheckForUpdates()
 			elif(UpdateSelected == 2):
-				AutoUpdate = not AutoUpdate
+				if(AutoUpdate == 0): AutoUpdate = 1
+				else: AutoUpdate = 0
 				SaveSetting('Updates', 'AutoUpdate', str(AutoUpdate))
 			elif(UpdateSelected == 3):
 				if(beta == 0): beta = 1
