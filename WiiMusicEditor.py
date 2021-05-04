@@ -749,6 +749,9 @@ def PrintSectionTitle(Text):
 
 def CheckForUpdates():
 	global ProgramPath
+	global beta
+	global updateUrl
+	global updateDownload
 	print('Checking for Updates...')
 	AutoUpdate.set_url(updateUrl[beta])
 	AutoUpdate.set_download_link(updateDownload[beta])
