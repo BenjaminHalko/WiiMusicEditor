@@ -7,4 +7,5 @@ cd..
 
 robocopy "%CD%%1" "%CD%" /MIR /XF settings.ini /XD "%CD%%1" .git
 
-timeout 30
+rm WiiMusicEditor.zip
+python WiiMusicEditor.py
