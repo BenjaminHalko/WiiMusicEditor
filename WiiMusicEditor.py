@@ -797,7 +797,14 @@ while True:
 	print("//       Music Editor       //")
 	print("//                          //")
 	print("//////////////////////////////\n")
-	if(not uptodate):
+
+	if(os.path.isdir(ProgramPath+'/WiiMusicEditor-main')):
+		print('\nFinishing Up...')
+		subprocess.run('del WiiMusicEditor-main')
+	elif(os.path.isdir(ProgramPath+'/WiiMusicEditor-beta')):
+		print('\nFinishing Up...')
+		subprocess.run('del WiiMusicEditor-beta')
+	elif(not uptodate):
 		CheckForUpdates()
 
 	PrintSectionTitle('Options')
