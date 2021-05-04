@@ -5,6 +5,6 @@ cd..
 cd..
 cd..
 
-echo robocopy "%CD%%1" "%CD%" /MIR /XF settings.ini /XD .git "%CD%%1"
+robocopy "%CD%%1" "%CD%" /MIR /XF settings.ini /XD .git %1
 
 timeout 30
