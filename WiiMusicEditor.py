@@ -799,11 +799,11 @@ while True:
 	print("//////////////////////////////\n")
 
 	if(os.path.isdir(ProgramPath+'/WiiMusicEditor-main')):
-		print('\nFinishing Up...')
-		subprocess.run('del '+ProgramPath+'/WiiMusicEditor-main')
+		print('Finishing Up...')
+		subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-main\"')
 	elif(os.path.isdir(ProgramPath+'/WiiMusicEditor-beta')):
-		print('\nFinishing Up...')
-		subprocess.run('del '+ProgramPath+'/WiiMusicEditor-beta')
+		print('Finishing Up...')
+		subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-beta\"')
 	elif(not uptodate):
 		CheckForUpdates()
 
