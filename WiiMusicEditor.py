@@ -1123,7 +1123,7 @@ while True:
 
 			while True:
 				UpdateSelected = input("\nPick an Option: ")
-				if(UpdateSelected.isnumeric()) and (int(UpdateSelected) < 3):
+				if(UpdateSelected.isnumeric()) and (int(UpdateSelected) < 4):
 					UpdateSelected = int(UpdateSelected)
 					break
 				else:
@@ -1133,7 +1133,7 @@ while True:
 			elif(UpdateSelected == 2):
 				AutoUpdate = not AutoUpdate
 				SaveSetting('Updates', 'AutoUpdate', str(AutoUpdate))
-			elif(UpdateSelected == 2):
+			elif(UpdateSelected == 3):
 				beta = not beta
 				SaveSetting('Updates', 'Branch', str(beta))
 				DownloadUpdate()
