@@ -800,10 +800,10 @@ while True:
 
 	if(os.path.isdir(ProgramPath+'/WiiMusicEditor-main')):
 		print('\nFinishing Up...')
-		subprocess.run('del WiiMusicEditor-main')
+		subprocess.run('del '+ProgramPath+'/WiiMusicEditor-main')
 	elif(os.path.isdir(ProgramPath+'/WiiMusicEditor-beta')):
 		print('\nFinishing Up...')
-		subprocess.run('del WiiMusicEditor-beta')
+		subprocess.run('del '+ProgramPath+'/WiiMusicEditor-beta')
 	elif(not uptodate):
 		CheckForUpdates()
 
