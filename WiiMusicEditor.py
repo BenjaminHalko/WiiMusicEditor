@@ -751,27 +751,31 @@ def CheckForUpdates():
 	global ProgramPath
 	global beta
 	global updateUrl
-	global updateDownload
 	print('Checking for Updates...')
 	version = open(ProgramPath+'/Helper/Update/Version.txt')
 	currentVersion = version.read()
 	version.close()
 	if (requests.get(updateUrl[beta]).text != currentVersion):
 		if(input("\nNew Update Avalible!\nWould you Like to Download it? [y/n] ") == 'y'):
-			print('\nDownloading...')
-			newZip = open('WiiMusicEditor.zip','wb')
-			newZip.write(requests.get(updateDownload[beta]).content)
-			newZip.close()
-			print('\nExtracting...\n')
-			subprocess.run('tar -xf WiiMusicEditor.zip')
-			newPath = '/WiiMusicEditor-main'
-			if(not os.path.isdir(ProgramPath+newPath)):
-				newPath = '/WiiMusicEditor-beta'
-			subprocess.Popen(ProgramPath+newPath+'/Helper/Update/Update.bat '+newPath.replace('/',''))
-			quit()
+			DownloadUpdate()
 
 	else:
 		print('\nUp to Date!')
+
+def DownloadUpdate():
+	global beta
+	global updateDownload
+	print('\nDownloading...')
+	newZip = open('WiiMusicEditor.zip','wb')
+	newZip.write(requests.get(updateDownload[beta]).content)
+	newZip.close()
+	print('\nExtracting...\n')
+	subprocess.run('tar -xf WiiMusicEditor.zip')
+	newPath = '/WiiMusicEditor-main'
+	if(not os.path.isdir(ProgramPath+newPath)):
+		newPath = '/WiiMusicEditor-beta'
+	subprocess.Popen(ProgramPath+newPath+'/Helper/Update/Update.bat '+newPath.replace('/',''))
+	quit()
 
 #Default Paths
 GamePath = LoadSetting('Paths','GamePath','None')
@@ -783,8 +787,9 @@ DolphinPath = LoadSetting('Paths','DolphinPath','None')
 ProgramPath = os.path.dirname(__file__)
 
 #Update
-beta = True
-uptodate = False
+beta = int(LoadSetting('Updates', 'Branch', '0'))
+AutoUpdate = int((LoadSetting('Updates', 'AutoUpdates', '1')))
+uptodate = not AutoUpdate
 updateUrl = ['https://raw.githubuser.com/BenjaminHalko/WiiMusicEditor/main/Version.txt',
 'https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/beta/Helper/Update/Version.txt']
 updateDownload = ['https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/main.zip',
@@ -817,7 +822,7 @@ while True:
 	print("(#4) Edit Styles")
 	print("(#5) Overwrite Save File With 100% Save")
 	print("(#6) Load Wii Music")
-	print("(#7) Change File Paths")
+	print("(#7) Settings")
 	print("(#8) Credits")
 	while True:
 		mode = input("\nPlease Select An Option: ")
@@ -1070,25 +1075,69 @@ while True:
 		subprocess.run('\"'+DolphinPath+'\" -e \"'+GamePath+'/sys/main.dol\"',capture_output=True)
 		print("")
 	elif(mode == '7'):
-		PrintSectionTitle("Path Editor")
+		PrintSectionTitle("Settings")
 		print("(#0) Back To Main Menu")
-		print("(#1) Game Path (Current Path: "+GamePath+')')
-		print("(#2) Dolphin Path (Current Path: "+DolphinPath+')')
+		print("(#1) Change File Paths")
+		print("(#2) Updates")
+
 		while True:
-			PathSelected = input("\nWhich Path Do You Want To Change: ")
-			if(PathSelected.isnumeric()) and (int(PathSelected) < 3):
-				PathSelected = int(PathSelected)
+			SettingSelected = input("\nWhich Setting Do You Want To Change: ")
+			if(SettingSelected.isnumeric()) and (int(SettingSelected) < 3):
+				SettingSelected = int(SettingSelected)
 				break
 			else:
 				print("\nERROR: Not a Valid Number")
-		if(PathSelected == 1):
-			GamePath = ''
-			FindGameFolder()
-			print("")
-		elif(PathSelected == 2):
-			DolphinPath = ''
-			FindDolphin()
-			print("")
+
+		if(SettingSelected == 1):
+			PrintSectionTitle('Path Editor')
+			print("(#0) Back To Settings")
+			print("(#1) Game Path (Current Path: "+GamePath+')')
+			print("(#2) Dolphin Path (Current Path: "+DolphinPath+')')
+			while True:
+				PathSelected = input("\nWhich Path Do You Want To Change: ")
+				if(PathSelected.isnumeric()) and (int(PathSelected) < 3):
+					PathSelected = int(PathSelected)
+					break
+				else:
+					print("\nERROR: Not a Valid Number")
+			if(PathSelected == 1):
+				GamePath = ''
+				FindGameFolder()
+				print("")
+			elif(PathSelected == 2):
+				DolphinPath = ''
+				FindDolphin()
+				print("")
+		elif(SettingSelected == 2):
+			PrintSectionTitle('Updates')
+			print("(#0) Back To Settings")
+			print("(#1) Check For Updates")
+			if(AutoUpdate):
+				print("(#2) Turn Off Auto Updates")
+			else:
+				print("(#2) Turn On Auto Updates")
+			if(beta == 'Main'):
+				print("(#3) Switch to Beta Branch")
+			else:
+				print("(#3) Switch to Main Branch")
+
+			while True:
+				UpdateSelected = input("\nPick an Option: ")
+				if(UpdateSelected.isnumeric()) and (int(UpdateSelected) < 3):
+					UpdateSelected = int(UpdateSelected)
+					break
+				else:
+					print("\nERROR: Not a Valid Number")
+			if(UpdateSelected == 1):
+				CheckForUpdates()
+			elif(UpdateSelected == 2):
+				AutoUpdate = not AutoUpdate
+				SaveSetting('Updates', 'AutoUpdate', str(AutoUpdate))
+			elif(UpdateSelected == 2):
+				beta = not beta
+				SaveSetting('Updates', 'Branch', str(beta))
+				DownloadUpdate()
+
 	elif(mode == '8'):
 		PrintSectionTitle('Credits')
 		print('\n-----Created By:-----')
