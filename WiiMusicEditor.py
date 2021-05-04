@@ -764,7 +764,7 @@ def CheckForUpdates():
 			newPath = '/WiiMusicEditor-main'
 			if(not os.path.isdir(ProgramPath+newPath)):
 				newPath = '/WiiMusicEditor-beta'
-			subprocess.Popen('\"'+ProgramPath+newPath+'/Helper/Update/Update.bat\" '+newPath.replace('/',''))
+			subprocess.Popen(ProgramPath+newPath+'/Helper/Update/Update.bat '+newPath.replace('/',''))
 			quit()
 
 	else:
