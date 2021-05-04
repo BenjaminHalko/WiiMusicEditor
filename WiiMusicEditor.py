@@ -812,7 +812,8 @@ while True:
 	elif(os.path.isdir(ProgramPath+'/WiiMusicEditor-beta')):
 		print('Finishing Up...')
 		subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-beta\"')
-	elif(AutoUpdate == 0) and (not uptodate):
+	elif(AutoUpdate == 1) and (not uptodate):
+		uptodate = True
 		CheckForUpdates()
 
 	PrintSectionTitle('Options')
