@@ -640,6 +640,7 @@ def FindGameFolder():
 	global GamePath
 	global BrsarPath
 	global MessagePath
+	global WiiDiskFolder
 	if(not os.path.isdir(GamePath+'/files')):
 		while True:
 			GamePath = input("\nDrag Decompressed Wii Music Directory: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
@@ -651,9 +652,20 @@ def FindGameFolder():
 				SaveSetting('Paths','GamePath',GamePath)
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 				MessagePath = GamePath+'/files/US/Message/message.carc'
+				FindWiiDiskFolder()
 				break
 			else:
 				print("\nERROR: Unable to Locate Valid Wii Music Directory")
+
+def FindWiiDiskFolder():
+	global GamePath
+	global WiiDiskFolder
+	WiiDiskFolder = os.path.basename(GamePath)
+	if(WiiDiskFolder == 'DATA'):
+		LastSlash = len(GamePath)-1
+		while(LastSlash >= 0) and (GamePath[LastSlash].isalpha()):
+			LastSlash -= 1
+		WiiDiskFolder = os.path.basename(GamePath[0:LastSlash:1])
 
 def FindDolphin():
 	global DolphinPath
@@ -830,6 +842,8 @@ CodePath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/GameSettin
 SaveDataPath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/Wii/title/00010000/52363445/data"
 DolphinPath = LoadSetting('Paths','DolphinPath','None')
 ProgramPath = os.path.dirname(__file__)
+WiiDiskFolder = ''
+FindWiiDiskFolder()
 
 #Update
 beta = int(LoadSetting('Updates', 'Branch', '0'))
@@ -888,6 +902,9 @@ while True:
 		#Load Brseq
 		InitializeBrseq()
 
+		#Applied Custom Songs
+		appliedCustomSongs = list(LoadSetting('Applied Custom Songs', WiiDiskFolder, '').split(','))
+
 		#Song List
 		LowestSong = -1
 		PrintSectionTitle('Song List')
@@ -897,13 +914,15 @@ while True:
 				SongMinLength.append(min(int(SongFileLengths[num],16),int(ScoreFileLengths[num],16)))
 			else:
 				SongMinLength.append(int(SongFileLengths[num],16))
-			if(int(BrseqLength,16) <= SongMinLength[num]):
+			if(int(BrseqLength,16) <= SongMinLength[num]) and (SongNames[num] not in appliedCustomSongs):
 				if(LowestSong == -1): LowestSong = SongMinLength[num]
 				else: LowestSong = min(SongMinLength[num],LowestSong)
 
 		for num in range(len(SongNames)):
 			if(int(BrseqLength,16) > SongMinLength[num]):
 				print(Fore.RED+'~unavalible~ '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+')')
+			elif(SongNames[num] in appliedCustomSongs):
+				print(Fore.YELLOW+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+') ~[Already Replaced]~')
 			elif (SongMinLength[num] == LowestSong):
 				print(Fore.GREEN+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+') ~[Smallest Song Avalible]~')
 			else:
@@ -922,12 +941,11 @@ while True:
 			SongSelected = input("Enter The Song Number You Want To Replace: ")
 			if(SongSelected.isnumeric()) and (int(SongSelected) < len(SongNames)):
 				SongSelected = int(SongSelected)
-				if(SongSelected != 50):
-					minLength = min(int(SongFileLengths[SongSelected],16),int(ScoreFileLengths[SongSelected],16))
-				else:
-					minLength = int(SongFileLengths[SongSelected],16)
-				if(int(BrseqLength,16) <= minLength):
-					break
+				if(int(BrseqLength,16) <= SongMinLength[SongSelected]):
+					if(SongNames[SongSelected] not in appliedCustomSongs) or (input('\nWARNING: You Have Already Replaced this Song Before! Are You Sure You Want to Replace this Song?\n(If you Want to Reset the Replaced Song Database, go to the Settings Menu.) [y/n] ') == 'y'):
+						break
+					else:
+						print('Aborted...\n')
 				else:
 					print("ERROR: Brseq Filesize is over the maximum filesize for this song!\n")
 			else:
@@ -1001,6 +1019,12 @@ while True:
 				brsar.write(BrseqInfo)
 			brsar.close()
 			if(SongSelected != 50): AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
+			if(SongNames[SongSelected] not in appliedCustomSongs):
+				if(appliedCustomSongs[0] == ''):
+					appliedCustomSongs = [SongNames[SongSelected]]
+				else:
+					appliedCustomSongs.append(SongNames[SongSelected])
+				SaveSetting('Applied Custom Songs', WiiDiskFolder, ','.join([str(elem) for elem in appliedCustomSongs]))
 			print("\nPatch Complete")
 			time.sleep(0.5)
 			if(SongSelected != 50) and (input('\nWould Like to Change the Song Text? [y/n] ') == 'y'):
@@ -1101,7 +1125,8 @@ while True:
 		PrintSectionTitle("Settings")
 		print("(#0) Back To Main Menu")
 		print("(#1) Change File Paths")
-		print("(#2) Updates")
+		print("(#2) Reset Replaced Song Database")
+		print("(#3) Updates")
 
 		while True:
 			SettingSelected = input("\nWhich Setting Do You Want To Change: ")
@@ -1132,6 +1157,13 @@ while True:
 				FindDolphin()
 				print("")
 		elif(SettingSelected == 2):
+			FindGameFolder()
+			if(input("\nAre You Sure You Want to Reset the Replaced Song Database? [y/n] ") == 'y'):
+				SaveSetting('Applied Custom Songs', WiiDiskFolder, '')
+				print('\nReset Successful!\n')
+			else:
+				print('')
+		elif(SettingSelected == 3):
 			PrintSectionTitle('Updates')
 			print("(#0) Back To Settings")
 			print("(#1) Check For Updates")
