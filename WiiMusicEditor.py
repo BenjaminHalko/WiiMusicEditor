@@ -389,7 +389,9 @@ StyleNames = [
 'Menu Style Main',
 'Menu Style Electronic',
 'Menu Style Japanese',
-'Menu Style March']
+'Menu Style March',
+'Replace All Normal Styles',
+'Replace All Menu Styles']
 
 StyleMemoryOffsets = [
 '0659A65C',
@@ -684,6 +686,22 @@ def FindDolphin():
 			else:
 				print("\nERROR: Unable to Locate Valid Dolphin Directory")
 
+def FindDolphinSave():
+	global DolphinSaveData
+	global CodePath
+	global SaveDataPath
+	if(not os.path.isdir(DolphinSaveData+'/Wii')):
+		while True:
+			DolphinSaveData = input("\nDrag Dolphin Save Directory Over Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			if(os.path.isdir(DolphinSaveData+'/Wii')):
+				DolphinSaveData = DolphinSaveData.replace('\\','/')
+				CodePath = DolphinSaveData+"/GameSettings/R64E01.ini"
+				SaveDataPath = DolphinSaveData+"/Wii/title/00010000/52363445/data"
+				SaveSetting('Paths','DolphinSaveData',DolphinSaveData)
+				break
+			else:
+				print("\nERROR: Unable to Locate Valid Dolphin Save Directory")
+
 def InitializeBrseq():
 	global BrseqPath
 	global BrseqInfo
@@ -821,10 +839,10 @@ def SelectStyleInstrument(PartString,IsPercussion):
 		if(PartType.isnumeric()):
 			PartType = int(PartType)
 			if(IsPercussion): PartType = PartType + normalInstrumentNumber
-			if((PartType == normalInstrumentNumber and not IsPercussion) or (PartType == len(InstrumentNames)-1 and IsPercussion)) and (StyleSelected < len(StyleNames)-4):
+			if((PartType == normalInstrumentNumber and not IsPercussion) or (PartType == len(InstrumentNames)-1 and IsPercussion)) and ((StyleSelected < len(StyleNames)-6) or (StyleSelected == len(StyleNames)-2)):
 				PartType = 'ffffffff'
 				break
-			elif((PartType < normalInstrumentNumber) != IsPercussion) and (PartType < len(InstrumentNames)) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[PartType] in MenuInstruments)):
+			elif((PartType < normalInstrumentNumber) != IsPercussion) and (PartType < len(InstrumentNames)) and ((StyleSelected < len(StyleNames)-6) or (StyleSelected == len(StyleNames)-2) or (InstrumentNames[PartType] in MenuInstruments)):
 				PartType = format(PartType,'x').upper()
 				PartType = '0'*(8-len(PartType))+PartType
 				break
@@ -838,8 +856,9 @@ def SelectStyleInstrument(PartString,IsPercussion):
 GamePath = LoadSetting('Paths','GamePath','None')
 BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 MessagePath = GamePath+'/files/US/Message/message.carc'
-CodePath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/GameSettings/R64E01.ini"
-SaveDataPath = "C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator/Wii/title/00010000/52363445/data"
+DolphinSaveData = LoadSetting('Paths','DolphinSaveData',"C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator")
+CodePath = DolphinSaveData+"/GameSettings/R64E01.ini"
+SaveDataPath = DolphinSaveData+"/Wii/title/00010000/52363445/data"
 DolphinPath = LoadSetting('Paths','DolphinPath','None')
 ProgramPath = os.path.dirname(__file__)
 WiiDiskFolder = ''
@@ -899,6 +918,9 @@ while True:
 		#Check For Brsar
 		FindGameFolder()
 
+		#Check For Dolphin Save
+		FindDolphinSave()
+
 		#Load Brseq
 		InitializeBrseq()
 
@@ -920,17 +942,17 @@ while True:
 
 		for num in range(len(SongNames)):
 			if(int(BrseqLength,16) > SongMinLength[num]):
-				print(Fore.RED+'~unavalible~ '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+')')
+				print(Fore.RED+'~unavalible~ '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+')'+Style.RESET_ALL)
 			elif(SongNames[num] in appliedCustomSongs):
-				print(Fore.YELLOW+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+') ~[Already Replaced]~')
+				print(Fore.YELLOW+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+') ~[Already Replaced]~'+Style.RESET_ALL)
 			elif (SongMinLength[num] == LowestSong):
-				print(Fore.GREEN+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+') ~[Smallest Song Avalible]~')
+				print(Fore.GREEN+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+') ~[Smallest Song Avalible]~'+Style.RESET_ALL)
 			else:
 				print(Style.RESET_ALL+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+')')
 			time.sleep(0.005)
 
 		#Brseq Info
-		PrintSectionTitle(Style.RESET_ALL+"File Info")
+		PrintSectionTitle("File Info")
 		print("Number of Beats: "+Length)
 		print("Tempo: "+Tempo)
 		print("File Size: "+BrseqLength)
@@ -1066,10 +1088,21 @@ while True:
 		print("\nEditing Successful!\n")
 	elif(mode == '4'):
 		PrintSectionTitle("Style List")
+		FindDolphinSave()
+		NormalStyleNumber = 11
+		SongStyles = 27
+		MenuStyles = 4
 		for num in range(len(StyleNames)):
+			if(num == 0):
+				print('\n//////////Normal Styles\n')
+			elif(num == NormalStyleNumber):
+				print('\n//////////Song Specific Styles\n')
+			elif(num == NormalStyleNumber+SongStyles):
+				print('\n//////////Menu Styles\n')
+			elif(num == NormalStyleNumber+SongStyles+MenuStyles):
+				print('\n//////////Replace All Styles\n')
 			print('(#'+str(num)+') '+str(StyleNames[num]))
 			time.sleep(0.005)
-		PrintSectionTitle("Style Selection")
 		while True:
 			StyleSelected = input("\nEnter The Style Number You Want To Replace: ")
 			if(StyleSelected.isnumeric()) and (int(StyleSelected) < len(StyleNames)):
@@ -1081,11 +1114,11 @@ while True:
 		normalInstrumentNumber = 40
 		for num in range(normalInstrumentNumber+1):
 			if(num == normalInstrumentNumber):
-				if(StyleSelected < len(StyleNames)-4):
+				if(StyleSelected < len(StyleNames)-6) or (StyleSelected == len(StyleNames)-2):
 					print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[len(InstrumentNames)-1]))
 				else:
 					print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[len(InstrumentNames)-1])+Style.RESET_ALL)
-			elif (StyleSelected < len(StyleNames)-4) or (InstrumentNames[num] in MenuInstruments):
+			elif (StyleSelected < len(StyleNames)-6) or (StyleSelected == len(StyleNames)-2) or (InstrumentNames[num] in MenuInstruments):
 				print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[num]))
 			else:
 				print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
@@ -1097,7 +1130,7 @@ while True:
 		Bass = SelectStyleInstrument('Bass',False)
 		PrintSectionTitle("Intrument List")
 		for num in range(40,len(InstrumentNames)):
-			if(StyleSelected < len(StyleNames)-4) or (InstrumentNames[num] in MenuInstruments):
+			if(StyleSelected < len(StyleNames)-6) or (StyleSelected == len(StyleNames)-2) or (InstrumentNames[num] in MenuInstruments):
 				print(Style.RESET_ALL+'(#'+str(num-40)+') '+str(InstrumentNames[num]))
 			else:
 				print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
@@ -1105,11 +1138,19 @@ while True:
 		Perc1 = SelectStyleInstrument('Percussion 1',True)
 		Perc2 = SelectStyleInstrument('Percussion 2',True)
 
-		AddPatch(StyleNames[StyleSelected]+' Style Patch',StyleMemoryOffsets[StyleSelected]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+		if(StyleSelected == len(StyleNames)-2):
+			for num in range(len(StyleNames)-6):
+				AddPatch(StyleNames[num]+' Style Patch',StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+		elif(StyleSelected >= len(StyleNames)-6):
+			for num in range(len(StyleNames)-6,len(StyleNames)-2):
+				AddPatch(StyleNames[num]+' Style Patch',StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+		else:
+			AddPatch(StyleNames[StyleSelected]+' Style Patch',StyleMemoryOffsets[StyleSelected]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 		print("\nPatch Complete")
 		time.sleep(0.5)
 		print("")
 	elif(mode == '5'):
+		FindDolphinSave()
 		if(input("\nAre You Sure You Want To Overwrite Your Save Data? [y/n] ") == 'y'):
 			subprocess.run('robocopy \"'+ProgramPath+'/Helper/WiiMusicSave\" \"'+SaveDataPath+'\" /MIR /E',capture_output=True)
 			print("\nOverwrite Successfull\n")
@@ -1142,9 +1183,10 @@ while True:
 			print("(#0) Back To Settings")
 			print("(#1) Game Path (Current Path: "+GamePath+')')
 			print("(#2) Dolphin Path (Current Path: "+DolphinPath+')')
+			print("(#3) Dolphin Save Path (Current Path: "+DolphinSaveData+')')
 			while True:
 				PathSelected = input("\nWhich Path Do You Want To Change: ")
-				if(PathSelected.isnumeric()) and (int(PathSelected) < 3):
+				if(PathSelected.isnumeric()) and (int(PathSelected) < 4):
 					PathSelected = int(PathSelected)
 					break
 				else:
@@ -1156,6 +1198,10 @@ while True:
 			elif(PathSelected == 2):
 				DolphinPath = ''
 				FindDolphin()
+				print("")
+			elif(PathSelected == 3):
+				DolphinSaveData = ''
+				FindDolphinSave()
 				print("")
 		elif(SettingSelected == 2):
 			FindGameFolder()
