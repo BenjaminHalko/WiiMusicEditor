@@ -15,11 +15,13 @@ while True:
 	try:
 		import requests
 		import mido
+		from colorama import Fore, Style
 		break
 	except ImportError:
 		subprocess.run('python -m pip install --upgrade pip')
 		subprocess.run('pip install mido')
 		subprocess.run('pip install requests')
+		subprocess.run('pip install colorama')
 
 time.sleep(0.05)
 
@@ -812,6 +814,16 @@ updateDownload = ['https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/
 
 #Main Loop
 while True:
+	if(not uptodate):
+		if(os.path.isdir(ProgramPath+'/WiiMusicEditor-main')):
+			print('Finishing Up...')
+			subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-main\"')
+			uptodate = True
+		elif(os.path.isdir(ProgramPath+'/WiiMusicEditor-beta')):
+			print('Finishing Up...')
+			subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-beta\"')
+			uptodate = True
+
 	#Options
 	print("//////////////////////////////")
 	print("//                          //")
@@ -820,14 +832,8 @@ while True:
 	print("//       Music Editor       //")
 	print("//                          //")
 	print("//////////////////////////////\n")
-
-	if(os.path.isdir(ProgramPath+'/WiiMusicEditor-main')):
-		print('Finishing Up...')
-		subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-main\"')
-	elif(os.path.isdir(ProgramPath+'/WiiMusicEditor-beta')):
-		print('Finishing Up...')
-		subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-beta\"')
-	elif(AutoUpdate == 1) and (not uptodate):
+	
+	if(AutoUpdate == 1) and (not uptodate):
 		uptodate = True
 		CheckForUpdates(False)
 
@@ -854,21 +860,30 @@ while True:
 		#Load Brseq
 		InitializeBrseq()
 
-		#Song Selection
+		#Song List
+		LowestSong = -1
 		PrintSectionTitle('Song List')
+		SongMinLength = []
 		for num in range(len(SongNames)):
 			if(num != 50):
-				SongMinLength = min(int(SongFileLengths[num],16),int(ScoreFileLengths[num],16))
+				SongMinLength.append(min(int(SongFileLengths[num],16),int(ScoreFileLengths[num],16)))
 			else:
-				SongMinLength = int(SongFileLengths[num],16)
-			if(int(BrseqLength,16) > SongMinLength):
-				print('~UNAVALIBLE~ '+str(SongNames[num])+' ('+format(SongMinLength,'x').upper()+')')
+				SongMinLength.append(int(SongFileLengths[num],16))
+			if(int(BrseqLength,16) <= SongMinLength[num]):
+				if(LowestSong == -1): LowestSong = SongMinLength[num]
+				else: LowestSong = min(SongMinLength[num],LowestSong)
+
+		for num in range(len(SongNames)):
+			if(int(BrseqLength,16) > SongMinLength[num]):
+				print(Fore.RED+'~unavalible~ '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+')')
+			elif (SongMinLength[num] == LowestSong):
+				print(Fore.GREEN+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+') ~[Smallest Song Avalible]~')
 			else:
-				print('(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength,'x').upper()+')')
+				print(Style.RESET_ALL+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+')')
 			time.sleep(0.005)
 
 		#Brseq Info
-		PrintSectionTitle("File Info")
+		PrintSectionTitle(Style.RESET_ALL+"File Info")
 		print("Number of Beats: "+Length)
 		print("Tempo: "+Tempo)
 		print("File Size: "+BrseqLength)
