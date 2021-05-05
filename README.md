@@ -34,6 +34,10 @@
 
 Sakura Sakura
 
+Jingle Bell Rock
+
+Ode to Joy
+
 ## Things to Add:
 
 Add Loading from .iso
