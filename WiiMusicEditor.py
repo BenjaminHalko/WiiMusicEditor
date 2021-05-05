@@ -1119,7 +1119,8 @@ while True:
 		FindGameFolder()
 		FindDolphin()
 		PrintSectionTitle("Running Dolphin")
-		subprocess.run('\"'+DolphinPath+'\" -e \"'+GamePath+'/sys/main.dol\"',capture_output=True)
+		subprocess.Popen('\"'+DolphinPath+'\" -e \"'+GamePath+'/sys/main.dol\"')
+		time.sleep(1)
 		print("")
 	elif(mode == '7'):
 		PrintSectionTitle("Settings")
