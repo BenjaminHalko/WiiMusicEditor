@@ -239,7 +239,7 @@ SongFileLengths = [
 '1AE0',
 '1840',
 '1940',
-'2260']
+'0']
 
 ScoreFileLengths = [
 '1920',
