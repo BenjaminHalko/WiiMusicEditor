@@ -15,13 +15,15 @@ while True:
 	try:
 		import requests
 		import mido
-		from colorama import Fore, Style
+		from colorama import Fore, Style, init
 		break
 	except ImportError:
 		subprocess.run('python -m pip install --upgrade pip')
 		subprocess.run('pip install mido')
 		subprocess.run('pip install requests')
 		subprocess.run('pip install colorama')
+
+init(convert=True)
 
 time.sleep(0.05)
 
@@ -390,48 +392,48 @@ StyleNames = [
 'Menu Style March']
 
 StyleMemoryOffsets = [
-'0659A65F',
-'0659A683',
-'0659A6A7',
-'0659A6CB',
-'0659A6EF',
-'0659A713',
-'0659A737',
-'0659A75B',
-'0659A77F',
-'0659A7A3',
-'0659A7C7',
-'0659A7EB', #Default Styles
-'0659A80F',
-'0659A833',
-'0659A856',
-'0659A87B',
-'0659A89F',
-'0659A8C3',
-'0659A8E7',
-'0659A90B',
-'0659A92F',
-'0659A953',
-'0659A977',
-'0659A99B',
-'0659A9BF',
-'0659A9E3',
-'0659AA07',
-'0659AA2B',
-'0659AA4F',
-'0659AA73',
-'0659AA97',
-'0659AABB',
-'0659AADF',
-'0659AB03',
-'0659AB27',
-'0659AB4B',
-'0659AB6F',
-'8059AC8F',
-'0659ACB3',
-'0659ACD7',
-'0659ACFB',
-'0659AD1F'] 
+'0659A65C',
+'0659A680',
+'0659A6A4',
+'0659A6C8',
+'0659A6EC',
+'0659A710',
+'0659A734',
+'0659A758',
+'0659A77C',
+'0659A7A0',
+'0659A7C4',
+'0659A7E8',
+'0659A80C',
+'0659A830',
+'0659A853',
+'0659A878',
+'0659A89C',
+'0659A8C0',
+'0659A8E4',
+'0659A908',
+'0659A92C',
+'0659A950',
+'0659A974',
+'0659A998',
+'0659A9BC',
+'0659A9E0',
+'0659AA04',
+'0659AA28',
+'0659AA4C',
+'0659AA70',
+'0659AA94',
+'0659AAB8',
+'0659AADC',
+'0659AB00',
+'0659AB24',
+'0659AB48',
+'0659AB6C',
+'0659AC8C',
+'0659ACB0',
+'0659ACD4',
+'0659ACF8',
+'0659AD1C']
 
 InstrumentNames = [
 'Piano',
@@ -500,7 +502,8 @@ InstrumentNames = [
 'Kung Fu Person',
 'Reggae Drums',
 'Whistle',
-'Beatbox']
+'Beatbox',
+'None']
 
 MenuInstruments = [
 'Saxophone',
@@ -604,7 +607,7 @@ def AddPatch(PatchName,PatchInfo):
 			while True:
 				if(len(lineText) <= songExists+1):
 					break
-				elif(not lineText[songExists+1][0].isnumeric()):
+				elif(not lineText[songExists+1][0].isnumeric() and (lineText[songExists+1][0] != 'f')):
 					break
 				else:
 					lineText.pop(songExists+1)
@@ -794,6 +797,31 @@ def DownloadUpdate():
 	except (requests.ConnectionError, requests.Timeout) as exception:
 		print('\nFailed to Download File...\n')
 
+def SelectStyleInstrument(PartString,IsPercussion):
+	global StyleNames
+	global StyleSelected
+	global InstrumentNames
+	global MenuInstruments
+	global normalInstrumentNumber
+	print('')
+	while True:
+		PartType = input("Enter The Instrument Number You Want For "+PartString+": ")
+		if(PartType.isnumeric()):
+			PartType = int(PartType)
+			if(IsPercussion): PartType = PartType + normalInstrumentNumber
+			if((PartType == normalInstrumentNumber and not IsPercussion) or (PartType == len(InstrumentNames)-1 and IsPercussion)) and (StyleSelected < len(StyleNames)-4):
+				PartType = 'ffffffff'
+				break
+			elif((PartType < normalInstrumentNumber) != IsPercussion) and (PartType < len(InstrumentNames)) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[PartType] in MenuInstruments)):
+				PartType = format(PartType,'x').upper()
+				PartType = '0'*(8-len(PartType))+PartType
+				break
+			else:
+				print("\nERROR: Not a Valid Number\n")
+		else:
+			print("\nERROR: Not a Valid Number\n")
+	return PartType
+
 #Default Paths
 GamePath = LoadSetting('Paths','GamePath','None')
 BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
@@ -816,11 +844,11 @@ updateDownload = ['https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/
 while True:
 	if(not uptodate):
 		if(os.path.isdir(ProgramPath+'/WiiMusicEditor-main')):
-			print('Finishing Up...')
+			print('Finishing Up...\n')
 			subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-main\"')
 			uptodate = True
 		elif(os.path.isdir(ProgramPath+'/WiiMusicEditor-beta')):
-			print('Finishing Up...')
+			print('Finishing Up...\n')
 			subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-beta\"')
 			uptodate = True
 
@@ -1025,71 +1053,35 @@ while True:
 				break
 			else:
 				print("\nERROR: Not a Valid Number")
-		PrintSectionTitle("Intrument List")
-		for num in range(40):
-			if(StyleSelected < len(StyleNames)-4) or (InstrumentNames[num] in MenuInstruments):
-				print('(#'+str(num)+') '+str(InstrumentNames[num]))
+		PrintSectionTitle("Instrument List")
+		normalInstrumentNumber = 40
+		for num in range(normalInstrumentNumber+1):
+			if(num == normalInstrumentNumber):
+				if(StyleSelected < len(StyleNames)-4):
+					print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[len(InstrumentNames)-1]))
+				else:
+					print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[len(InstrumentNames)-1])+Style.RESET_ALL)
+			elif (StyleSelected < len(StyleNames)-4) or (InstrumentNames[num] in MenuInstruments):
+				print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[num]))
 			else:
-				print('(UNAVALIBLE) '+str(InstrumentNames[num]))
+				print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
 			time.sleep(0.005)
 		PrintSectionTitle("Instrument Selection")
-		while True:
-			Melody = input("Enter The Instrument Number You Want For Melody: ")
-			if(Melody.isnumeric()) and (int(Melody) < 40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Melody)] in MenuInstruments)):
-				Melody = format(int(Melody),'x').upper()
-				Melody = '0'*(2-len(Melody))+Melody
-				break
-			else:
-				print("\nERROR: Not a Valid Number\n")
-		while True:
-			Harmony = input("\nEnter The Instrument Number You Want For Harmony: ")
-			if(Harmony.isnumeric()) and (int(Harmony) < 40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Harmony)] in MenuInstruments)):
-				Harmony = format(int(Harmony),'x').upper()
-				Harmony = '0'*(2-len(Harmony))+Harmony
-				break
-			else:
-				print("\nERROR: Not a Valid Number")
-		while True:
-			Chord = input("\nEnter The Instrument Number You Want For Chord: ")
-			if(Chord.isnumeric()) and (int(Chord) < 40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Chord)] in MenuInstruments)):
-				Chord = format(int(Chord),'x').upper()
-				Chord = '0'*(2-len(Chord))+Chord
-				break
-			else:
-				print("\nERROR: Not a Valid Number")
-		while True:
-			Bass = input("\nEnter The Instrument Number You Want For Bass: ")
-			if(Bass.isnumeric()) and (int(Bass) < 40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Bass)] in MenuInstruments)):
-				Bass = format(int(Bass),'x').upper()
-				Bass = '0'*(2-len(Bass))+Bass
-				break
-			else:
-				print("\nERROR: Not a Valid Number")
+		Melody = SelectStyleInstrument('Melody',False)
+		Harmony = SelectStyleInstrument('Harmony',False)
+		Chord = SelectStyleInstrument('Chord',False)
+		Bass = SelectStyleInstrument('Bass',False)
 		PrintSectionTitle("Intrument List")
 		for num in range(40,len(InstrumentNames)):
 			if(StyleSelected < len(StyleNames)-4) or (InstrumentNames[num] in MenuInstruments):
-				print('(#'+str(num-40)+') '+str(InstrumentNames[num]))
+				print(Style.RESET_ALL+'(#'+str(num-40)+') '+str(InstrumentNames[num]))
 			else:
-				print('(UNAVALIBLE) '+str(InstrumentNames[num]))
+				print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
 			time.sleep(0.005)
-		while True:
-			Perc1 = input("\nEnter The Instrument Number You Want For Percussion 1: ")
-			if(Perc1.isnumeric()) and (int(Perc1) < len(InstrumentNames)-40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Perc1)+40] in MenuInstruments)):
-				Perc1 = format(int(Perc1)+40,'x').upper()
-				Perc1 = '0'*(2-len(Perc1))+Perc1
-				break
-			else:
-				print("\nERROR: Not a Valid Number")
-		while True:
-			Perc2 = input("\nEnter The Instrument Number You Want For Percussion 2: ")
-			if(Perc2.isnumeric()) and (int(Perc2) < len(InstrumentNames)-40) and ((StyleSelected < len(StyleNames)-4) or (InstrumentNames[int(Perc2)+40] in MenuInstruments)):
-				Perc2 = format(int(Perc2)+40,'x').upper()
-				Perc2 = '0'*(2-len(Perc2))+Perc2
-				break
-			else:
-				print("\nERROR: Not a Valid Number")
+		Perc1 = SelectStyleInstrument('Percussion 1',True)
+		Perc2 = SelectStyleInstrument('Percussion 2',True)
 
-		AddPatch(StyleNames[StyleSelected]+' Style Patch',StyleMemoryOffsets[StyleSelected]+' 00000018\n'+Melody+'000000 '+Harmony+'000000\n'+Chord+'000000 '+Bass+'000000\n'+Perc1+'000000 '+Perc2+'000000\n')
+		AddPatch(StyleNames[StyleSelected]+' Style Patch',StyleMemoryOffsets[StyleSelected]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 		print("\nPatch Complete")
 		time.sleep(0.5)
 		print("")
