@@ -22,7 +22,7 @@
 
 2: Install the latest version of Python (https://https://www.python.org/downloads/, make sure to check add to PATH when downloading).
 
-3: Download WiiMusicEditor and Dolphin (https://dolphin-emu.org/download/?ref=btn) for testing (It's recommended that you make a portable installation by adding portable.txt to the root folder if you have another Dolphin installation).
+3: Download WiiMusicEditor and Dolphin (https://dolphin-emu.org/download/) for testing (It's recommended that you make a portable installation by adding portable.txt to the root folder if you have another Dolphin installation).
 
 3: MAKE SURE that you have Cheats enabled on Dolphin and change the settings to your liking.
 
