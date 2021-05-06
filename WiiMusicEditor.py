@@ -400,7 +400,7 @@ StyleMemoryOffsets = [
 '0659A6C8',
 '0659A6EC',
 '0659A710',
-'0659A734',
+'0659A724',
 '0659A758',
 '0659A77C',
 '0659A7A0',
@@ -408,7 +408,7 @@ StyleMemoryOffsets = [
 '0659A7E8',
 '0659A80C',
 '0659A830',
-'0659A853',
+'0659A854',
 '0659A878',
 '0659A89C',
 '0659A8C0',
@@ -903,7 +903,7 @@ while True:
 	print("(#2) Change Song Names")
 	print("(#3) Change All Wii Music Text (Advanced)")
 	print("(#4) Edit Styles")
-	print("(#5) Overwrite Save File With 100% Save")
+	print("(#5) Overwrite Save File With 100% Save (In Progress)")
 	print("(#6) Load Wii Music")
 	print("(#7) Settings")
 	print("(#8) Credits")
@@ -1112,6 +1112,7 @@ while True:
 				print("\nERROR: Not a Valid Number")
 		PrintSectionTitle("Instrument List")
 		normalInstrumentNumber = 40
+		
 		for num in range(normalInstrumentNumber+1):
 			if(num == normalInstrumentNumber):
 				if(StyleSelected < len(StyleNames)-6) or (StyleSelected == len(StyleNames)-2):
@@ -1146,6 +1147,7 @@ while True:
 				AddPatch(StyleNames[num]+' Style Patch',StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 		else:
 			AddPatch(StyleNames[StyleSelected]+' Style Patch',StyleMemoryOffsets[StyleSelected]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+
 		print("\nPatch Complete")
 		time.sleep(0.5)
 		print("")
@@ -1160,7 +1162,7 @@ while True:
 		FindGameFolder()
 		FindDolphin()
 		PrintSectionTitle("Running Dolphin")
-		subprocess.Popen('\"'+DolphinPath+'\" -e \"'+GamePath+'/sys/main.dol\"')
+		subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
 		time.sleep(1)
 		print("")
 	elif(mode == '7'):
