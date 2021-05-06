@@ -974,8 +974,8 @@ while True:
 	print("(#3) Change All Wii Music Text (Advanced)")
 	print("(#4) Edit Styles")
 	print("(#5) Load Wii Music")
-	print("(#6) Overwrite Save File With 100% Save (In Progress)")
-	print("(#7) Extract/Compile Wii Music Disk")
+	print("(#6) Extract/Compile Wii Music Disk")
+	print("(#7) Overwrite Save File With 100% Save (In Progress)")
 	print("(#8) Settings")
 	print("(#9) Credits")
 
@@ -1220,14 +1220,7 @@ while True:
 			subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
 		time.sleep(1)
 		print("")
-	elif(Selection == 6): #////////////////////////////////////////100% Save File
-		FindDolphinSave()
-		if(input("\nAre You Sure You Want To Overwrite Your Save Data? [y/n] ") == 'y'):
-			subprocess.run('robocopy \"'+ProgramPath+'/Helper/WiiMusicSave\" \"'+SaveDataPath+'\" /MIR /E',capture_output=True)
-			print("\nOverwrite Successfull\n")
-		else:
-			print("\nAborted...\n")
-	elif(Selection == 7): #////////////////////////////////////////Extract/Compile Disk
+	elif(Selection == 6): #////////////////////////////////////////Extract/Compile Disk
 		PrintSectionTitle('Extract/Compile Disk')
 		print("(#0) Back To Main Menu")
 		print("(#1) Extract Disk")
@@ -1261,6 +1254,13 @@ while True:
 				DiskPath = GamePath[0:len(GamePath)-5:1]
 			subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+'.wbfs\" --wbfs')
 		print('')
+	elif(Selection == 7): #////////////////////////////////////////100% Save File
+		FindDolphinSave()
+		if(input("\nAre You Sure You Want To Overwrite Your Save Data? [y/n] ") == 'y'):
+			subprocess.run('robocopy \"'+ProgramPath+'/Helper/WiiMusicSave\" \"'+SaveDataPath+'\" /MIR /E',capture_output=True)
+			print("\nOverwrite Successfull\n")
+		else:
+			print("\nAborted...\n")
 	elif(Selection == 8): #////////////////////////////////////////Settings
 		PrintSectionTitle("Settings")
 		print("(#0) Back To Main Menu")
