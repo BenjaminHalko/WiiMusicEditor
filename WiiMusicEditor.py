@@ -583,9 +583,6 @@ SongMemoryOrder = [
 'Animal Crossing',
 'F-Zero']
 
-TextType = ['Song','Desc','Genre']
-TextOffset = ['c8','190','12c']
-
 #Functions
 def AddPatch(PatchName,PatchInfo):
 	global CodePath
@@ -645,9 +642,10 @@ def FindGameFolder():
 	global BrsarPath
 	global MessagePath
 	global WiiDiskFolder
-	if(not os.path.isdir(GamePath+'/files')):
+	ExceptedFileExtensions = ['.iso','.wbfs']
+	if(not os.path.isdir(GamePath+'/files')) and ((not os.path.isfile(GamePath)) or (not pathlib.Path(GamePath).suffix in ExceptedFileExtensions)):
 		while True:
-			GamePath = input("\nDrag Decompressed Wii Music Directory: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			GamePath = input("\nDrag Decompressed Wii Music Directory Or Wii Music Disk: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isdir(GamePath+'/DATA/files')) or (os.path.isdir(GamePath+'/files')):
 				if(os.path.isdir(GamePath+'/DATA')):
 					GamePath = os.path.dirname(GamePath+'/DATA/files').replace('\\','/')
@@ -658,6 +656,12 @@ def FindGameFolder():
 				MessagePath = GamePath+'/files/US/Message/message.carc'
 				FindWiiDiskFolder()
 				break
+			elif(os.path.isfile(GamePath)) and (pathlib.Path(GamePath).suffix in ExceptedFileExtensions):
+				SaveSetting('Paths','GamePath',GamePath)
+				BrsarPath = ProgramPath+'/tmp/DATA/files/sound/MusicStatic/rp_Music_sound.brsar'
+				MessagePath = ProgramPath+'/tmp/DATA/files/US/Message/message.carc'
+				FindWiiDiskFolder()
+				break
 			else:
 				print("\nERROR: Unable to Locate Valid Wii Music Directory")
 
@@ -665,7 +669,7 @@ def FindWiiDiskFolder():
 	global GamePath
 	global WiiDiskFolder
 	WiiDiskFolder = os.path.basename(GamePath)
-	if(WiiDiskFolder == 'DATA'):
+	if(WiiDiskFolder == 'DATA') and (os.path.isdir(GamePath)):
 		LastSlash = len(GamePath)-1
 		while(LastSlash >= 0) and (GamePath[LastSlash].isalpha()):
 			LastSlash -= 1
@@ -749,24 +753,28 @@ def InitializeBrseq():
 		BrseqLength = format(os.stat(directory+"/z.brseq").st_size,'x').upper()
 
 
-def ChangeName(SongToChange,newText,TypeOfText):
+def ChangeName(SongToChange,newText):
 	global ProgramPath
+	TextOffset = ['c8','190','12c']
+	ExtractDisk()
 	subprocess.run('\"'+ProgramPath+'\\Helper\\Wiimms\\decode.bat\" '+MessageFolder(),capture_output=True)
-	message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
-	textlines = message.readlines()
-	message.close()
-	offset = format(int(TextOffset[TextType.index(TypeOfText)],16)+SongMemoryOrder.index(SongNames[SongToChange]),'x').lower()
-	offset = ' ' * (4-len(offset))+offset+'00 @'
-	for num in range(len(textlines)):
-		if offset in str(textlines[num]):
-			while bytes('@','utf-8') not in textlines[num+1]:
-				textlines.pop(num+1)
-			textlines[num] = bytes(offset+str(textlines[num])[10:24:1]+newText+'\r\n','utf-8')
-			break
-	message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','wb')
-	message.writelines(textlines)
-	message.close()
+	for typeNum in range(3):
+		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
+		textlines = message.readlines()
+		message.close()
+		offset = format(int(TextOffset[typeNum],16)+SongMemoryOrder.index(SongNames[SongToChange]),'x').lower()
+		offset = ' ' * (4-len(offset))+offset+'00 @'
+		for num in range(len(textlines)):
+			if offset in str(textlines[num]):
+				while bytes('@','utf-8') not in textlines[num+1]:
+					textlines.pop(num+1)
+				textlines[num] = bytes(offset+str(textlines[num])[10:24:1]+newText[typeNum]+'\r\n','utf-8')
+				break
+		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','wb')
+		message.writelines(textlines)
+		message.close()
 	subprocess.run('\"'+ProgramPath+'\\Helper\\Wiimms\\encode.bat\" '+MessageFolder(),capture_output=True)
+	CompileDisk()
 
 def MessageFolder():
 	return '\"'+(os.path.dirname(MessagePath)).replace('/','\\')+'\"'
@@ -889,15 +897,35 @@ def ChangeDefaultAnswer(ResponseOptions,iniKey):
 	print('')
 	return ResponseOptions[Selection]
 
+def ExtractDisk():
+	global GamePath
+	global ProgramPath
+	if(os.path.isfile(GamePath)):
+		print('\nExtracting Disk...')
+		subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp --fst \"'+GamePath+'\" \"'+ProgramPath+'/tmp\"',capture_output=True)
+
+def CompileDisk():
+	global GamePath
+	global ProgramPath
+	if(os.path.isfile(GamePath)):
+		print('\nCompiling Disk...')
+		subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/delete.bat\" \"'+GamePath+'\"')
+		subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+ProgramPath+'/tmp\" \"'+GamePath+'\"',capture_output=True)
+		subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/erasedir.bat\"')
+
 #Default Paths
+ProgramPath = os.path.dirname(__file__)
 GamePath = LoadSetting('Paths','GamePath','None')
-BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
-MessagePath = GamePath+'/files/US/Message/message.carc'
+if(os.path.isfile(GamePath)):
+	BrsarPath = ProgramPath+'/tmp/DATA/files/sound/MusicStatic/rp_Music_sound.brsar'
+	MessagePath = ProgramPath+'/tmp/DATA/files/US/Message/message.carc'
+else:
+	BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
+	MessagePath = GamePath+'/files/US/Message/message.carc'
 DolphinSaveData = LoadSetting('Paths','DolphinSaveData',"C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator")
 CodePath = DolphinSaveData+"/GameSettings/R64E01.ini"
 SaveDataPath = DolphinSaveData+"/Wii/title/00010000/52363445/data"
 DolphinPath = LoadSetting('Paths','DolphinPath','None')
-ProgramPath = os.path.dirname(__file__)
 WiiDiskFolder = ''
 FindWiiDiskFolder()
 
@@ -954,10 +982,11 @@ while True:
 	print("(#4) Edit Styles")
 	print("(#5) Load Wii Music")
 	print("(#6) Overwrite Save File With 100% Save (In Progress)")
-	print("(#7) Settings")
-	print("(#8) Credits")
+	print("(#7) Extract Wii Music Disk")
+	print("(#8) Settings")
+	print("(#9) Credits")
 
-	Selection = MakeSelection(['Please Select an Option',1,8])
+	Selection = MakeSelection(['Please Select an Option',1,9])
 
 	if(Selection == 1): #////////////////////////////////////////Add Custom Song
 		#Load Files
@@ -1057,6 +1086,7 @@ while True:
 
 		if(DefaultWantToReplaceSong == 'No') or (input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou Will NOT Be Able to Restore the Song Unless You Have Made a Backup! [y/n] ') == 'y'):
 			#Brsar Writing
+			ExtractDisk()
 			brsar = open(BrsarPath, "r+b")
 			brsar.seek(int(SongOffsets[SongSelected],16))
 			brsar.write(bytes(int(SongFileLengths[SongSelected],16)))
@@ -1074,6 +1104,7 @@ while True:
 				brsar.seek(int(ScoreOffsets[SongSelected],16))
 				brsar.write(BrseqInfo)
 			brsar.close()
+			CompileDisk()
 			if(SongSelected != 50): AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
 			if(SongNames[SongSelected] not in appliedCustomSongs):
 				if(appliedCustomSongs[0] == ''):
@@ -1105,9 +1136,7 @@ while True:
 		PrintSectionTitle("Song Selection")
 		Selection = MakeSelection(['\nWhich Song Do You Want To Change The Name Of',0,len(SongNames)-1])
 		
-		ChangeName(Selection,input('\nPlease Input the New Song Title: '),'Song')
-		ChangeName(Selection,input('\nPlease Input the New Song Description: (Use \\n For New Line) '),'Desc')
-		ChangeName(Selection,input('\nPlease Input the New Song Genre: '),'Genre')
+		ChangeName(Selection,[input('\nPlease Input the New Song Title: '),input('\nPlease Input the New Song Description: (Use \\n For New Line) '),input('\nPlease Input the New Song Genre: ')])
 		print("\nEditing Successful!\n")
 	elif(Selection == 3): #////////////////////////////////////////Change Text
 		#Load Files
@@ -1196,7 +1225,10 @@ while True:
 		FindGameFolder()
 		FindDolphin()
 		PrintSectionTitle("Running Dolphin")
-		subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
+		if(os.path.isfile(GamePath)):
+			subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'\"')
+		else:
+			subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
 		time.sleep(1)
 		print("")
 	elif(Selection == 6): #////////////////////////////////////////100% Save File
@@ -1206,7 +1238,16 @@ while True:
 			print("\nOverwrite Successfull\n")
 		else:
 			print("\nAborted...\n")
-	elif(Selection == 7): #////////////////////////////////////////Settings
+	elif(Selection == 7): #////////////////////////////////////////Extract Disk
+		ExceptedFileExtensions = ['.iso','.wbfs']
+		while True:
+			DiskPath = input("\nPlease Drag the Wii Music Disk: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			if(os.path.isfile(DiskPath)) and (pathlib.Path(DiskPath).suffix in ExceptedFileExtensions):
+				break
+			else:
+				print('ERROR: Not Supported File Type')
+		subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/extractdisk.bat\" \"'+os.path.dirname(DiskPath)+'\" \"'+os.path.splitext(os.path.basename(DiskPath))[0]+'\" '+os.path.splitext(os.path.basename(DiskPath))[1])
+	elif(Selection == 8): #////////////////////////////////////////Settings
 		PrintSectionTitle("Settings")
 		print("(#0) Back To Main Menu")
 		print("(#1) Change File Paths")
@@ -1293,7 +1334,7 @@ while True:
 				unsafeMode = not unsafeMode
 				SaveSetting('Unsafe Mode','Unsafe Mode',str(int(unsafeMode)))
 			print('')
-	elif(Selection == 8): #////////////////////////////////////////Credits
+	elif(Selection == 9): #////////////////////////////////////////Credits
 		PrintSectionTitle('Credits')
 		print('\n-----Created By:-----')
 		print('- Benjamin Halko')
