@@ -829,7 +829,7 @@ def DownloadUpdate():
 
 def SelectStyleInstrument(PartString,IsPercussion):
 	global StyleNames
-	global StyleSelected
+	global Selection
 	global InstrumentNames
 	global MenuInstruments
 	global normalInstrumentNumber
@@ -839,10 +839,10 @@ def SelectStyleInstrument(PartString,IsPercussion):
 		if(PartType.isnumeric()):
 			PartType = int(PartType)
 			if(IsPercussion): PartType = PartType + normalInstrumentNumber
-			if((PartType == normalInstrumentNumber and not IsPercussion) or (PartType == len(InstrumentNames)-1 and IsPercussion)) and ((StyleSelected < len(StyleNames)-6) or (StyleSelected == len(StyleNames)-2)):
+			if((PartType == normalInstrumentNumber and not IsPercussion) or (PartType == len(InstrumentNames)-1 and IsPercussion)) and ((Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2)):
 				PartType = 'ffffffff'
 				break
-			elif((PartType < normalInstrumentNumber) != IsPercussion) and (PartType < len(InstrumentNames)) and ((StyleSelected < len(StyleNames)-6) or (StyleSelected == len(StyleNames)-2) or (InstrumentNames[PartType] in MenuInstruments)):
+			elif((PartType < normalInstrumentNumber) != IsPercussion) and (PartType < len(InstrumentNames)) and ((Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2) or (InstrumentNames[PartType] in MenuInstruments)):
 				PartType = format(PartType,'x').upper()
 				PartType = '0'*(8-len(PartType))+PartType
 				break
@@ -851,6 +851,24 @@ def SelectStyleInstrument(PartString,IsPercussion):
 		else:
 			print("\nERROR: Not a Valid Number\n")
 	return PartType
+
+def MakeSelection(MessageRangeArray):
+	while True:
+		TempSelection = input("\n"+MessageRangeArray[0]+": ")
+		if(TempSelection.isnumeric()) and ((len(MessageRangeArray) <= 1) or ((int(TempSelection) <= MessageRangeArray[2]) and (int(TempSelection) >= MessageRangeArray[1]))):
+			break
+		else:
+			print("\nERROR: Not a Valid Number")
+	return int(TempSelection)
+
+def ChangeDefaultAnswer(ResponseOptions,iniKey):
+	for num in range(len(ResponseOptions)):
+		print('(#'+str(num)+') '+ResponseOptions[num])
+
+	Selection = MakeSelection(['Select an Option',0,len(ResponseOptions)-1])
+	SaveSetting('Default Answers', iniKey, ResponseOptions[Selection])
+	print('')
+	return ResponseOptions[Selection]
 
 #Default Paths
 GamePath = LoadSetting('Paths','GamePath','None')
@@ -873,8 +891,15 @@ updateUrl = ['https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/mai
 updateDownload = ['https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/main.zip',
 'https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/beta.zip']
 
+#Default Answers
+DefaultWantToReplaceSong = LoadSetting('Default Answers', 'Want To Replace Song', 'Yes')
+DefaultReplacingReplacedSong = LoadSetting('Default Answers', 'Replacing Replaced Song', 'Yes')
+DefaultReplaceSongNames = LoadSetting('Default Answers', 'Replace Song Names', 'Ask')
+DefaultUseAutoLengthTempo = LoadSetting('Default Answers', 'Use Auto Length and Tempo', 'Ask')
+
 #Main Loop
 while True:
+	#Finish Updates
 	if(not uptodate):
 		if(os.path.isdir(ProgramPath+'/WiiMusicEditor-main')):
 			print('Finishing Up...\n')
@@ -885,7 +910,7 @@ while True:
 			subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-beta\"')
 			uptodate = True
 
-	#Options
+	#Title
 	print("//////////////////////////////")
 	print("//                          //")
 	print("//        Welcome To        //")
@@ -894,10 +919,12 @@ while True:
 	print("//                          //")
 	print("//////////////////////////////\n")
 	
+	#Updates
 	if(AutoUpdate == 1) and (not uptodate):
 		uptodate = True
 		CheckForUpdates(False)
 
+	#Options
 	PrintSectionTitle('Options')
 	print("(#1) Add Custom Song To Wii Music")
 	print("(#2) Change Song Names")
@@ -907,21 +934,13 @@ while True:
 	print("(#6) Load Wii Music")
 	print("(#7) Settings")
 	print("(#8) Credits")
-	while True:
-		mode = input("\nPlease Select An Option: ")
-		if(mode == '1') or (mode == '2') or (mode == '3') or (mode == '4') or (mode == '5') or (mode == '6') or (mode == '7') or (mode == '8'):
-			break
-		else:
-			print("\nERROR: Not a Valid Option!")
 
-	if(mode == '1'):
-		#Check For Brsar
+	Selection = MakeSelection(['Please Select an Option',1,8])
+
+	if(Selection == 1): #////////////////////////////////////////Add Custom Song
+		#Load Files
 		FindGameFolder()
-
-		#Check For Dolphin Save
 		FindDolphinSave()
-
-		#Load Brseq
 		InitializeBrseq()
 
 		#Applied Custom Songs
@@ -964,7 +983,7 @@ while True:
 			if(SongSelected.isnumeric()) and (int(SongSelected) < len(SongNames)):
 				SongSelected = int(SongSelected)
 				if(int(BrseqLength,16) <= SongMinLength[SongSelected]):
-					if(SongNames[SongSelected] not in appliedCustomSongs) or (input('\nWARNING: You Have Already Replaced this Song Before! Are You Sure You Want to Replace this Song?\n(If you Want to Reset the Replaced Song Database, go to the Settings Menu.) [y/n] ') == 'y'):
+					if(SongNames[SongSelected] not in appliedCustomSongs) or (DefaultReplacingReplacedSong == 'No') or (input('\nWARNING: You Have Already Replaced this Song Before! Are You Sure You Want to Replace this Song?\n(If you Want to Reset the Replaced Song Database, go to the Settings Menu.) [y/n] ') == 'y'):
 						break
 					else:
 						print('Aborted...\n')
@@ -977,32 +996,25 @@ while True:
 		if(SongSelected != 50):
 			PrintSectionTitle("Length, Tempo, Time Signature Patch")
 			AutoFill = 'n'
-			if(Tempo != 'Could Not Locate') or (Length != '0'):
+			if((Tempo != 'Could Not Locate') or (Length != '0')) and (DefaultUseAutoLengthTempo != 'No'):
 				MetaDataFound = ''
 				if(Length != '0'): MetaDataFound = 'Length'
 				if(Tempo != 'Could Not Locate'):
 					if(MetaDataFound == ''): MetaDataFound = 'Tempo'
 					else: MetaDataFound = MetaDataFound+', Tempo'
 				print('Meta Data Found: '+MetaDataFound)
-				AutoFill = input("\nWe Have Automatically Located Some Meta Data! Would You Like To Autofill It: [y/n] ")
+				if(DefaultUseAutoLengthTempo == 'Yes'):
+					AutoFill = 'y'
+				else:
+					AutoFill = input("\nWe Have Automatically Located Some Meta Data! Would You Like To Autofill It: [y/n] ")
 			
 			if(AutoFill != 'y') or (Length == '0'):
-				while True:
-					Length = input("\nHow Many Measures Does Your Song Have: ")
-					if(Length.isnumeric()): 
-						break
-					else:
-						print("\nERROR: Not a Valid Number\n")
+				Length = MakeSelection(['\nHow Many Measures in Your Song'])
 			else:
 				Length = format(int(Length),'x').upper()
 
 			if(AutoFill != 'y') or (not Tempo.isnumeric()):
-				while True:
-					Tempo = input("\nWhat is the Tempo of Your Song: ")
-					if(Tempo.isnumeric()):
-						break
-					else:
-						print("\nERROR: Not a Valid Number")
+				Tempo = MakeSelection(['What is the Tempo of Your Song'])
 
 			Tempo = format(int(Tempo),'x').upper()
 
@@ -1021,7 +1033,7 @@ while True:
 			TempoCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
 			TimeCode = SongMemoryOffsets[SongSelected]+' 00000'+TimeSignature+'00\n'
 
-		if(input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou Will NOT Be Able to Restore the Song Unless You Have Made a Backup! [y/n] ') == 'y'):
+		if(DefaultWantToReplaceSong == 'No') or (input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou Will NOT Be Able to Restore the Song Unless You Have Made a Backup! [y/n] ') == 'y'):
 			#Brsar Writing
 			brsar = open(BrsarPath, "r+b")
 			brsar.seek(int(SongOffsets[SongSelected],16))
@@ -1049,7 +1061,7 @@ while True:
 				SaveSetting('Applied Custom Songs', WiiDiskFolder, ','.join([str(elem) for elem in appliedCustomSongs]))
 			print("\nPatch Complete")
 			time.sleep(0.5)
-			if(SongSelected != 50) and (input('\nWould Like to Change the Song Text? [y/n] ') == 'y'):
+			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould Like to Change the Song Text? [y/n] ') == 'y')):
 				ChangeName(SongSelected,input('\nPlease Input the New Song Title: '),'Song')
 				ChangeName(SongSelected,input('\nPlease Input the New Song Description: (Use \\n For New Line) '),'Desc')
 				ChangeName(SongSelected,input('\nPlease Input the New Song Genre: '),'Genre')
@@ -1057,36 +1069,36 @@ while True:
 			else: print('')
 		else:
 			print("Aborted...")
-	elif(mode == '2'):
+	elif(Selection == 2): #////////////////////////////////////////Change Song Names
+		#Load Files
 		FindGameFolder()
-		#Song Selection
+
+		#Song List
 		PrintSectionTitle("Song List")
 		for num in range(len(SongNames)):
 			print('(#'+str(num)+') '+str(SongNames[num]))
 			time.sleep(0.005)
 
-		while True:
-			PrintSectionTitle("Song Selection")
-			SongSelected = input("\nWhich Song Do You Want To Change The Name Of: ")
-			if(SongSelected.isnumeric()) and (int(SongSelected) < len(SongNames)):
-				SongSelected = int(SongSelected)
-				break
-			else:
-				print("\nERROR: Not a Valid Number")
+		#Song Selection
+		PrintSectionTitle("Song Selection")
+		Selection = MakeSelection(['\nWhich Song Do You Want To Change The Name Of',0,len(SongNames)-1])
 		
-		ChangeName(SongSelected,input('\nPlease Input the New Song Title: '),'Song')
-		ChangeName(SongSelected,input('\nPlease Input the New Song Description: (Use \\n For New Line) '),'Desc')
-		ChangeName(SongSelected,input('\nPlease Input the New Song Genre: '),'Genre')
+		ChangeName(Selection,input('\nPlease Input the New Song Title: '),'Song')
+		ChangeName(Selection,input('\nPlease Input the New Song Description: (Use \\n For New Line) '),'Desc')
+		ChangeName(Selection,input('\nPlease Input the New Song Genre: '),'Genre')
 		print("\nEditing Successful!\n")
-	elif(mode == '3'):
+	elif(Selection == 3): #////////////////////////////////////////Change Text
+		#Load Files
 		FindGameFolder()
+		
+		#Run Notepad
 		subprocess.run('\"'+os.path.dirname(__file__)+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
 		time.sleep(0.5)
 		print("\nWaiting For User to Finish Editing and for Notepad to Close...")
 		subprocess.run('notepad \"'+MessageFolder().replace('\"','')+'/message.d/new_music_message.txt\"',capture_output=True)
 		subprocess.run('\"'+os.path.dirname(__file__)+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 		print("\nEditing Successful!\n")
-	elif(mode == '4'):
+	elif(Selection == 4): #////////////////////////////////////////Change Style
 		PrintSectionTitle("Style List")
 		FindDolphinSave()
 		NormalStyleNumber = 11
@@ -1103,23 +1115,17 @@ while True:
 				print('\n//////////Replace All Styles\n')
 			print('(#'+str(num)+') '+str(StyleNames[num]))
 			time.sleep(0.005)
-		while True:
-			StyleSelected = input("\nEnter The Style Number You Want To Replace: ")
-			if(StyleSelected.isnumeric()) and (int(StyleSelected) < len(StyleNames)):
-				StyleSelected = int(StyleSelected)
-				break
-			else:
-				print("\nERROR: Not a Valid Number")
+		Selection = MakeSelection(['\nEnter the Style Number You Want to Change',0,len(StyleNames)])
 		PrintSectionTitle("Instrument List")
 		normalInstrumentNumber = 40
 		
 		for num in range(normalInstrumentNumber+1):
 			if(num == normalInstrumentNumber):
-				if(StyleSelected < len(StyleNames)-6) or (StyleSelected == len(StyleNames)-2):
+				if(Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2):
 					print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[len(InstrumentNames)-1]))
 				else:
 					print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[len(InstrumentNames)-1])+Style.RESET_ALL)
-			elif (StyleSelected < len(StyleNames)-6) or (StyleSelected == len(StyleNames)-2) or (InstrumentNames[num] in MenuInstruments):
+			elif (Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2) or (InstrumentNames[num] in MenuInstruments):
 				print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[num]))
 			else:
 				print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
@@ -1131,7 +1137,7 @@ while True:
 		Bass = SelectStyleInstrument('Bass',False)
 		PrintSectionTitle("Intrument List")
 		for num in range(40,len(InstrumentNames)):
-			if(StyleSelected < len(StyleNames)-6) or (StyleSelected == len(StyleNames)-2) or (InstrumentNames[num] in MenuInstruments):
+			if(Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2) or (InstrumentNames[num] in MenuInstruments):
 				print(Style.RESET_ALL+'(#'+str(num-40)+') '+str(InstrumentNames[num]))
 			else:
 				print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
@@ -1139,80 +1145,86 @@ while True:
 		Perc1 = SelectStyleInstrument('Percussion 1',True)
 		Perc2 = SelectStyleInstrument('Percussion 2',True)
 
-		if(StyleSelected == len(StyleNames)-2):
+		if(Selection == len(StyleNames)-2):
 			for num in range(len(StyleNames)-6):
 				AddPatch(StyleNames[num]+' Style Patch',StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
-		elif(StyleSelected >= len(StyleNames)-6):
+		elif(Selection >= len(StyleNames)-6):
 			for num in range(len(StyleNames)-6,len(StyleNames)-2):
 				AddPatch(StyleNames[num]+' Style Patch',StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 		else:
-			AddPatch(StyleNames[StyleSelected]+' Style Patch',StyleMemoryOffsets[StyleSelected]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+			AddPatch(StyleNames[Selection]+' Style Patch',StyleMemoryOffsets[Selection]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 
 		print("\nPatch Complete")
 		time.sleep(0.5)
 		print("")
-	elif(mode == '5'):
-		FindDolphinSave()
-		if(input("\nAre You Sure You Want To Overwrite Your Save Data? [y/n] ") == 'y'):
-			subprocess.run('robocopy \"'+ProgramPath+'/Helper/WiiMusicSave\" \"'+SaveDataPath+'\" /MIR /E',capture_output=True)
-			print("\nOverwrite Successfull\n")
-		else:
-			print("\nAborted...\n")
-	elif(mode == '6'):
+	elif(Selection == 5): #////////////////////////////////////////Run Game
 		FindGameFolder()
 		FindDolphin()
 		PrintSectionTitle("Running Dolphin")
 		subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
 		time.sleep(1)
 		print("")
-	elif(mode == '7'):
+	elif(Selection == 6): #////////////////////////////////////////100% Save File
+		FindDolphinSave()
+		if(input("\nAre You Sure You Want To Overwrite Your Save Data? [y/n] ") == 'y'):
+			subprocess.run('robocopy \"'+ProgramPath+'/Helper/WiiMusicSave\" \"'+SaveDataPath+'\" /MIR /E',capture_output=True)
+			print("\nOverwrite Successfull\n")
+		else:
+			print("\nAborted...\n")
+	elif(Selection == 7): #////////////////////////////////////////Settings
 		PrintSectionTitle("Settings")
 		print("(#0) Back To Main Menu")
 		print("(#1) Change File Paths")
-		print("(#2) Reset Replaced Song Database")
-		print("(#3) Updates")
+		print("(#2) Change Default Answers")
+		print("(#3) Reset Replaced Song Database")
+		print("(#4) Updates")
 
-		while True:
-			SettingSelected = input("\nWhich Setting Do You Want To Change: ")
-			if(SettingSelected.isnumeric()) and (int(SettingSelected) < 3):
-				SettingSelected = int(SettingSelected)
-				break
-			else:
-				print("\nERROR: Not a Valid Number")
+		Selection = MakeSelection(['Which Setting Do You Want to Change',0,4])
 
-		if(SettingSelected == 1):
+		if(Selection == 1):
 			PrintSectionTitle('Path Editor')
 			print("(#0) Back To Settings")
 			print("(#1) Game Path (Current Path: "+GamePath+')')
 			print("(#2) Dolphin Path (Current Path: "+DolphinPath+')')
 			print("(#3) Dolphin Save Path (Current Path: "+DolphinSaveData+')')
-			while True:
-				PathSelected = input("\nWhich Path Do You Want To Change: ")
-				if(PathSelected.isnumeric()) and (int(PathSelected) < 4):
-					PathSelected = int(PathSelected)
-					break
-				else:
-					print("\nERROR: Not a Valid Number")
-			if(PathSelected == 1):
+			Selection = MakeSelection(['Which Path Do You Want to Change',0,3])
+			if(Selection == 1):
 				GamePath = ''
 				FindGameFolder()
 				print("")
-			elif(PathSelected == 2):
+			elif(Selection == 2):
 				DolphinPath = ''
 				FindDolphin()
 				print("")
-			elif(PathSelected == 3):
+			elif(Selection == 3):
 				DolphinSaveData = ''
 				FindDolphinSave()
 				print("")
-		elif(SettingSelected == 2):
+		elif(Selection == 2):
+			PrintSectionTitle('Default Answers')
+			print("(#0) Back To Settings")
+			print("(#1) Always Ask \"Are You Sure You Want To Replace Song\": "+DefaultWantToReplaceSong)
+			print("(#2) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
+			print("(#3) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
+			print("(#4) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
+
+			Selection = MakeSelection(['Choose an Option',0,4])
+			if(Selection == 1):
+				DefaultWantToReplaceSong = ChangeDefaultAnswer(['Yes','No'],'Want To Replace Song')
+			elif(Selection == 2):
+				DefaultReplacingReplacedSong = ChangeDefaultAnswer(['Yes','No'],'Replacing Replaced Song')
+			elif(Selection == 3):
+				DefaultUseAutoLengthTempo = ChangeDefaultAnswer(['Ask','Yes','No'],'Use Auto Length and Tempo')
+			elif(Selection == 4):
+				DefaultReplaceSongNames = ChangeDefaultAnswer(['Ask','Yes','No'],'Replace Song Names')
+		elif(Selection == 3):
 			FindGameFolder()
 			if(input("\nAre You Sure You Want to Reset the Replaced Song Database? [y/n] ") == 'y'):
 				SaveSetting('Applied Custom Songs', WiiDiskFolder, '')
 				print('\nReset Successful!\n')
 			else:
 				print('')
-		elif(SettingSelected == 3):
+		elif(Selection == 4):
 			PrintSectionTitle('Updates')
 			print("(#0) Back To Settings")
 			print("(#1) Check For Updates")
@@ -1225,28 +1237,21 @@ while True:
 			else:
 				print("(#3) Switch to Main Branch")
 
-			while True:
-				UpdateSelected = input("\nPick an Option: ")
-				if(UpdateSelected.isnumeric()) and (int(UpdateSelected) < 4):
-					UpdateSelected = int(UpdateSelected)
-					break
-				else:
-					print("\nERROR: Not a Valid Number")
-			if(UpdateSelected == 1):
+			Selection = MakeSelection(['Pick an Option',0,3])
+			if(Selection == 1):
 				print('')
 				CheckForUpdates(True)
 				print('')
-			elif(UpdateSelected == 2):
+			elif(Selection == 2):
 				if(AutoUpdate == 0): AutoUpdate = 1
 				else: AutoUpdate = 0
 				SaveSetting('Updates', 'AutoUpdate', str(AutoUpdate))
-			elif(UpdateSelected == 3):
+			elif(Selection == 3):
 				if(beta == 0): beta = 1
 				else: beta = 0
 				SaveSetting('Updates', 'Branch', str(beta))
 				DownloadUpdate()
-
-	elif(mode == '8'):
+	elif(Selection == 8): #////////////////////////////////////////Credits
 		PrintSectionTitle('Credits')
 		print('\n-----Created By:-----')
 		print('- Benjamin Halko')
