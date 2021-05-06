@@ -28,7 +28,7 @@
 
 4: Run the WiiMusicEditor batch file 
 
-5: Type 7 on your keyboard and press Enter. Once you've done that, drag your Wii Music ROM into the window and press Enter. The ISO will be extracted and renamed to the ROM's file name.
+5: Select Extract Disk. Once you've done that, drag your Wii Music ROM into the window and press Enter. The ISO will be extracted and renamed to the ROM's file name.
 ### You are now set up and ready for Wii Music Modding!
 
 ## Section 2 - Help
