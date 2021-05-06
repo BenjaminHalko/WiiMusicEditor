@@ -522,6 +522,8 @@ MenuInstruments = [
 'Singer',
 'Another Singer',
 'Basic Drums',
+'Rock Drums',
+'Latin Drums',
 'Snare Drum',
 'DJ Turntables',
 'Beatbox',
@@ -827,22 +829,39 @@ def DownloadUpdate():
 	except (requests.ConnectionError, requests.Timeout) as exception:
 		print('\nFailed to Download File...\n')
 
-def SelectStyleInstrument(PartString,IsPercussion):
+def SelectStyleInstrument(PartString,MenuString,IsPercussion):
 	global StyleNames
 	global Selection
 	global InstrumentNames
 	global MenuInstruments
 	global normalInstrumentNumber
+	global unsafeMode
+	global NormalStyleSelected
+	if(NormalStyleSelected):
+		PartName = PartString
+	else:
+		PartName = MenuString
 	print('')
 	while True:
-		PartType = input("Enter The Instrument Number You Want For "+PartString+": ")
+		
+		PartType = input("Enter The Instrument Number You Want For "+PartName+": ")
 		if(PartType.isnumeric()):
 			PartType = int(PartType)
-			if(IsPercussion): PartType = PartType + normalInstrumentNumber
-			if((PartType == normalInstrumentNumber and not IsPercussion) or (PartType == len(InstrumentNames)-1 and IsPercussion)) and ((Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2)):
+			if(IsPercussion) and (not unsafeMode) and (NormalStyleSelected): PartType = PartType + normalInstrumentNumber
+			if(unsafeMode) or (not NormalStyleSelected):
+				if(PartType == len(InstrumentNames)-1):
+					PartType = 'ffffffff'
+					break
+				elif (PartType < len(InstrumentNames)) and ((unsafeMode) or (InstrumentNames[PartType] in MenuInstruments)):
+					PartType = format(PartType,'x').upper()
+					PartType = '0'*(8-len(PartType))+PartType
+					break
+				else:
+					print("\nERROR: Not a Valid Number\n")
+			elif((PartType == normalInstrumentNumber and not IsPercussion) or (PartType == len(InstrumentNames)-1 and IsPercussion)) and (NormalStyleSelected):
 				PartType = 'ffffffff'
 				break
-			elif((PartType < normalInstrumentNumber) != IsPercussion) and (PartType < len(InstrumentNames)) and ((Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2) or (InstrumentNames[PartType] in MenuInstruments)):
+			elif((PartType < normalInstrumentNumber) != IsPercussion) and (PartType < len(InstrumentNames)) and ((NormalStyleSelected) or (InstrumentNames[PartType] in MenuInstruments)):
 				PartType = format(PartType,'x').upper()
 				PartType = '0'*(8-len(PartType))+PartType
 				break
@@ -884,7 +903,7 @@ FindWiiDiskFolder()
 
 #Update
 beta = int(LoadSetting('Updates', 'Branch', '0'))
-AutoUpdate = int(LoadSetting('Updates', 'AutoUpdate', '1'))
+AutoUpdate = bool(int(LoadSetting('Updates', 'AutoUpdate', '1')))
 uptodate = False
 updateUrl = ['https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/main/Helper/Update/Version.txt',
 'https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/beta/Helper/Update/Version.txt']
@@ -896,6 +915,9 @@ DefaultWantToReplaceSong = LoadSetting('Default Answers', 'Want To Replace Song'
 DefaultReplacingReplacedSong = LoadSetting('Default Answers', 'Replacing Replaced Song', 'Yes')
 DefaultReplaceSongNames = LoadSetting('Default Answers', 'Replace Song Names', 'Ask')
 DefaultUseAutoLengthTempo = LoadSetting('Default Answers', 'Use Auto Length and Tempo', 'Ask')
+
+#Unsafe Mode
+unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
 
 #Main Loop
 while True:
@@ -918,9 +940,9 @@ while True:
 	print("//       Music Editor       //")
 	print("//                          //")
 	print("//////////////////////////////\n")
-	
+
 	#Updates
-	if(AutoUpdate == 1) and (not uptodate):
+	if(AutoUpdate) and (not uptodate):
 		uptodate = True
 		CheckForUpdates(False)
 
@@ -930,8 +952,8 @@ while True:
 	print("(#2) Change Song Names")
 	print("(#3) Change All Wii Music Text (Advanced)")
 	print("(#4) Edit Styles")
-	print("(#5) Overwrite Save File With 100% Save (In Progress)")
-	print("(#6) Load Wii Music")
+	print("(#5) Load Wii Music")
+	print("(#6) Overwrite Save File With 100% Save (In Progress)")
 	print("(#7) Settings")
 	print("(#8) Credits")
 
@@ -1116,34 +1138,47 @@ while True:
 			print('(#'+str(num)+') '+str(StyleNames[num]))
 			time.sleep(0.005)
 		Selection = MakeSelection(['\nEnter the Style Number You Want to Change',0,len(StyleNames)])
+		NormalStyleSelected = (Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2)
 		PrintSectionTitle("Instrument List")
 		normalInstrumentNumber = 40
 		
-		for num in range(normalInstrumentNumber+1):
-			if(num == normalInstrumentNumber):
-				if(Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2):
-					print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[len(InstrumentNames)-1]))
+		if(NormalStyleSelected) and (not unsafeMode):
+			for num in range(normalInstrumentNumber+1):
+				if(num == normalInstrumentNumber):
+					print('(#'+str(num)+') '+str(InstrumentNames[len(InstrumentNames)-1]))
 				else:
-					print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[len(InstrumentNames)-1])+Style.RESET_ALL)
-			elif (Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2) or (InstrumentNames[num] in MenuInstruments):
-				print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[num]))
-			else:
-				print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
-			time.sleep(0.005)
+					print('(#'+str(num)+') '+str(InstrumentNames[num]))
+				time.sleep(0.005)
+		else:
+			for num in range(len(InstrumentNames)):
+				if ((InstrumentNames[num] in MenuInstruments) and (not NormalStyleSelected)) or (((num < normalInstrumentNumber) or (num == len(InstrumentNames)-1)) and (NormalStyleSelected)):
+					print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[num]))
+				elif (unsafeMode):
+					print(Fore.RED+'(#'+str(num)+') '+str(InstrumentNames[num])+Style.RESET_ALL)
+				else:
+					print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
+				time.sleep(0.005)
 		PrintSectionTitle("Instrument Selection")
-		Melody = SelectStyleInstrument('Melody',False)
-		Harmony = SelectStyleInstrument('Harmony',False)
-		Chord = SelectStyleInstrument('Chord',False)
-		Bass = SelectStyleInstrument('Bass',False)
-		PrintSectionTitle("Intrument List")
-		for num in range(40,len(InstrumentNames)):
-			if(Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2) or (InstrumentNames[num] in MenuInstruments):
-				print(Style.RESET_ALL+'(#'+str(num-40)+') '+str(InstrumentNames[num]))
+		Melody = SelectStyleInstrument('Melody','Instrument 1',False)
+		Harmony = SelectStyleInstrument('Harmony','Instrument 2',False)
+		Chord = SelectStyleInstrument('Chord','Instrument 3',False)
+		Bass = SelectStyleInstrument('Bass','Instrument 4',False)
+		if(NormalStyleSelected):
+			PrintSectionTitle("Intrument List")
+			if(not unsafeMode):
+				for num in range(40,len(InstrumentNames)):
+					print('(#'+str(num-40)+') '+str(InstrumentNames[num]))
+					time.sleep(0.005)
 			else:
-				print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
-			time.sleep(0.005)
-		Perc1 = SelectStyleInstrument('Percussion 1',True)
-		Perc2 = SelectStyleInstrument('Percussion 2',True)
+				for num in range(len(InstrumentNames)):
+					if(num < normalInstrumentNumber):
+						print(Fore.RED+'(#'+str(num)+') '+str(InstrumentNames[num]))
+					else:
+						print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[num]))
+					time.sleep(0.005)
+
+		Perc1 = SelectStyleInstrument('Percussion 1','Instrument 5',True)
+		Perc2 = SelectStyleInstrument('Percussion 2','Instrument 6',True)
 
 		if(Selection == len(StyleNames)-2):
 			for num in range(len(StyleNames)-6):
@@ -1178,8 +1213,12 @@ while True:
 		print("(#2) Change Default Answers")
 		print("(#3) Reset Replaced Song Database")
 		print("(#4) Updates")
+		if(unsafeMode):
+			print("(#5) Switch to Safe Mode")
+		else:
+			print("(#5) Switch to Unsafe Mode")
 
-		Selection = MakeSelection(['Which Setting Do You Want to Change',0,4])
+		Selection = MakeSelection(['Which Setting Do You Want to Change',0,5])
 
 		if(Selection == 1):
 			PrintSectionTitle('Path Editor')
@@ -1232,7 +1271,7 @@ while True:
 				print("(#2) Turn Off Auto Updates")
 			else:
 				print("(#2) Turn On Auto Updates")
-			if(beta == False):
+			if(not bool(beta)):
 				print("(#3) Switch to Beta Branch")
 			else:
 				print("(#3) Switch to Main Branch")
@@ -1243,14 +1282,17 @@ while True:
 				CheckForUpdates(True)
 				print('')
 			elif(Selection == 2):
-				if(AutoUpdate == 0): AutoUpdate = 1
-				else: AutoUpdate = 0
-				SaveSetting('Updates', 'AutoUpdate', str(AutoUpdate))
+				AutoUpdate = not AutoUpdate
+				SaveSetting('Updates', 'AutoUpdate', str(int(AutoUpdate)))
 			elif(Selection == 3):
-				if(beta == 0): beta = 1
-				else: beta = 0
+				beta = int(not bool(beta))
 				SaveSetting('Updates', 'Branch', str(beta))
 				DownloadUpdate()
+		elif(Selection == 5):
+			if((not unsafeMode) and (input('\nAre You Sure You Want to Turn on Unsafe Mode? [y/n] ') == 'y')) or (unsafeMode):
+				unsafeMode = not unsafeMode
+				SaveSetting('Unsafe Mode','Unsafe Mode',str(int(unsafeMode)))
+			print('')
 	elif(Selection == 8): #////////////////////////////////////////Credits
 		PrintSectionTitle('Credits')
 		print('\n-----Created By:-----')
