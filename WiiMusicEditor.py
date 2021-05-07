@@ -650,7 +650,7 @@ def AddPatch(PatchName,PatchInfo):
 			codes.close()
 	if(TempCodePath != CodePath):
 		FindGameFolder()
-		subprocess.run('python \"'+ProgramPath+'/Helper/GctLoader/GeckoLoader.py\" \"'+GamePath+'/sys/main.dol\" \"'+GamePath+'/geckoCodes.txt\" -tc ALL --dest \"'+GamePath+'/sys/main.dol\"',capture_output=True)
+		subprocess.run('python \"'+ProgramPath+'/Helper/GctLoader/GeckoLoader.py\" \"'+GamePath+'/sys/main.dol\" \"'+GamePath+'/geckoCodes.txt\" --dest \"'+GamePath+'/sys/main.dol\" -tc ALL')
 
 def FindGameFolder():
 	global GamePath
@@ -1160,7 +1160,7 @@ while True:
 			print("\nPatch Complete")
 			time.sleep(0.5)
 			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould Like to Change the Song Text? [y/n] ') == 'y')):
-				ChangeName(Selection,[input('\nPlease Input the New Song Title: '),input('\nPlease Input the New Song Description: (Use \\n For New Line) '),input('\nPlease Input the New Song Genre: ')])
+				ChangeName(SongSelected,[input('\nPlease Input the New Song Title: '),input('\nPlease Input the New Song Description: (Use \\n For New Line) '),input('\nPlease Input the New Song Genre: ')])
 				print("\nEditing Successful!\n")
 			else: print('')
 		else:
