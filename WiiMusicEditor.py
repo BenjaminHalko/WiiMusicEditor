@@ -16,13 +16,13 @@ while True:
 		import mido
 		from colorama import Fore, Style, init
 		from tqdm import tqdm
+		import PyQt5
+		import bs4
 		break
 	except ImportError:
 		subprocess.run('python -m pip install --upgrade pip')
-		subprocess.run('pip install mido')
-		subprocess.run('pip install requests')
-		subprocess.run('pip install colorama')
-		subprocess.run('pip install tqdm')
+		subprocess.run('pip install mido requests colorama tqdm PyQt5 setuptools')
+		subprocess.run('pip install bs4')
 
 init(convert=True)
 
@@ -586,57 +586,71 @@ SongMemoryOrder = [
 
 #Functions
 def AddPatch(PatchName,PatchInfo):
+	global GamePath
 	global CodePath
-	if(os.path.exists(CodePath)):
-		codes = open(CodePath,'r')
-		lineText = codes.readlines()
-		codes.close()
-		geckoExists = -1
-		songExists = -1
-		geckoEnabled = -1
-		songEnabled = -1
-		for num in range(len(lineText)):
-			if(lineText[num].rstrip() == '[Gecko]'):
-				geckoExists = num
-			if(lineText[num].rstrip() == '$'+PatchName+' [WiiMusicEditor]'):
-				songExists = num
-
-		if(geckoExists == -1):
-			lineText.insert(0,'[Gecko]\n'+'$'+PatchName+' [WiiMusicEditor]\n'+PatchInfo)
-		elif(songExists == -1):
-			lineText.insert(geckoExists+1,'$'+PatchName+' [WiiMusicEditor]\n'+PatchInfo)
-		else:
-			while True:
-				if(len(lineText) <= songExists+1):
-					break
-				elif(not lineText[songExists+1][0].isnumeric() and (lineText[songExists+1][0] != 'f')):
-					break
-				else:
-					lineText.pop(songExists+1)
-			lineText.insert(songExists+1,PatchInfo)
-		
-		for num in range(len(lineText)):
-			if(lineText[num].rstrip() == '[Gecko_Enabled]'):
-				geckoEnabled = num
-			if(lineText[num].rstrip() == '$'+PatchName):
-				songEnabled = num
-
-		if(geckoEnabled == -1):
-			lineText.insert(len(lineText),'[Gecko_Enabled]\n'+'$'+PatchName+'\n')
-		elif(songEnabled == -1):
-			lineText.insert(geckoEnabled+1,'$'+PatchName+'\n')
-		
-		codes = open(CodePath,'w')
-		codes.writelines(lineText)
-		codes.close()
+	global DefaultStyleMethod
+	global ProgramPath
+	if(DefaultStyleMethod == 'Main.dol'):
+		TempCodePath = GamePath+'/geckoCodes.txt'
 	else:
-		codes = open(CodePath,'w')
-		codes.write('[Gecko]\n')
-		codes.write('$'+PatchName+' [WiiMusicEditor]\n')
-		codes.write(PatchInfo)
-		codes.write('[Gecko_Enabled]\n')
-		codes.write('$'+PatchName+'\n')
-		codes.close()
+		TempCodePath = CodePath
+	if(type(PatchName) == str):
+		PatchName = [PatchName]
+		PatchInfo = [PatchInfo]
+	for patchNum in range(len(PatchName)):
+		if(os.path.exists(TempCodePath)):
+			codes = open(TempCodePath,'r')
+			lineText = codes.readlines()
+			codes.close()
+			geckoExists = -1
+			songExists = -1
+			geckoEnabled = -1
+			songEnabled = -1
+			for num in range(len(lineText)):
+				if(lineText[num].rstrip() == '[Gecko]'):
+					geckoExists = num
+				if(lineText[num].rstrip() == '$'+PatchName[patchNum]+' [WiiMusicEditor]'):
+					songExists = num
+
+			if(geckoExists == -1):
+				lineText.insert(0,'[Gecko]\n'+'$'+PatchName[patchNum]+' [WiiMusicEditor]\n'+PatchInfo[patchNum])
+			elif(songExists == -1):
+				lineText.insert(geckoExists+1,'$'+PatchName[patchNum]+' [WiiMusicEditor]\n'+PatchInfo[patchNum])
+			else:
+				while True:
+					if(len(lineText) <= songExists+1):
+						break
+					elif(not lineText[songExists+1][0].isnumeric() and (lineText[songExists+1][0] != 'f')):
+						break
+					else:
+						lineText.pop(songExists+1)
+				lineText.insert(songExists+1,PatchInfo[patchNum])
+			
+			for num in range(len(lineText)):
+				if(lineText[num].rstrip() == '[Gecko_Enabled]'):
+					geckoEnabled = num
+				if(lineText[num].rstrip() == '$'+PatchName[patchNum]):
+					songEnabled = num
+
+			if(geckoEnabled == -1):
+				lineText.insert(len(lineText),'[Gecko_Enabled]\n'+'$'+PatchName[patchNum]+'\n')
+			elif(songEnabled == -1):
+				lineText.insert(geckoEnabled+1,'$'+PatchName[patchNum]+'\n')
+			
+			codes = open(TempCodePath,'w')
+			codes.writelines(lineText)
+			codes.close()
+		else:
+			codes = open(TempCodePath,'w')
+			codes.write('[Gecko]\n')
+			codes.write('$'+PatchName[patchNum]+' [WiiMusicEditor]\n')
+			codes.write(PatchInfo[patchNum])
+			codes.write('[Gecko_Enabled]\n')
+			codes.write('$'+PatchName[patchNum]+'\n')
+			codes.close()
+	if(TempCodePath != CodePath):
+		FindGameFolder()
+		subprocess.run('python \"'+ProgramPath+'/Helper/GctLoader/GeckoLoader.py\" \"'+GamePath+'/sys/main.dol\" \"'+GamePath+'/geckoCodes.txt\" -tc ALL --dest \"'+GamePath+'/sys/main.dol\"',capture_output=True)
 
 def FindGameFolder():
 	global GamePath
@@ -967,6 +981,7 @@ DefaultWantToReplaceSong = LoadSetting('Default Answers', 'Want To Replace Song'
 DefaultReplacingReplacedSong = LoadSetting('Default Answers', 'Replacing Replaced Song', 'Yes')
 DefaultReplaceSongNames = LoadSetting('Default Answers', 'Replace Song Names', 'Ask')
 DefaultUseAutoLengthTempo = LoadSetting('Default Answers', 'Use Auto Length and Tempo', 'Ask')
+DefaultStyleMethod = LoadSetting('Default Answers', 'Style Patch Method', 'Main.dol')
 
 #Unsafe Mode
 unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
@@ -1238,11 +1253,19 @@ while True:
 		Perc2 = SelectStyleInstrument('Percussion 2','Instrument 6',True)
 
 		if(Selection == len(StyleNames)-2):
+			PatchName = []
+			PatchInfo = []
 			for num in range(len(StyleNames)-6):
-				AddPatch(StyleNames[num]+' Style Patch',StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+				PatchName.append(StyleNames[num]+' Style Patch')
+				PatchInfo.append(StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+			AddPatch(PatchName,PatchInfo)
 		elif(Selection >= len(StyleNames)-6):
+			PatchName = []
+			PatchInfo = []
 			for num in range(len(StyleNames)-6,len(StyleNames)-2):
-				AddPatch(StyleNames[num]+' Style Patch',StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+				PatchName.append(StyleNames[num]+' Style Patch')
+				PatchInfo.append(StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+			AddPatch(PatchName,PatchInfo)
 		else:
 			AddPatch(StyleNames[Selection]+' Style Patch',StyleMemoryOffsets[Selection]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 
@@ -1300,100 +1323,105 @@ while True:
 		else:
 			print("\nAborted...\n")
 	elif(Selection == 8): #////////////////////////////////////////Settings
-		PrintSectionTitle("Settings")
-		print("(#0) Back To Main Menu")
-		print("(#1) Change File Paths")
-		print("(#2) Change Default Answers")
-		print("(#3) Reset Replaced Song Database")
-		print("(#4) Updates")
-		if(unsafeMode):
-			print("(#5) Switch to Safe Mode")
-		else:
-			print("(#5) Switch to Unsafe Mode")
-
-		Selection = MakeSelection(['Which Setting Do You Want to Change',0,5])
-
-		if(Selection == 1):
-			while True:
-				PrintSectionTitle('Path Editor')
-				print("(#0) Back To Settings")
-				print("(#1) Game Path (Current Path: "+GamePath+')')
-				print("(#2) Dolphin Path (Current Path: "+DolphinPath+')')
-				print("(#3) Dolphin Save Path (Current Path: "+DolphinSaveData+')')
-				Selection = MakeSelection(['Which Path Do You Want to Change',0,3])
-				if(Selection == 1):
-					GamePath = ''
-					FindGameFolder()
-					print("")
-				elif(Selection == 2):
-					DolphinPath = ''
-					FindDolphin()
-					print("")
-				elif(Selection == 3):
-					DolphinSaveData = ''
-					FindDolphinSave()
-					print("")
-				else: break
-		elif(Selection == 2):
-			while True:
-				PrintSectionTitle('Default Answers')
-				print("(#0) Back To Settings")
-				print("(#1) Always Ask \"Are You Sure You Want To Replace Song\": "+DefaultWantToReplaceSong)
-				print("(#2) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
-				print("(#3) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
-				print("(#4) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
-
-				Selection = MakeSelection(['Choose an Option',0,4])
-				if(Selection == 1):
-					DefaultWantToReplaceSong = ChangeDefaultAnswer(['Yes','No'],['Want To Replace Song',DefaultWantToReplaceSong])
-				elif(Selection == 2):
-					DefaultReplacingReplacedSong = ChangeDefaultAnswer(['Yes','No'],['Replacing Replaced Song',DefaultReplacingReplacedSong])
-				elif(Selection == 3):
-					DefaultUseAutoLengthTempo = ChangeDefaultAnswer(['Ask','Yes','No'],['Use Auto Length and Tempo'])
-				elif(Selection == 4):
-					DefaultReplaceSongNames = ChangeDefaultAnswer(['Ask','Yes','No'],['Replace Song Names'])
-				else: break
-		elif(Selection == 3):
-			FindGameFolder()
-			if(input("\nAre You Sure You Want to Reset the Replaced Song Database? [y/n] ") == 'y'):
-				SaveSetting('Applied Custom Songs', WiiDiskFolder, '')
-				print('\nReset Successful!\n')
+		while True:
+			PrintSectionTitle("Settings")
+			print("(#0) Back To Main Menu")
+			print("(#1) Change File Paths")
+			print("(#2) Change Default Answers")
+			print("(#3) Reset Replaced Song Database")
+			print("(#4) Change Gecko Code Patch Method (Current Method: "+DefaultStyleMethod+")")
+			print("(#5) Updates")
+			if(unsafeMode):
+				print("(#6) Switch to Safe Mode")
 			else:
-				print('')
-		elif(Selection == 4):
-			while True:
-				PrintSectionTitle('Updates')
-				print("(#0) Back To Settings")
-				print("(#1) Check For Updates")
-				if(AutoUpdate):
-					print("(#2) Turn Off Auto Updates")
-				else:
-					print("(#2) Turn On Auto Updates")
-				if(not bool(beta)):
-					print("(#3) Switch to Beta Branch")
-				else:
-					print("(#3) Switch to Main Branch")
+				print("(#6) Switch to Unsafe Mode")
 
-				Selection = MakeSelection(['Pick an Option',0,3])
-				if(Selection == 1):
+			Selection = MakeSelection(['Which Setting Do You Want to Change',0,5])
+
+			if(Selection == 1):
+				while True:
+					PrintSectionTitle('Path Editor')
+					print("(#0) Back To Settings")
+					print("(#1) Game Path (Current Path: "+GamePath+')')
+					print("(#2) Dolphin Path (Current Path: "+DolphinPath+')')
+					print("(#3) Dolphin Save Path (Current Path: "+DolphinSaveData+')')
+					Selection = MakeSelection(['Which Path Do You Want to Change',0,3])
+					if(Selection == 1):
+						GamePath = ''
+						FindGameFolder()
+						print("")
+					elif(Selection == 2):
+						DolphinPath = ''
+						FindDolphin()
+						print("")
+					elif(Selection == 3):
+						DolphinSaveData = ''
+						FindDolphinSave()
+						print("")
+					else: break
+			elif(Selection == 2):
+				while True:
+					PrintSectionTitle('Default Answers')
+					print("(#0) Back To Settings")
+					print("(#1) Always Ask \"Are You Sure You Want To Replace Song\": "+DefaultWantToReplaceSong)
+					print("(#2) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
+					print("(#3) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
+					print("(#4) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
+
+					Selection = MakeSelection(['Choose an Option',0,4])
+					if(Selection == 1):
+						DefaultWantToReplaceSong = ChangeDefaultAnswer(['Yes','No'],['Want To Replace Song',DefaultWantToReplaceSong])
+					elif(Selection == 2):
+						DefaultReplacingReplacedSong = ChangeDefaultAnswer(['Yes','No'],['Replacing Replaced Song',DefaultReplacingReplacedSong])
+					elif(Selection == 3):
+						DefaultUseAutoLengthTempo = ChangeDefaultAnswer(['Ask','Yes','No'],['Use Auto Length and Tempo'])
+					elif(Selection == 4):
+						DefaultReplaceSongNames = ChangeDefaultAnswer(['Ask','Yes','No'],['Replace Song Names'])
+					else: break
+			elif(Selection == 3):
+				FindGameFolder()
+				if(input("\nAre You Sure You Want to Reset the Replaced Song Database? [y/n] ") == 'y'):
+					SaveSetting('Applied Custom Songs', WiiDiskFolder, '')
+					print('\nReset Successful!\n')
+				else:
 					print('')
-					CheckForUpdates(True)
-					print('')
-				elif(Selection == 2):
-					AutoUpdate = not AutoUpdate
-					SaveSetting('Updates', 'AutoUpdate', str(int(AutoUpdate)))
-				elif(Selection == 3):
-					beta = int(not bool(beta))
-					SaveSetting('Updates', 'Branch', str(beta))
-					if(DownloadUpdate()):
+			elif(Selection == 4):
+				DefaultStyleMethod = ChangeDefaultAnswer(['Main.dol','Dolphin'],['Style Patch Method',DefaultStyleMethod])
+			elif(Selection == 5):
+				while True:
+					PrintSectionTitle('Updates')
+					print("(#0) Back To Settings")
+					print("(#1) Check For Updates")
+					if(AutoUpdate):
+						print("(#2) Turn Off Auto Updates")
+					else:
+						print("(#2) Turn On Auto Updates")
+					if(not bool(beta)):
+						print("(#3) Switch to Beta Branch")
+					else:
+						print("(#3) Switch to Main Branch")
+
+					Selection = MakeSelection(['Pick an Option',0,3])
+					if(Selection == 1):
+						print('')
+						CheckForUpdates(True)
+						print('')
+					elif(Selection == 2):
+						AutoUpdate = not AutoUpdate
+						SaveSetting('Updates', 'AutoUpdate', str(int(AutoUpdate)))
+					elif(Selection == 3):
 						beta = int(not bool(beta))
 						SaveSetting('Updates', 'Branch', str(beta))
-				else: break
-		elif(Selection == 5):
-			if((not unsafeMode) and (input('\nAre You Sure You Want to Turn on Unsafe Mode? [y/n] ') == 'y')) or (unsafeMode):
-				unsafeMode = not unsafeMode
-				SaveSetting('Unsafe Mode','Unsafe Mode',str(int(unsafeMode)))
-			print('')
+						if(DownloadUpdate()):
+							beta = int(not bool(beta))
+							SaveSetting('Updates', 'Branch', str(beta))
+					else: break
+			elif(Selection == 6):
+				if((not unsafeMode) and (input('\nAre You Sure You Want to Turn on Unsafe Mode? [y/n] ') == 'y')) or (unsafeMode):
+					unsafeMode = not unsafeMode
+					SaveSetting('Unsafe Mode','Unsafe Mode',str(int(unsafeMode)))
+				print('')
+			else: break
 	elif(Selection == 9): #////////////////////////////////////////Credits
 		PrintSectionTitle('Credits')
 		print('\n-----Created By:-----')
