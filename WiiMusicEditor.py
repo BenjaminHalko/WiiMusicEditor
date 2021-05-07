@@ -643,8 +643,9 @@ def FindGameFolder():
 	global MessagePath
 	global WiiDiskFolder
 	if(not os.path.isdir(GamePath+'/files')):
+		ExceptedFileExtensions = ['.iso','.wbfs']
 		while True:
-			GamePath = input("\nDrag Decompressed Wii Music Directory Or Wii Music Disk: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			GamePath = input("\nDrag the Decompressed Wii Music Directory or a Wii Music Disk on to the Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isdir(GamePath+'/DATA/files')) or (os.path.isdir(GamePath+'/files')):
 				if(os.path.isdir(GamePath+'/DATA')):
 					GamePath = os.path.dirname(GamePath+'/DATA/files').replace('\\','/')
@@ -656,6 +657,8 @@ def FindGameFolder():
 				FindWiiDiskFolder()
 				break
 			elif(os.path.isfile(GamePath)) and (pathlib.Path(GamePath).suffix in ExceptedFileExtensions):
+				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/extractdisk.bat\" \"'+os.path.dirname(GamePath)+'\" \"'+os.path.splitext(os.path.basename(GamePath))[0]+'\" '+os.path.splitext(os.path.basename(GamePath))[1])
+				GamePath = os.path.dirname(GamePath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(GamePath))[0]+'/DATA'
 				SaveSetting('Paths','GamePath',GamePath)
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 				MessagePath = GamePath+'/files/US/Message/message.carc'
@@ -676,9 +679,12 @@ def FindWiiDiskFolder():
 
 def FindDolphin():
 	global DolphinPath
+	global DolphinSaveData
+	global CodePath
+	global SaveDataPath
 	if(not os.path.isfile(DolphinPath)):
 		while True:
-			DolphinPath = input("\nDrag Dolphin.exe Over Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			DolphinPath = input("\nDrag Dolphin.exe or the Dolphin Folder on to the Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isfile(DolphinPath+'/dolphin.exe')):
 				DolphinPath = DolphinPath.replace('\\','/')
 				DolphinPath = DolphinPath+'/dolphin.exe'
@@ -690,6 +696,15 @@ def FindDolphin():
 				break
 			else:
 				print("\nERROR: Unable to Locate Valid Dolphin Directory")
+		if(os.path.isfile(DolphinPath[0:len(DolphinPath)-11:1]+'portable.txt')):
+			print('\nPortable Version Detected!')
+			if(input('Do You Want to Set the Dolphin Save Directory to the User Folder? [y/n] ') == 'y'):
+				DolphinSaveData = DolphinPath[0:len(DolphinPath)-11:1]+'User'
+				if(not os.path.isdir(DolphinSaveData)): os.mkdir(DolphinSaveData)
+				if(not os.path.isdir(DolphinSaveData+'/Wii')): os.mkdir(DolphinSaveData+'/Wii')
+				CodePath = DolphinSaveData+"/GameSettings/R64E01.ini"
+				SaveDataPath = DolphinSaveData+"/Wii/title/00010000/52363445/data"
+				SaveSetting('Paths','DolphinSaveData',DolphinSaveData)
 
 def FindDolphinSave():
 	global DolphinSaveData
@@ -697,7 +712,7 @@ def FindDolphinSave():
 	global SaveDataPath
 	if(not os.path.isdir(DolphinSaveData+'/Wii')):
 		while True:
-			DolphinSaveData = input("\nDrag Dolphin Save Directory Over Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			DolphinSaveData = input("\nDrag the Dolphin Save Directory Over the Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isdir(DolphinSaveData+'/Wii')):
 				DolphinSaveData = DolphinSaveData.replace('\\','/')
 				CodePath = DolphinSaveData+"/GameSettings/R64E01.ini"
@@ -886,11 +901,15 @@ def MakeSelection(MessageRangeArray):
 	return int(TempSelection)
 
 def ChangeDefaultAnswer(ResponseOptions,iniKey):
-	for num in range(len(ResponseOptions)):
-		print('(#'+str(num)+') '+ResponseOptions[num])
+	if(len(ResponseOptions) == 2):
+		if(ResponseOptions.index(iniKey[1]) == 0): Selection = 1
+		else: Selection = 0
+	else:
+		for num in range(len(ResponseOptions)):
+			print('(#'+str(num)+') '+ResponseOptions[num])
 
-	Selection = MakeSelection(['Select an Option',0,len(ResponseOptions)-1])
-	SaveSetting('Default Answers', iniKey, ResponseOptions[Selection])
+		Selection = MakeSelection(['Select an Option',0,len(ResponseOptions)-1])
+	SaveSetting('Default Answers', iniKey[0], ResponseOptions[Selection])
 	print('')
 	return ResponseOptions[Selection]
 
@@ -966,6 +985,14 @@ while True:
 	if(AutoUpdate) and (not uptodate):
 		uptodate = True
 		CheckForUpdates(False)
+
+	#First Run
+	if(GamePath == 'None'):
+		print('\nThanks for Downloading the Wii Music Editor!')
+		print('\nLet\'s Setup Some File Paths for You!')
+		FindGameFolder()
+		if(input('\nWould You Like to Specify a Dolphin Directory? [y/n] ') == 'y'):
+			FindDolphin()
 
 	#Options
 	PrintSectionTitle('Options')
@@ -1241,7 +1268,6 @@ while True:
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 				MessagePath = GamePath+'/files/US/Message/message.carc'
 				SaveSetting('Paths','GamePath',GamePath)
-				print(GamePath)
 		elif(Selection == 2):
 			if(input('\nUse Game Path as Disk Directory? [y/n] ') != 'y'):
 				while True:
@@ -1276,41 +1302,45 @@ while True:
 		Selection = MakeSelection(['Which Setting Do You Want to Change',0,5])
 
 		if(Selection == 1):
-			PrintSectionTitle('Path Editor')
-			print("(#0) Back To Settings")
-			print("(#1) Game Path (Current Path: "+GamePath+')')
-			print("(#2) Dolphin Path (Current Path: "+DolphinPath+')')
-			print("(#3) Dolphin Save Path (Current Path: "+DolphinSaveData+')')
-			Selection = MakeSelection(['Which Path Do You Want to Change',0,3])
-			if(Selection == 1):
-				GamePath = ''
-				FindGameFolder()
-				print("")
-			elif(Selection == 2):
-				DolphinPath = ''
-				FindDolphin()
-				print("")
-			elif(Selection == 3):
-				DolphinSaveData = ''
-				FindDolphinSave()
-				print("")
+			while True:
+				PrintSectionTitle('Path Editor')
+				print("(#0) Back To Settings")
+				print("(#1) Game Path (Current Path: "+GamePath+')')
+				print("(#2) Dolphin Path (Current Path: "+DolphinPath+')')
+				print("(#3) Dolphin Save Path (Current Path: "+DolphinSaveData+')')
+				Selection = MakeSelection(['Which Path Do You Want to Change',0,3])
+				if(Selection == 1):
+					GamePath = ''
+					FindGameFolder()
+					print("")
+				elif(Selection == 2):
+					DolphinPath = ''
+					FindDolphin()
+					print("")
+				elif(Selection == 3):
+					DolphinSaveData = ''
+					FindDolphinSave()
+					print("")
+				else: break
 		elif(Selection == 2):
-			PrintSectionTitle('Default Answers')
-			print("(#0) Back To Settings")
-			print("(#1) Always Ask \"Are You Sure You Want To Replace Song\": "+DefaultWantToReplaceSong)
-			print("(#2) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
-			print("(#3) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
-			print("(#4) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
+			while True:
+				PrintSectionTitle('Default Answers')
+				print("(#0) Back To Settings")
+				print("(#1) Always Ask \"Are You Sure You Want To Replace Song\": "+DefaultWantToReplaceSong)
+				print("(#2) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
+				print("(#3) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
+				print("(#4) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
 
-			Selection = MakeSelection(['Choose an Option',0,4])
-			if(Selection == 1):
-				DefaultWantToReplaceSong = ChangeDefaultAnswer(['Yes','No'],'Want To Replace Song')
-			elif(Selection == 2):
-				DefaultReplacingReplacedSong = ChangeDefaultAnswer(['Yes','No'],'Replacing Replaced Song')
-			elif(Selection == 3):
-				DefaultUseAutoLengthTempo = ChangeDefaultAnswer(['Ask','Yes','No'],'Use Auto Length and Tempo')
-			elif(Selection == 4):
-				DefaultReplaceSongNames = ChangeDefaultAnswer(['Ask','Yes','No'],'Replace Song Names')
+				Selection = MakeSelection(['Choose an Option',0,4])
+				if(Selection == 1):
+					DefaultWantToReplaceSong = ChangeDefaultAnswer(['Yes','No'],['Want To Replace Song',DefaultWantToReplaceSong])
+				elif(Selection == 2):
+					DefaultReplacingReplacedSong = ChangeDefaultAnswer(['Yes','No'],['Replacing Replaced Song',DefaultReplacingReplacedSong])
+				elif(Selection == 3):
+					DefaultUseAutoLengthTempo = ChangeDefaultAnswer(['Ask','Yes','No'],['Use Auto Length and Tempo'])
+				elif(Selection == 4):
+					DefaultReplaceSongNames = ChangeDefaultAnswer(['Ask','Yes','No'],['Replace Song Names'])
+				else: break
 		elif(Selection == 3):
 			FindGameFolder()
 			if(input("\nAre You Sure You Want to Reset the Replaced Song Database? [y/n] ") == 'y'):
@@ -1319,30 +1349,32 @@ while True:
 			else:
 				print('')
 		elif(Selection == 4):
-			PrintSectionTitle('Updates')
-			print("(#0) Back To Settings")
-			print("(#1) Check For Updates")
-			if(AutoUpdate):
-				print("(#2) Turn Off Auto Updates")
-			else:
-				print("(#2) Turn On Auto Updates")
-			if(not bool(beta)):
-				print("(#3) Switch to Beta Branch")
-			else:
-				print("(#3) Switch to Main Branch")
+			while True:
+				PrintSectionTitle('Updates')
+				print("(#0) Back To Settings")
+				print("(#1) Check For Updates")
+				if(AutoUpdate):
+					print("(#2) Turn Off Auto Updates")
+				else:
+					print("(#2) Turn On Auto Updates")
+				if(not bool(beta)):
+					print("(#3) Switch to Beta Branch")
+				else:
+					print("(#3) Switch to Main Branch")
 
-			Selection = MakeSelection(['Pick an Option',0,3])
-			if(Selection == 1):
-				print('')
-				CheckForUpdates(True)
-				print('')
-			elif(Selection == 2):
-				AutoUpdate = not AutoUpdate
-				SaveSetting('Updates', 'AutoUpdate', str(int(AutoUpdate)))
-			elif(Selection == 3):
-				beta = int(not bool(beta))
-				SaveSetting('Updates', 'Branch', str(beta))
-				DownloadUpdate()
+				Selection = MakeSelection(['Pick an Option',0,3])
+				if(Selection == 1):
+					print('')
+					CheckForUpdates(True)
+					print('')
+				elif(Selection == 2):
+					AutoUpdate = not AutoUpdate
+					SaveSetting('Updates', 'AutoUpdate', str(int(AutoUpdate)))
+				elif(Selection == 3):
+					beta = int(not bool(beta))
+					SaveSetting('Updates', 'Branch', str(beta))
+					DownloadUpdate()
+				else: break
 		elif(Selection == 5):
 			if((not unsafeMode) and (input('\nAre You Sure You Want to Turn on Unsafe Mode? [y/n] ') == 'y')) or (unsafeMode):
 				unsafeMode = not unsafeMode
