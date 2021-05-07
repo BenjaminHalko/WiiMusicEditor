@@ -643,8 +643,9 @@ def FindGameFolder():
 	global MessagePath
 	global WiiDiskFolder
 	if(not os.path.isdir(GamePath+'/files')):
+		ExceptedFileExtensions = ['.iso','.wbfs']
 		while True:
-			GamePath = input("\nDrag Decompressed Wii Music Directory Or Wii Music Disk: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			GamePath = input("\nDrag the Decompressed Wii Music Directory or a Wii Music Disk on to the Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isdir(GamePath+'/DATA/files')) or (os.path.isdir(GamePath+'/files')):
 				if(os.path.isdir(GamePath+'/DATA')):
 					GamePath = os.path.dirname(GamePath+'/DATA/files').replace('\\','/')
@@ -656,6 +657,8 @@ def FindGameFolder():
 				FindWiiDiskFolder()
 				break
 			elif(os.path.isfile(GamePath)) and (pathlib.Path(GamePath).suffix in ExceptedFileExtensions):
+				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/extractdisk.bat\" \"'+os.path.dirname(GamePath)+'\" \"'+os.path.splitext(os.path.basename(GamePath))[0]+'\" '+os.path.splitext(os.path.basename(GamePath))[1])
+				GamePath = os.path.dirname(GamePath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(GamePath))[0]+'/DATA'
 				SaveSetting('Paths','GamePath',GamePath)
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 				MessagePath = GamePath+'/files/US/Message/message.carc'
@@ -676,9 +679,12 @@ def FindWiiDiskFolder():
 
 def FindDolphin():
 	global DolphinPath
+	global DolphinSaveData
+	global CodePath
+	global SaveDataPath
 	if(not os.path.isfile(DolphinPath)):
 		while True:
-			DolphinPath = input("\nDrag Dolphin.exe Over Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			DolphinPath = input("\nDrag Dolphin.exe or the Dolphin Folder on to the Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isfile(DolphinPath+'/dolphin.exe')):
 				DolphinPath = DolphinPath.replace('\\','/')
 				DolphinPath = DolphinPath+'/dolphin.exe'
@@ -690,6 +696,15 @@ def FindDolphin():
 				break
 			else:
 				print("\nERROR: Unable to Locate Valid Dolphin Directory")
+		if(os.path.isfile(DolphinPath[0:len(DolphinPath)-11:1]+'portable.txt')):
+			print('\nPortable Version Detected!')
+			if(input('Do You Want to Set the Dolphin Save Directory to the User Folder? [y/n] ') == 'y'):
+				DolphinSaveData = DolphinPath[0:len(DolphinPath)-11:1]+'User'
+				if(not os.path.isdir(DolphinSaveData)): os.mkdir(DolphinSaveData)
+				if(not os.path.isdir(DolphinSaveData+'/Wii')): os.mkdir(DolphinSaveData+'/Wii')
+				CodePath = DolphinSaveData+"/GameSettings/R64E01.ini"
+				SaveDataPath = DolphinSaveData+"/Wii/title/00010000/52363445/data"
+				SaveSetting('Paths','DolphinSaveData',DolphinSaveData)
 
 def FindDolphinSave():
 	global DolphinSaveData
@@ -697,7 +712,7 @@ def FindDolphinSave():
 	global SaveDataPath
 	if(not os.path.isdir(DolphinSaveData+'/Wii')):
 		while True:
-			DolphinSaveData = input("\nDrag Dolphin Save Directory Over Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			DolphinSaveData = input("\nDrag the Dolphin Save Directory Over the Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isdir(DolphinSaveData+'/Wii')):
 				DolphinSaveData = DolphinSaveData.replace('\\','/')
 				CodePath = DolphinSaveData+"/GameSettings/R64E01.ini"
@@ -966,6 +981,14 @@ while True:
 	if(AutoUpdate) and (not uptodate):
 		uptodate = True
 		CheckForUpdates(False)
+
+	#First Run
+	if(GamePath == 'None'):
+		print('\nThanks for Downloading the Wii Music Editor!')
+		print('\nLet\'s Setup Some File Paths for You!')
+		FindGameFolder()
+		if(input('\nWould You Like to Specify a Dolphin Directory? [y/n] ') == 'y'):
+			FindDolphin()
 
 	#Options
 	PrintSectionTitle('Options')
@@ -1241,7 +1264,6 @@ while True:
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 				MessagePath = GamePath+'/files/US/Message/message.carc'
 				SaveSetting('Paths','GamePath',GamePath)
-				print(GamePath)
 		elif(Selection == 2):
 			if(input('\nUse Game Path as Disk Directory? [y/n] ') != 'y'):
 				while True:
