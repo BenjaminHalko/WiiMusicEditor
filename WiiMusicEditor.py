@@ -5,10 +5,9 @@ import time
 import subprocess
 import configparser
 import pathlib
-from shutil import copyfile
 import tempfile
-from math import ceil
-from math import floor
+from shutil import copyfile
+from math import floor, ceil
 
 #Special Imports
 while True:
@@ -16,12 +15,14 @@ while True:
 		import requests
 		import mido
 		from colorama import Fore, Style, init
+		from tqdm import tqdm
 		break
 	except ImportError:
 		subprocess.run('python -m pip install --upgrade pip')
 		subprocess.run('pip install mido')
 		subprocess.run('pip install requests')
 		subprocess.run('pip install colorama')
+		subprocess.run('pip install tqdm')
 
 init(convert=True)
 
@@ -835,19 +836,30 @@ def DownloadUpdate():
 	global updateDownload
 	print('\nDownloading...')
 	try:
-		zipContent = requests.get(updateDownload[beta])
-		newZip = open('WiiMusicEditor.zip','wb')
-		newZip.write(zipContent.content)
-		newZip.close()
-		print('\nExtracting...\n')
-		subprocess.run('tar -xf WiiMusicEditor.zip')
-		newPath = '/WiiMusicEditor-main'
-		if(not os.path.isdir(ProgramPath+newPath)):
-			newPath = '/WiiMusicEditor-beta'
-		subprocess.Popen(ProgramPath+newPath+'/Helper/Update/Update.bat '+newPath.replace('/',''))
-		quit()
+		response = requests.get(updateDownload[beta], stream=True)
+		total_size_in_bytes= int(response.headers.get('content-length', 0))
+		block_size = 1024
+		progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
+		with open('WiiMusicEditor.zip', 'wb') as file:
+			for data in response.iter_content(block_size):
+				progress_bar.update(len(data))
+				file.write(data)
+		progress_bar.close()
+		if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
+			print("\nERROR, something went wrong\n")
+			return True
+		else:
+			print('\nExtracting...\n')
+			subprocess.run('tar -xf WiiMusicEditor.zip')
+			newPath = '/WiiMusicEditor-main'
+			if(not os.path.isdir(ProgramPath+newPath)):
+				newPath = '/WiiMusicEditor-beta'
+			subprocess.Popen(ProgramPath+newPath+'/Helper/Update/Update.bat '+newPath.replace('/',''))
+			quit()
+			return False
 	except (requests.ConnectionError, requests.Timeout) as exception:
 		print('\nFailed to Download File...\n')
+		return True
 
 def SelectStyleInstrument(PartString,MenuString,IsPercussion):
 	global StyleNames
@@ -1002,7 +1014,7 @@ while True:
 	print("(#4) Edit Styles")
 	print("(#5) Load Wii Music")
 	print("(#6) Extract/Compile Wii Music Disk")
-	print("(#7) Overwrite Save File With 100% Save (In Progress)")
+	print("(#7) Overwrite Save File With 100% Save")
 	print("(#8) Settings")
 	print("(#9) Credits")
 
@@ -1373,7 +1385,9 @@ while True:
 				elif(Selection == 3):
 					beta = int(not bool(beta))
 					SaveSetting('Updates', 'Branch', str(beta))
-					DownloadUpdate()
+					if(DownloadUpdate()):
+						beta = int(not bool(beta))
+						SaveSetting('Updates', 'Branch', str(beta))
 				else: break
 		elif(Selection == 5):
 			if((not unsafeMode) and (input('\nAre You Sure You Want to Turn on Unsafe Mode? [y/n] ') == 'y')) or (unsafeMode):
