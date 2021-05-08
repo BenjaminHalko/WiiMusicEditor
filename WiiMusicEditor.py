@@ -1357,6 +1357,7 @@ while True:
 				print("\nERROR, something went wrong\n")
 			else:
 				print('\nExtracting...\n')
+				time.sleep(0.5)
 				if(os.path.isdir('PreMade Custom Songs')): rmtree('PreMade Custom Songs')
 				subprocess.run('tar -xf CustomSongs.zip')
 				os.rename('Pre-Made-Songs-for-Wii-Music-main', 'PreMade Custom Songs')
