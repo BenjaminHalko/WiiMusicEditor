@@ -855,6 +855,7 @@ def DownloadUpdate():
 		else:
 			print('\nExtracting...\n')
 			subprocess.run('tar -xf WiiMusicEditor.zip')
+			os.remove('WiiMusicEditor.zip')
 			newPath = 'WiiMusicEditor-main'
 			if(not os.path.isdir(newPath)):
 				newPath = 'WiiMusicEditor-beta'
