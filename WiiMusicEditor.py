@@ -1316,7 +1316,10 @@ while True:
 			else:
 				print('\nExtracting...\n')
 				subprocess.run('tar -xf CustomSongs.zip')
-				newPath = '/WiiMusicEditor-main'
+				if(os.path.isdir('PreMade Custom Songs')): rmtree('PreMade Custom Songs')
+				os.rename('Pre-Made-Songs-for-Wii-Music-main', 'PreMade Custom Songs')
+				os.remove('CustomSongs.zip')
+				print('Saved To: \"'+ProgramPath.replace('\\','/')+'/PreMade Custom Songs\"\n')
 		except (requests.ConnectionError, requests.Timeout) as exception:
 			print('\nFailed to Download File...\n')
 	elif(Selection == 10): #////////////////////////////////////////Settings
