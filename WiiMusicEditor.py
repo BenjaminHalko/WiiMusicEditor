@@ -855,11 +855,11 @@ def DownloadUpdate():
 		else:
 			print('\nExtracting...\n')
 			subprocess.run('tar -xf WiiMusicEditor.zip')
-			os.remove('WiiMusicEditor.zip')
 			newPath = 'WiiMusicEditor-main'
 			if(not os.path.isdir(newPath)):
 				newPath = 'WiiMusicEditor-beta'
 			os.rename(newPath, 'WiiMusicEditor')
+			os.remove('WiiMusicEditor.zip')
 			subprocess.Popen('WiiMusicEditor/Helper/Update/Update.bat')
 			quit()
 			return False
