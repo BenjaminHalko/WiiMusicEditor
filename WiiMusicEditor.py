@@ -925,6 +925,15 @@ def ChangeDefaultAnswer(ResponseOptions,iniKey):
 	print('')
 	return ResponseOptions[Selection]
 
+def CreateGct():
+	Patches = open(CodePath)
+	
+	driver = webdriver.Chrome()
+	driver.get('https://mkwii.com/gct/')
+	text_area = driver.find_element_by_id('game_id')
+	text_area.send_keys("REOIEROWIERJWOPIEJR")
+	for num in
+
 #Default Paths
 ProgramPath = os.path.dirname(__file__)
 GamePath = LoadSetting('Paths','GamePath','None')
@@ -1315,8 +1324,8 @@ while True:
 				print("\nERROR, something went wrong\n")
 			else:
 				print('\nExtracting...\n')
-				subprocess.run('tar -xf CustomSongs.zip')
 				if(os.path.isdir('PreMade Custom Songs')): rmtree('PreMade Custom Songs')
+				subprocess.run('tar -xf CustomSongs.zip')
 				os.rename('Pre-Made-Songs-for-Wii-Music-main', 'PreMade Custom Songs')
 				os.remove('CustomSongs.zip')
 				print('Saved To: \"'+ProgramPath.replace('\\','/')+'/PreMade Custom Songs\"\n')
