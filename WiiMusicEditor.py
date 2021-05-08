@@ -1355,14 +1355,12 @@ while True:
 			progress_bar.close()
 			if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
 				print("\nERROR, something went wrong\n")
-			else:
-				print('\nExtracting...\n')
-				time.sleep(0.5)
-				if(os.path.isdir('PreMade Custom Songs')): rmtree('PreMade Custom Songs')
-				subprocess.run('tar -xf CustomSongs.zip')
-				os.rename('Pre-Made-Songs-for-Wii-Music-main', 'PreMade Custom Songs')
-				os.remove('CustomSongs.zip')
-				print('Saved To: \"'+ProgramPath.replace('\\','/')+'/PreMade Custom Songs\"\n')
+			print('\nExtracting...\n')
+			if(os.path.isdir('PreMade Custom Songs')): rmtree('PreMade Custom Songs')
+			subprocess.run('tar -xf CustomSongs.zip')
+			os.rename('Pre-Made-Songs-for-Wii-Music-main', 'PreMade Custom Songs')
+			os.remove('CustomSongs.zip')
+			print('Saved To: \"'+ProgramPath.replace('\\','/')+'/PreMade Custom Songs\"\n')
 		except (requests.ConnectionError, requests.Timeout) as exception:
 			print('\nFailed to Download File...\n')
 	elif(Selection == 11): #////////////////////////////////////////Settings
