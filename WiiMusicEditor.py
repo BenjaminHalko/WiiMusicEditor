@@ -926,14 +926,25 @@ def ChangeDefaultAnswer(ResponseOptions,iniKey):
 	return ResponseOptions[Selection]
 
 def CreateGct():
-	Patches = open(CodePath)
-	
-	driver = webdriver.Chrome()
+	global CodePath
+	global ProgramPath
+	patches = open(CodePath)
+	textlines = patches.readlines()
+	patches.close()
+	codes = ''
+	for text in textlines:
+		if(text.isalpha() or text.isnumeric()):
+			codes = codes + text
+	options = webdriver.ChromeOptions()
+	options.add_argument("download.default_directory="+ProgramPath)
+	driver = webdriver.Chrome(options=options)
 	driver.get('https://mkwii.com/gct/')
-	text_area = driver.find_element_by_id('game_id')
-	text_area.send_keys("REOIEROWIERJWOPIEJR")
-	for num in
-
+	driver.find_element_by_id('game_id').send_keys("REOIEROWIERJWOPIEJR")
+	driver.find_element_by_id('code_title').send_keys("Code List")
+	driver.find_element_by_id('code').send_keys(codes)
+	driver.find_element_by_id('add_code_b').click()
+	driver.find_element_by_id('gct_b').click()
+	driver.quit()
 #Default Paths
 ProgramPath = os.path.dirname(__file__)
 GamePath = LoadSetting('Paths','GamePath','None')
