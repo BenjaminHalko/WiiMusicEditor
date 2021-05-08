@@ -16,10 +16,11 @@ while True:
 		import mido
 		from colorama import Fore, Style, init
 		from tqdm import tqdm
+		from selenium import webdriver
 		break
 	except ImportError:
 		subprocess.run('python -m pip install --upgrade pip')
-		subprocess.run('pip install mido requests colorama tqdm')
+		subprocess.run('pip install mido requests colorama tqdm selenium')
 
 init(convert=True)
 
@@ -928,23 +929,27 @@ def ChangeDefaultAnswer(ResponseOptions,iniKey):
 def CreateGct():
 	global CodePath
 	global ProgramPath
+	if(os.path.isfile('R64E01.gct')): os.remove('R64E01.gct')
 	patches = open(CodePath)
 	textlines = patches.readlines()
 	patches.close()
 	codes = ''
 	for text in textlines:
-		if(text.isalpha() or text.isnumeric()):
+		if(text[0].isalpha() or text[0].isnumeric()):
 			codes = codes + text
-	options = webdriver.ChromeOptions()
-	options.add_argument("download.default_directory="+ProgramPath)
-	driver = webdriver.Chrome(options=options)
+	chromeOptions = webdriver.ChromeOptions()
+	prefs = {"download.default_directory" : ProgramPath}
+	chromeOptions.add_experimental_option("prefs",prefs)
+	driver = webdriver.Chrome('Helper/BrowserDrivers/chromedriver.exe',options=chromeOptions)
 	driver.get('https://mkwii.com/gct/')
-	driver.find_element_by_id('game_id').send_keys("REOIEROWIERJWOPIEJR")
+	driver.find_element_by_id('game_id').send_keys("R64E01")
 	driver.find_element_by_id('code_title').send_keys("Code List")
 	driver.find_element_by_id('code').send_keys(codes)
 	driver.find_element_by_id('add_code_b').click()
 	driver.find_element_by_id('gct_b').click()
+	time.sleep(1)
 	driver.quit()
+
 #Default Paths
 ProgramPath = os.path.dirname(__file__)
 GamePath = LoadSetting('Paths','GamePath','None')
@@ -1015,13 +1020,14 @@ while True:
 	print("(#4) Edit Styles")
 	print("(#5) Load Wii Music")
 	print("(#6) Extract/Compile Wii Music Disk")
-	print("(#7) Overwrite Save File With 100% Save")
-	print("(#8) Download Pre-Made Custom Songs")
-	print("(#9) Help")
-	print("(#10) Settings")
-	print("(#11) Credits")
+	print("(#7) Patch Main.dol With Gecko Codes")
+	print("(#8) Overwrite Save File With 100% Save")
+	print("(#9) Download Pre-Made Custom Songs")
+	print("(#10) Help")
+	print("(#11) Settings")
+	print("(#12) Credits")
 
-	Selection = MakeSelection(['Please Select an Option',1,11])
+	Selection = MakeSelection(['Please Select an Option',1,12])
 
 	if(Selection == 1): #////////////////////////////////////////Add Custom Song
 		#Load Files
@@ -1310,16 +1316,32 @@ while True:
 						print("\nERROR: Unable to Locate Valid Wii Music Directory")
 			else:
 				DiskPath = GamePath[0:len(GamePath)-5:1]
-			subprocess.run('Helper/Wiimms/wit.exe cp \"'+DiskPath+'\" \"'+DiskPath+'.wbfs\" --wbfs')
+			
+			DiskName = ''
+			DiskNum = 0
+			while(os.path.isfile(DiskPath+DiskName+'.wbfs')):
+				DiskNum = DiskNum+1
+				DiskName = '('+str(DiskNum)+')'
+			subprocess.run('Helper/Wiimms/wit.exe cp \"'+DiskPath+'\" \"'+DiskPath+DiskName+'.wbfs\" --wbfs')
 		print('')
-	elif(Selection == 7): #////////////////////////////////////////100% Save File
+	elif(Selection == 7): #////////////////////////////////////////Patch Main.dol
+		FindGameFolder()
+		FindDolphinSave()
+		if(input('\nAre you sure you want to patch Main.dol? [y/n] ') == 'y'):
+			print('\nCreating Gct...')
+			CreateGct()
+			print('\nPatching Main.dol...')
+			subprocess.run('Helper/Wiimms/wstrt.exe patch \"'+GamePath+'/sys/main.dol\" --add-section R64E01.gct',capture_output=True)
+			os.remove('R64E01.gct')
+			print('\nPatch Successful!\n')
+	elif(Selection == 8): #////////////////////////////////////////100% Save File
 		FindDolphinSave()
 		if(input("\nAre You Sure You Want To Overwrite Your Save Data? [y/n] ") == 'y'):
 			subprocess.run('robocopy \"'+ProgramPath+'/Helper/WiiMusicSave\" \"'+SaveDataPath+'\" /MIR /E',capture_output=True)
 			print("\nOverwrite Successfull\n")
 		else:
 			print("\nAborted...\n")
-	elif(Selection == 8): #////////////////////////////////////////Download Pre-Made Custom Songs
+	elif(Selection == 9): #////////////////////////////////////////Download Pre-Made Custom Songs
 		print('\nDownloading...')
 		try:
 			response = requests.get('https://github.com/BenjaminHalko/Pre-Made-Songs-for-Wii-Music/archive/refs/heads/main.zip', stream=True)
@@ -1342,7 +1364,7 @@ while True:
 				print('Saved To: \"'+ProgramPath.replace('\\','/')+'/PreMade Custom Songs\"\n')
 		except (requests.ConnectionError, requests.Timeout) as exception:
 			print('\nFailed to Download File...\n')
-	elif(Selection == 10): #////////////////////////////////////////Settings
+	elif(Selection == 11): #////////////////////////////////////////Settings
 		while True:
 			PrintSectionTitle("Settings")
 			print("(#0) Back To Main Menu")
@@ -1439,7 +1461,7 @@ while True:
 					SaveSetting('Unsafe Mode','Unsafe Mode',str(int(unsafeMode)))
 				print('')
 			else: break
-	elif(Selection == 11): #////////////////////////////////////////Credits
+	elif(Selection == 12): #////////////////////////////////////////Credits
 		PrintSectionTitle('Credits')
 		print('\n-----Created By:-----')
 		print('- Benjamin Halko')
