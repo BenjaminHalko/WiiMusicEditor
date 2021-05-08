@@ -859,7 +859,7 @@ def DownloadUpdate():
 			newPath = 'WiiMusicEditor-main'
 			if(not os.path.isdir(newPath)):
 				newPath = 'WiiMusicEditor-beta'
-			os.rename(newPath, 'WiiMusicEditor')
+			os.rename(newPath, 'WiiMusicEditorNew')
 			subprocess.Popen('WiiMusicEditor/Helper/Update/Update.bat')
 			quit()
 			return False
@@ -984,9 +984,9 @@ unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
 while True:
 	#Finish Updates
 	if(not uptodate):
-		if(os.path.isdir('WiiMusicEditor') or os.path.isfile('WiiMusicEditor.zip')):
+		if(os.path.isdir('WiiMusicEditorNew') or os.path.isfile('WiiMusicEditor.zip')):
 			print('Finishing Up...\n')
-			if(os.path.isdir('WiiMusicEditor')): rmtree('WiiMusicEditor')
+			if(os.path.isdir('WiiMusicEditorNew')): rmtree('WiiMusicEditorNew')
 			if(os.path.isfile('WiiMusicEditor.zip')): os.remove('WiiMusicEditor.zip')
 			uptodate = True
 
@@ -1021,13 +1021,14 @@ while True:
 	print("(#5) Load Wii Music")
 	print("(#6) Extract/Compile Wii Music Disk")
 	print("(#7) Patch Main.dol With Gecko Codes")
-	print("(#8) Overwrite Save File With 100% Save")
-	print("(#9) Download Pre-Made Custom Songs")
-	print("(#10) Help")
-	print("(#11) Settings")
-	print("(#12) Credits")
+	print("(#8) Create Riivolution Patch")
+	print("(#9) Overwrite Save File With 100% Save")
+	print("(#10) Download Pre-Made Custom Songs")
+	print("(#11) Help")
+	print("(#12) Settings")
+	print("(#13) Credits")
 
-	Selection = MakeSelection(['Please Select an Option',1,12])
+	Selection = MakeSelection(['Please Select an Option',1,13])
 
 	if(Selection == 1): #////////////////////////////////////////Add Custom Song
 		#Load Files
@@ -1334,14 +1335,14 @@ while True:
 			subprocess.run('Helper/Wiimms/wstrt.exe patch \"'+GamePath+'/sys/main.dol\" --add-section R64E01.gct',capture_output=True)
 			os.remove('R64E01.gct')
 			print('\nPatch Successful!\n')
-	elif(Selection == 8): #////////////////////////////////////////100% Save File
+	elif(Selection == 9): #////////////////////////////////////////100% Save File
 		FindDolphinSave()
 		if(input("\nAre You Sure You Want To Overwrite Your Save Data? [y/n] ") == 'y'):
 			subprocess.run('robocopy \"'+ProgramPath+'/Helper/WiiMusicSave\" \"'+SaveDataPath+'\" /MIR /E',capture_output=True)
 			print("\nOverwrite Successfull\n")
 		else:
 			print("\nAborted...\n")
-	elif(Selection == 9): #////////////////////////////////////////Download Pre-Made Custom Songs
+	elif(Selection == 10): #////////////////////////////////////////Download Pre-Made Custom Songs
 		print('\nDownloading...')
 		try:
 			response = requests.get('https://github.com/BenjaminHalko/Pre-Made-Songs-for-Wii-Music/archive/refs/heads/main.zip', stream=True)
@@ -1363,7 +1364,7 @@ while True:
 			print('Saved To: \"'+ProgramPath.replace('\\','/')+'/PreMade Custom Songs\"\n')
 		except (requests.ConnectionError, requests.Timeout) as exception:
 			print('\nFailed to Download File...\n')
-	elif(Selection == 11): #////////////////////////////////////////Settings
+	elif(Selection == 12): #////////////////////////////////////////Settings
 		while True:
 			PrintSectionTitle("Settings")
 			print("(#0) Back To Main Menu")
@@ -1460,7 +1461,7 @@ while True:
 					SaveSetting('Unsafe Mode','Unsafe Mode',str(int(unsafeMode)))
 				print('')
 			else: break
-	elif(Selection == 12): #////////////////////////////////////////Credits
+	elif(Selection == 13): #////////////////////////////////////////Credits
 		PrintSectionTitle('Credits')
 		print('\n-----Created By:-----')
 		print('- Benjamin Halko')
