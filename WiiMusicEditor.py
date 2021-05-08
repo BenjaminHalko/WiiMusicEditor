@@ -6,7 +6,7 @@ import subprocess
 import configparser
 import pathlib
 import tempfile
-from shutil import copyfile
+from shutil import copyfile, rmtree
 from math import floor, ceil
 
 #Special Imports
@@ -16,14 +16,10 @@ while True:
 		import mido
 		from colorama import Fore, Style, init
 		from tqdm import tqdm
-		#import PyQt5
-		#import bs4
 		break
 	except ImportError:
 		subprocess.run('python -m pip install --upgrade pip')
 		subprocess.run('pip install mido requests colorama tqdm')
-		#subprocess.run('pip install PyQt5 setuptools')
-		#subprocess.run('pip install bs4')
 
 init(convert=True)
 
@@ -591,16 +587,12 @@ def AddPatch(PatchName,PatchInfo):
 	global CodePath
 	global DefaultStyleMethod
 	global ProgramPath
-	#if(DefaultStyleMethod == 'Main.dol'):
-	#	TempCodePath = GamePath+'/geckoCodes.txt'
-	#else:
-	TempCodePath = CodePath
 	if(type(PatchName) == str):
 		PatchName = [PatchName]
 		PatchInfo = [PatchInfo]
 	for patchNum in range(len(PatchName)):
-		if(os.path.exists(TempCodePath)):
-			codes = open(TempCodePath,'r')
+		if(os.path.exists(CodePath)):
+			codes = open(CodePath,'r')
 			lineText = codes.readlines()
 			codes.close()
 			geckoExists = -1
@@ -638,20 +630,17 @@ def AddPatch(PatchName,PatchInfo):
 			elif(songEnabled == -1):
 				lineText.insert(geckoEnabled+1,'$'+PatchName[patchNum]+'\n')
 			
-			codes = open(TempCodePath,'w')
+			codes = open(CodePath,'w')
 			codes.writelines(lineText)
 			codes.close()
 		else:
-			codes = open(TempCodePath,'w')
+			codes = open(CodePath,'w')
 			codes.write('[Gecko]\n')
 			codes.write('$'+PatchName[patchNum]+' [WiiMusicEditor]\n')
 			codes.write(PatchInfo[patchNum])
 			codes.write('[Gecko_Enabled]\n')
 			codes.write('$'+PatchName[patchNum]+'\n')
 			codes.close()
-	if(TempCodePath != CodePath):
-		FindGameFolder()
-		subprocess.run('python \"'+ProgramPath+'/Helper/GctLoader/GeckoLoader.py\" \"'+GamePath+'/sys/main.dol\" \"'+GamePath+'/geckoCodes.txt\" --dest \"'+GamePath+'/sys/main.dol\" -o -tc ALL -')
 
 def FindGameFolder():
 	global GamePath
@@ -673,7 +662,7 @@ def FindGameFolder():
 				FindWiiDiskFolder()
 				break
 			elif(os.path.isfile(GamePath)) and (pathlib.Path(GamePath).suffix in ExceptedFileExtensions):
-				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/extractdisk.bat\" \"'+os.path.dirname(GamePath)+'\" \"'+os.path.splitext(os.path.basename(GamePath))[0]+'\" '+os.path.splitext(os.path.basename(GamePath))[1])
+				subprocess.run('\"Helper/Wiimms/extractdisk.bat\" \"'+os.path.dirname(GamePath)+'\" \"'+os.path.splitext(os.path.basename(GamePath))[0]+'\" '+os.path.splitext(os.path.basename(GamePath))[1])
 				GamePath = os.path.dirname(GamePath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(GamePath))[0]+'/DATA'
 				SaveSetting('Paths','GamePath',GamePath)
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
@@ -763,11 +752,11 @@ def InitializeBrseq():
 		if(prefix == '.mid'): prefix = '.midi'
 		copyfile(BrseqPath,directory+'/z'+prefix)
 		if(os.path.isfile(directory+'/z.rseq')):
-			subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" assemble \"'+directory+'/z.rseq\"')
+			subprocess.run('\"Helper/SequenceCmd/GotaSequenceCmd.exe\" assemble \"'+directory+'/z.rseq\"')
 		if(os.path.isfile(directory+'/z.brseq')):
-			subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" to_midi \"'+directory+'/z.brseq\"')
+			subprocess.run('\"Helper/SequenceCmd/GotaSequenceCmd.exe\" to_midi \"'+directory+'/z.brseq\"')
 		else:
-			subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" from_midi \"'+directory+'/z.midi\"')
+			subprocess.run('\"Helper/SequenceCmd/GotaSequenceCmd.exe\" from_midi \"'+directory+'/z.midi\"')
 		mid = mido.MidiFile(directory+"/z.midi")
 		Tempo = 'Could Not Locate'
 		Length = 0
@@ -786,7 +775,7 @@ def InitializeBrseq():
 def ChangeName(SongToChange,newText):
 	global ProgramPath
 	TextOffset = ['c8','190','12c']
-	subprocess.run('\"'+ProgramPath+'\\Helper\\Wiimms\\decode.bat\" '+MessageFolder(),capture_output=True)
+	subprocess.run('\"Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
 	for typeNum in range(3):
 		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
 		textlines = message.readlines()
@@ -802,7 +791,7 @@ def ChangeName(SongToChange,newText):
 		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','wb')
 		message.writelines(textlines)
 		message.close()
-	subprocess.run('\"'+ProgramPath+'\\Helper\\Wiimms\\encode.bat\" '+MessageFolder(),capture_output=True)
+	subprocess.run('\"Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 
 def MessageFolder():
 	return '\"'+(os.path.dirname(MessagePath)).replace('/','\\')+'\"'
@@ -833,7 +822,7 @@ def CheckForUpdates(PrintMessages):
 	global beta
 	global updateUrl
 	if(PrintMessages): print('Checking for Updates...')
-	version = open(ProgramPath+'/Helper/Update/Version.txt')
+	version = open('Helper/Update/Version.txt')
 	currentVersion = version.read()
 	version.close()
 	try:
@@ -866,10 +855,11 @@ def DownloadUpdate():
 		else:
 			print('\nExtracting...\n')
 			subprocess.run('tar -xf WiiMusicEditor.zip')
-			newPath = '/WiiMusicEditor-main'
-			if(not os.path.isdir(ProgramPath+newPath)):
-				newPath = '/WiiMusicEditor-beta'
-			subprocess.Popen(ProgramPath+newPath+'/Helper/Update/Update.bat '+newPath.replace('/',''))
+			newPath = 'WiiMusicEditor-main'
+			if(not os.path.isdir(newPath)):
+				newPath = 'WiiMusicEditor-beta'
+			os.rename(newPath, 'WiiMusicEditor')
+			subprocess.Popen('WiiMusicEditor/Helper/Update/Update.bat')
 			quit()
 			return False
 	except (requests.ConnectionError, requests.Timeout) as exception:
@@ -935,22 +925,6 @@ def ChangeDefaultAnswer(ResponseOptions,iniKey):
 	print('')
 	return ResponseOptions[Selection]
 
-def ExtractDisk():
-	global GamePath
-	global ProgramPath
-	if(os.path.isfile(GamePath)):
-		print('\nExtracting Disk...')
-		subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp --fst \"'+GamePath+'\" \"'+ProgramPath+'/tmp\"',capture_output=True)
-
-def CompileDisk():
-	global GamePath
-	global ProgramPath
-	if(os.path.isfile(GamePath)):
-		print('\nCompiling Disk...')
-		subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/delete.bat\" \"'+GamePath+'\"')
-		subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+ProgramPath+'/tmp\" \"'+GamePath+'\"',capture_output=True)
-		subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/erasedir.bat\"')
-
 #Default Paths
 ProgramPath = os.path.dirname(__file__)
 GamePath = LoadSetting('Paths','GamePath','None')
@@ -977,7 +951,6 @@ DefaultWantToReplaceSong = LoadSetting('Default Answers', 'Want To Replace Song'
 DefaultReplacingReplacedSong = LoadSetting('Default Answers', 'Replacing Replaced Song', 'Yes')
 DefaultReplaceSongNames = LoadSetting('Default Answers', 'Replace Song Names', 'Ask')
 DefaultUseAutoLengthTempo = LoadSetting('Default Answers', 'Use Auto Length and Tempo', 'Ask')
-DefaultStyleMethod = LoadSetting('Default Answers', 'Style Patch Method', 'Main.dol')
 
 #Unsafe Mode
 unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
@@ -986,13 +959,9 @@ unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
 while True:
 	#Finish Updates
 	if(not uptodate):
-		if(os.path.isdir(ProgramPath+'/WiiMusicEditor-main')):
+		if(os.path.isdir('WiiMusicEditor')):
 			print('Finishing Up...\n')
-			subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-main\"')
-			uptodate = True
-		elif(os.path.isdir(ProgramPath+'/WiiMusicEditor-beta')):
-			print('Finishing Up...\n')
-			subprocess.run(ProgramPath+'/Helper/Update/FinishUpdate.bat \"'+ProgramPath+'/WiiMusicEditor-beta\"')
+			rmtree('WiiMusicEditor')
 			uptodate = True
 
 	#Title
@@ -1026,10 +995,12 @@ while True:
 	print("(#5) Load Wii Music")
 	print("(#6) Extract/Compile Wii Music Disk")
 	print("(#7) Overwrite Save File With 100% Save")
-	print("(#8) Settings")
-	print("(#9) Credits")
+	print("(#8) Download Pre-Made Custom Songs")
+	print("(#9) Help")
+	print("(#10) Settings")
+	print("(#11) Credits")
 
-	Selection = MakeSelection(['Please Select an Option',1,9])
+	Selection = MakeSelection(['Please Select an Option',1,11])
 
 	if(Selection == 1): #////////////////////////////////////////Add Custom Song
 		#Load Files
@@ -1302,7 +1273,7 @@ while True:
 					break
 				else:
 					print('ERROR: Not Supported File Type')
-			subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/extractdisk.bat\" \"'+os.path.dirname(DiskPath)+'\" \"'+os.path.splitext(os.path.basename(DiskPath))[0]+'\" '+os.path.splitext(os.path.basename(DiskPath))[1])
+			subprocess.run('Helper/Wiimms/extractdisk.bat \"'+os.path.dirname(DiskPath)+'\" \"'+os.path.splitext(os.path.basename(DiskPath))[0]+'\" '+os.path.splitext(os.path.basename(DiskPath))[1])
 			if(input('\nWould You Like to Set This Path as the Current Game Path? [y/n] ') == 'y'):
 				GamePath = os.path.dirname(DiskPath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(DiskPath))[0]+'/DATA'
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
@@ -1318,7 +1289,7 @@ while True:
 						print("\nERROR: Unable to Locate Valid Wii Music Directory")
 			else:
 				DiskPath = GamePath[0:len(GamePath)-5:1]
-			subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+'.wbfs\" --wbfs')
+			subprocess.run('Helper/Wiimms/wit.exe cp \"'+DiskPath+'\" \"'+DiskPath+'.wbfs\" --wbfs')
 		print('')
 	elif(Selection == 7): #////////////////////////////////////////100% Save File
 		FindDolphinSave()
@@ -1327,14 +1298,33 @@ while True:
 			print("\nOverwrite Successfull\n")
 		else:
 			print("\nAborted...\n")
-	elif(Selection == 8): #////////////////////////////////////////Settings
+	elif(Selection == 8): #////////////////////////////////////////Download Pre-Made Custom Songs
+		print('\nDownloading...')
+		try:
+			response = requests.get('https://github.com/BenjaminHalko/Pre-Made-Songs-for-Wii-Music/archive/refs/heads/main.zip', stream=True)
+			total_size_in_bytes= int(response.headers.get('content-length', 0))
+			block_size = 1024
+			progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
+			with open('CustomSongs.zip', 'wb') as file:
+				for data in response.iter_content(block_size):
+					progress_bar.update(len(data))
+					file.write(data)
+			progress_bar.close()
+			if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
+				print("\nERROR, something went wrong\n")
+			else:
+				print('\nExtracting...\n')
+				subprocess.run('tar -xf CustomSongs.zip')
+				newPath = '/WiiMusicEditor-main'
+		except (requests.ConnectionError, requests.Timeout) as exception:
+			print('\nFailed to Download File...\n')
+	elif(Selection == 10): #////////////////////////////////////////Settings
 		while True:
 			PrintSectionTitle("Settings")
 			print("(#0) Back To Main Menu")
 			print("(#1) Change File Paths")
 			print("(#2) Change Default Answers")
 			print("(#3) Reset Replaced Song Database")
-			#print("(#4) Change Gecko Code Patch Method (Current Method: "+DefaultStyleMethod+")")
 			print("(#4) Updates")
 			if(unsafeMode):
 				print("(#5) Switch to Safe Mode")
@@ -1390,8 +1380,6 @@ while True:
 					print('\nReset Successful!\n')
 				else:
 					print('')
-			#elif(Selection == 4):
-			#	DefaultStyleMethod = ChangeDefaultAnswer(['Main.dol','Dolphin'],['Style Patch Method',DefaultStyleMethod])
 			elif(Selection == 4):
 				while True:
 					PrintSectionTitle('Updates')
@@ -1427,7 +1415,7 @@ while True:
 					SaveSetting('Unsafe Mode','Unsafe Mode',str(int(unsafeMode)))
 				print('')
 			else: break
-	elif(Selection == 9): #////////////////////////////////////////Credits
+	elif(Selection == 11): #////////////////////////////////////////Credits
 		PrintSectionTitle('Credits')
 		print('\n-----Created By:-----')
 		print('- Benjamin Halko')

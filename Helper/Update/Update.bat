@@ -5,6 +5,6 @@ cd..
 cd..
 cd..
 
-robocopy "%CD%\%1" "%CD%" /MIR /XF settings.ini /XD .git %1 > nul
+robocopy "%CD%\WiiMusicEditor" "%CD%" /MIR /XF settings.ini /XD .git WiiMusicEditor > nul
 
 python "WiiMusicEditor.py"
