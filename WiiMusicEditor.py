@@ -859,7 +859,6 @@ def DownloadUpdate():
 			if(not os.path.isdir(newPath)):
 				newPath = 'WiiMusicEditor-beta'
 			os.rename(newPath, 'WiiMusicEditor')
-			os.remove('WiiMusicEditor.zip')
 			subprocess.Popen('WiiMusicEditor/Helper/Update/Update.bat')
 			quit()
 			return False
@@ -960,9 +959,10 @@ unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
 while True:
 	#Finish Updates
 	if(not uptodate):
-		if(os.path.isdir('WiiMusicEditor')):
+		if(os.path.isdir('WiiMusicEditor') or os.path.isfile('WiiMusicEditor.zip')):
 			print('Finishing Up...\n')
-			rmtree('WiiMusicEditor')
+			if(os.path.isdir('WiiMusicEditor')): rmtree('WiiMusicEditor')
+			if(os.path.isfile('WiiMusicEditor.zip')): os.remove('WiiMusicEditor.zip')
 			uptodate = True
 
 	#Title
