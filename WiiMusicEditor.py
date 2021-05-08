@@ -16,13 +16,14 @@ while True:
 		import mido
 		from colorama import Fore, Style, init
 		from tqdm import tqdm
-		import PyQt5
-		import bs4
+		#import PyQt5
+		#import bs4
 		break
 	except ImportError:
 		subprocess.run('python -m pip install --upgrade pip')
-		subprocess.run('pip install mido requests colorama tqdm PyQt5 setuptools')
-		subprocess.run('pip install bs4')
+		subprocess.run('pip install mido requests colorama tqdm')
+		#subprocess.run('pip install PyQt5 setuptools')
+		#subprocess.run('pip install bs4')
 
 init(convert=True)
 
@@ -296,17 +297,6 @@ ScoreFileLengths = [
 ['2960','2640','29C0','2BC0','29A0']]
 
 SongMemoryOffsets = [
-'025a08a8',
-'025a0c54',
-'025a2780',
-'025a1758',
-'025a04fc',
-'025a0674',
-'025a1df4',
-'025a1c7c',
-'025a0adc',
-'025a1d38',
-'025a283c',
 '025a1468',
 '025a1814',
 '025a1000', 
@@ -341,6 +331,17 @@ SongMemoryOffsets = [
 '025a18d0',
 '025a0d10',
 '025a12f0',
+'025a08a8',
+'025a0c54',
+'025a2780',
+'025a1758',
+'025a04fc',
+'025a0674',
+'025a1df4',
+'025a1c7c',
+'025a0adc',
+'025a1d38',
+'025a283c',
 '025a23d4',
 '025a0730',
 '025a26c4',
@@ -349,17 +350,6 @@ SongMemoryOffsets = [
 ['8059ACB3','8059ACD7','8059ACFB','8059AD1F']]
 
 StyleNames = [
-'Jazz',
-'Rock',
-'Latin',
-'March',
-'Electronic',
-'Pop',
-'Japanese',
-'Tango',
-'Classical',
-'Hawaiian',
-'Reggae',
 'Twinkle Twinkle Little Star',
 'Yankee Doodle',
 'Oh My Darling Clementine',
@@ -387,6 +377,17 @@ StyleNames = [
 'Animal Crossing K.K. Blues',
 'Wii Music',
 'Super Mario Bros',
+'Jazz',
+'Rock',
+'Latin',
+'March',
+'Electronic',
+'Pop',
+'Japanese',
+'Tango',
+'Classical',
+'Hawaiian',
+'Reggae',
 'Menu Style Main',
 'Menu Style Electronic',
 'Menu Style Japanese',
@@ -395,17 +396,6 @@ StyleNames = [
 'Replace All Menu Styles']
 
 StyleMemoryOffsets = [
-'0659A65C',
-'0659A680',
-'0659A6A4',
-'0659A6C8',
-'0659A6EC',
-'0659A710',
-'0659A724',
-'0659A758',
-'0659A77C',
-'0659A7A0',
-'0659A7C4',
 '0659A7E8',
 '0659A80C',
 '0659A830',
@@ -433,6 +423,17 @@ StyleMemoryOffsets = [
 '0659AB48',
 '0659AB6C',
 '0659AC8C',
+'0659A65C',
+'0659A680',
+'0659A6A4',
+'0659A6C8',
+'0659A6EC',
+'0659A710',
+'0659A724',
+'0659A758',
+'0659A77C',
+'0659A7A0',
+'0659A7C4',
 '0659ACB0',
 '0659ACD4',
 '0659ACF8',
@@ -590,10 +591,10 @@ def AddPatch(PatchName,PatchInfo):
 	global CodePath
 	global DefaultStyleMethod
 	global ProgramPath
-	if(DefaultStyleMethod == 'Main.dol'):
-		TempCodePath = GamePath+'/geckoCodes.txt'
-	else:
-		TempCodePath = CodePath
+	#if(DefaultStyleMethod == 'Main.dol'):
+	#	TempCodePath = GamePath+'/geckoCodes.txt'
+	#else:
+	TempCodePath = CodePath
 	if(type(PatchName) == str):
 		PatchName = [PatchName]
 		PatchInfo = [PatchInfo]
@@ -650,7 +651,7 @@ def AddPatch(PatchName,PatchInfo):
 			codes.close()
 	if(TempCodePath != CodePath):
 		FindGameFolder()
-		subprocess.run('python \"'+ProgramPath+'/Helper/GctLoader/GeckoLoader.py\" \"'+GamePath+'/sys/main.dol\" \"'+GamePath+'/geckoCodes.txt\" --dest \"'+GamePath+'/sys/main.dol\" -tc ALL')
+		subprocess.run('python \"'+ProgramPath+'/Helper/GctLoader/GeckoLoader.py\" \"'+GamePath+'/sys/main.dol\" \"'+GamePath+'/geckoCodes.txt\" --dest \"'+GamePath+'/sys/main.dol\" -o -tc ALL -')
 
 def FindGameFolder():
 	global GamePath
@@ -875,7 +876,7 @@ def DownloadUpdate():
 		print('\nFailed to Download File...\n')
 		return True
 
-def SelectStyleInstrument(PartString,MenuString,IsPercussion):
+def SelectStyleInstrument(PartString,IsPercussion):
 	global StyleNames
 	global Selection
 	global InstrumentNames
@@ -883,22 +884,17 @@ def SelectStyleInstrument(PartString,MenuString,IsPercussion):
 	global normalInstrumentNumber
 	global unsafeMode
 	global NormalStyleSelected
-	if(NormalStyleSelected):
-		PartName = PartString
-	else:
-		PartName = MenuString
 	print('')
 	while True:
-		
-		PartType = input("Enter The Instrument Number You Want For "+PartName+": ")
+		PartType = input("Enter The Instrument Number You Want For "+PartString+": ")
 		if(PartType.isnumeric()):
 			PartType = int(PartType)
-			if(IsPercussion) and (not unsafeMode) and (NormalStyleSelected): PartType = PartType + normalInstrumentNumber
-			if(unsafeMode) or (not NormalStyleSelected):
+			if(IsPercussion) and (not unsafeMode): PartType = PartType + normalInstrumentNumber
+			if(unsafeMode):
 				if(PartType == len(InstrumentNames)-1):
 					PartType = 'ffffffff'
 					break
-				elif (PartType < len(InstrumentNames)) and ((unsafeMode) or (InstrumentNames[PartType] in MenuInstruments)):
+				elif (PartType < len(InstrumentNames)):
 					PartType = format(PartType,'x').upper()
 					PartType = '0'*(8-len(PartType))+PartType
 					break
@@ -1195,14 +1191,14 @@ while True:
 	elif(Selection == 4): #////////////////////////////////////////Change Style
 		PrintSectionTitle("Style List")
 		FindDolphinSave()
-		NormalStyleNumber = 11
 		SongStyles = 27
+		NormalStyleNumber = 11
 		MenuStyles = 4
 		for num in range(len(StyleNames)):
 			if(num == 0):
-				print('\n//////////Normal Styles\n')
-			elif(num == NormalStyleNumber):
 				print('\n//////////Song Specific Styles\n')
+			elif(num == SongStyles):
+				print('\n//////////Normal Styles\n')
 			elif(num == NormalStyleNumber+SongStyles):
 				print('\n//////////Menu Styles\n')
 			elif(num == NormalStyleNumber+SongStyles+MenuStyles):
@@ -1214,43 +1210,52 @@ while True:
 		PrintSectionTitle("Instrument List")
 		normalInstrumentNumber = 40
 		
-		if(NormalStyleSelected) and (not unsafeMode):
+		if(not unsafeMode):
 			for num in range(normalInstrumentNumber+1):
+				realNum = num
 				if(num == normalInstrumentNumber):
-					print('(#'+str(num)+') '+str(InstrumentNames[len(InstrumentNames)-1]))
+					num = len(InstrumentNames)-1
+				if (InstrumentNames[num] not in MenuInstruments) and (not NormalStyleSelected):
+					print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
 				else:
-					print('(#'+str(num)+') '+str(InstrumentNames[num]))
+					print('(#'+str(realNum)+') '+str(InstrumentNames[num]))
 				time.sleep(0.005)
 		else:
 			for num in range(len(InstrumentNames)):
-				if ((InstrumentNames[num] in MenuInstruments) and (not NormalStyleSelected)) or (((num < normalInstrumentNumber) or (num == len(InstrumentNames)-1)) and (NormalStyleSelected)):
+				if ((InstrumentNames[num] in MenuInstruments) and (not NormalStyleSelected) and (num < normalInstrumentNumber)) or (((num < normalInstrumentNumber) or (num == len(InstrumentNames)-1)) and (NormalStyleSelected)):
 					print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[num]))
 				elif (unsafeMode):
-					print(Fore.RED+'(#'+str(num)+') '+str(InstrumentNames[num])+Style.RESET_ALL)
-				else:
-					print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
+					if((InstrumentNames[num] in MenuInstruments) and (not NormalStyleSelected)) or (NormalStyleSelected):
+						print(Fore.YELLOW+'(#'+str(num)+') '+str(InstrumentNames[num])+Style.RESET_ALL)
+					else:
+						print(Fore.RED+'(#'+str(num)+') '+str(InstrumentNames[num])+Style.RESET_ALL)
 				time.sleep(0.005)
 		PrintSectionTitle("Instrument Selection")
-		Melody = SelectStyleInstrument('Melody','Instrument 1',False)
-		Harmony = SelectStyleInstrument('Harmony','Instrument 2',False)
-		Chord = SelectStyleInstrument('Chord','Instrument 3',False)
-		Bass = SelectStyleInstrument('Bass','Instrument 4',False)
-		if(NormalStyleSelected):
-			PrintSectionTitle("Intrument List")
-			if(not unsafeMode):
-				for num in range(40,len(InstrumentNames)):
+		Melody = SelectStyleInstrument('Melody',False)
+		Harmony = SelectStyleInstrument('Harmony',False)
+		Chord = SelectStyleInstrument('Chord',False)
+		Bass = SelectStyleInstrument('Bass',False)
+		PrintSectionTitle("Intrument List")
+		if(not unsafeMode):
+			for num in range(40,len(InstrumentNames)):
+				if (InstrumentNames[num] not in MenuInstruments) and (not NormalStyleSelected):
+					print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
+				else:
 					print('(#'+str(num-40)+') '+str(InstrumentNames[num]))
-					time.sleep(0.005)
-			else:
-				for num in range(len(InstrumentNames)):
-					if(num < normalInstrumentNumber):
-						print(Fore.RED+'(#'+str(num)+') '+str(InstrumentNames[num]))
+				time.sleep(0.005)
+		else:
+			for num in range(len(InstrumentNames)):
+				if ((InstrumentNames[num] in MenuInstruments) and (not NormalStyleSelected) and (num >= normalInstrumentNumber)) or (((num >= normalInstrumentNumber) or (num == len(InstrumentNames)-1)) and (NormalStyleSelected)):
+					print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[num]))
+				elif (unsafeMode):
+					if((InstrumentNames[num] in MenuInstruments) and (not NormalStyleSelected)) or (NormalStyleSelected):
+						print(Fore.YELLOW+'(#'+str(num)+') '+str(InstrumentNames[num])+Style.RESET_ALL)
 					else:
-						print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[num]))
-					time.sleep(0.005)
+						print(Fore.RED+'(#'+str(num)+') '+str(InstrumentNames[num])+Style.RESET_ALL)
+				time.sleep(0.005)
 
-		Perc1 = SelectStyleInstrument('Percussion 1','Instrument 5',True)
-		Perc2 = SelectStyleInstrument('Percussion 2','Instrument 6',True)
+		Perc1 = SelectStyleInstrument('Percussion 1',True)
+		Perc2 = SelectStyleInstrument('Percussion 2',True)
 
 		if(Selection == len(StyleNames)-2):
 			PatchName = []
@@ -1329,12 +1334,12 @@ while True:
 			print("(#1) Change File Paths")
 			print("(#2) Change Default Answers")
 			print("(#3) Reset Replaced Song Database")
-			print("(#4) Change Gecko Code Patch Method (Current Method: "+DefaultStyleMethod+")")
-			print("(#5) Updates")
+			#print("(#4) Change Gecko Code Patch Method (Current Method: "+DefaultStyleMethod+")")
+			print("(#4) Updates")
 			if(unsafeMode):
-				print("(#6) Switch to Safe Mode")
+				print("(#5) Switch to Safe Mode")
 			else:
-				print("(#6) Switch to Unsafe Mode")
+				print("(#5) Switch to Unsafe Mode")
 
 			Selection = MakeSelection(['Which Setting Do You Want to Change',0,5])
 
@@ -1385,9 +1390,9 @@ while True:
 					print('\nReset Successful!\n')
 				else:
 					print('')
+			#elif(Selection == 4):
+			#	DefaultStyleMethod = ChangeDefaultAnswer(['Main.dol','Dolphin'],['Style Patch Method',DefaultStyleMethod])
 			elif(Selection == 4):
-				DefaultStyleMethod = ChangeDefaultAnswer(['Main.dol','Dolphin'],['Style Patch Method',DefaultStyleMethod])
-			elif(Selection == 5):
 				while True:
 					PrintSectionTitle('Updates')
 					print("(#0) Back To Settings")
@@ -1416,7 +1421,7 @@ while True:
 							beta = int(not bool(beta))
 							SaveSetting('Updates', 'Branch', str(beta))
 					else: break
-			elif(Selection == 6):
+			elif(Selection == 5):
 				if((not unsafeMode) and (input('\nAre You Sure You Want to Turn on Unsafe Mode? [y/n] ') == 'y')) or (unsafeMode):
 					unsafeMode = not unsafeMode
 					SaveSetting('Unsafe Mode','Unsafe Mode',str(int(unsafeMode)))
