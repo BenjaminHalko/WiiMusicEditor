@@ -858,14 +858,13 @@ def DownloadUpdate():
 		else:
 			print('\nExtracting...\n')
 			subprocess.run('tar -xf WiiMusicEditor.zip')
-			while(not os.path.isdir('WiiMusicEditorNew')):
-				newPath = 'WiiMusicEditor-main'
-				if(not os.path.isdir(newPath)):
-					newPath = 'WiiMusicEditor-beta'
-				os.rename(newPath, 'WiiMusicEditorNew')
-			time.sleep(0.5)
-			subprocess.run(ProgramPath+'/WiiMusicEditorNew/Helper/Update/Update.bat')
-			quit()
+			newPath = 'WiiMusicEditor-main'
+			if(not os.path.isdir(newPath)):
+				newPath = 'WiiMusicEditor-beta'
+			os.rename(newPath, 'WiiMusicEditorNew')
+			if(os.path.isfile(ProgramPath+'/WiiMusicEditorNew/.gitignore')): os.remove(ProgramPath+'/WiiMusicEditorNew/.gitignore')
+			#subprocess.run(ProgramPath+'/WiiMusicEditorNew/Helper/Update/Update.bat')
+			#quit()
 			return False
 	except (requests.ConnectionError, requests.Timeout) as exception:
 		print('\nFailed to Download File...\n')
