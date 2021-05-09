@@ -863,7 +863,7 @@ def DownloadUpdate():
 					newPath = 'WiiMusicEditor-beta'
 				os.rename(newPath, 'WiiMusicEditorNew')
 			time.sleep(0.5)
-			subprocess.run(ProgramPath+'WiiMusicEditorNew/Helper/Update/Update.bat')
+			subprocess.run(ProgramPath+'/WiiMusicEditorNew/Helper/Update/Update.bat')
 			quit()
 			return False
 	except (requests.ConnectionError, requests.Timeout) as exception:
