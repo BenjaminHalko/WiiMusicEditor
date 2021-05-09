@@ -796,7 +796,7 @@ def ChangeName(SongToChange,newText):
 	subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 
 def MessageFolder():
-	return '\"'+(os.path.dirname(MessagePath)).replace('/','\\')+'\"'
+	return '\"'+(os.path.dirname(MessagePath))+'\"'
 
 def LoadSetting(section,key,default):
 	ini = configparser.ConfigParser()
