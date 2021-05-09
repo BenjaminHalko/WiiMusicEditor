@@ -861,8 +861,9 @@ def DownloadUpdate():
 				if(not os.path.isdir(newPath)):
 					newPath = 'WiiMusicEditor-beta'
 				os.rename(newPath, 'WiiMusicEditorNew')
+			time.sleep(0.5)
 			print('WiiMusicEditorNew/Helper/Update/Update.bat')
-			#quit()
+			quit()
 			return False
 	except (requests.ConnectionError, requests.Timeout) as exception:
 		print('\nFailed to Download File...\n')
