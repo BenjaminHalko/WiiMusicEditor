@@ -863,8 +863,8 @@ def DownloadUpdate():
 				newPath = 'WiiMusicEditor-beta'
 			os.rename(newPath, 'WiiMusicEditorNew')
 			if(os.path.isfile(ProgramPath+'/WiiMusicEditorNew/.gitignore')): os.remove(ProgramPath+'/WiiMusicEditorNew/.gitignore')
-			#subprocess.run(ProgramPath+'/WiiMusicEditorNew/Helper/Update/Update.bat')
-			#quit()
+			subprocess.run(ProgramPath+'/WiiMusicEditorNew/Helper/Update/Update.bat')
+			quit()
 			return False
 	except (requests.ConnectionError, requests.Timeout) as exception:
 		print('\nFailed to Download File...\n')
@@ -986,6 +986,17 @@ unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
 
 #Main Loop
 while True:
+	#Find Branch
+	if(os.path.exists('settings.ini')):
+		if(os.path.exists('README.md')):
+			readme = open('README.md')
+			if('Beta' in readme.read()):
+				beta = 1
+				SaveSetting('Updates', 'Branch', '1')
+			else:
+				beta = 0
+				SaveSetting('Updates', 'Branch', '0')
+			readme.close()
 	#Finish Updates
 	if(not uptodate):
 		if(os.path.isdir('WiiMusicEditorNew') or os.path.isfile('WiiMusicEditor.zip')):
