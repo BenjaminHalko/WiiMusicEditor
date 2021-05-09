@@ -6,7 +6,7 @@ import subprocess
 import configparser
 import pathlib
 import tempfile
-from shutil import copyfile, rmtree
+from shutil import copyfile, rmtree, copytree
 from math import floor, ceil
 import webbrowser
 
@@ -1375,12 +1375,12 @@ while True:
 				os.mkdir(ModPath)
 				os.mkdir(ModPath+'/Riivolution')
 				os.mkdir(ModPath+'/Riivolution/codes')
-				os.mkdir(ModPath+'/Mod')
+				os.mkdir(ModPath+'/'+ModName.replace(' ',''))
 				print('\nMaking Gct...')
 				CreateGct()
 				print('\nCopying Files...')
-				copyfile(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar',ModPath+'/Mod/rp_Music_sound.brsar')
-				copyfile(GamePath+'/files/US/Message/message.carc',ModPath+'/Mod/message.carc')
+				copyfile(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar',ModPath+'/'+ModName.replace(' ','')+'/rp_Music_sound.brsar')
+				copyfile(GamePath+'/files/US/Message/message.carc',ModPath+'/'+ModName.replace(' ','')+'/message.carc')
 				copyfile(ProgramPath+'/Helper/GctFiles/codehandler.bin',ModPath+'/Riivolution/codehandler.bin')
 				os.rename(ProgramPath+'/R64E01.gct',ModPath+'/Riivolution/codes/R64E01.gct')
 				print('\nCreating XML file...')
@@ -1397,8 +1397,8 @@ while True:
 				'    </section>\n',
 				'  </options>\n',
 				'  <patch id="TheMod">\n',
-				'    <file disc="/Sound/MusicStatic/rp_Music_sound.brsar" external="/Mod/rp_Music_sound.brsar" offset="" />\n',
-				'    <file disc="/US/Message/message.carc" external="/Mod/message.carc" offset="" />\n',
+				'    <file disc="/Sound/MusicStatic/rp_Music_sound.brsar" external="/'+ModName.replace(' ','')+'/rp_Music_sound.brsar" offset="" />\n',
+				'    <file disc="/US/Message/message.carc" external="/'+ModName.replace(' ','')+'/message.carc" offset="" />\n',
 				'    <memory valuefile="codehandler.bin" offset="0x80001800" />\n',
 				'    <memory value="8000" offset="0x00001CDE" />\n',
 				'    <memory value="28B8" offset="0x00001CE2" />\n',
@@ -1407,10 +1407,16 @@ while True:
 				'    <memory valuefile="/codes/R64E01.gct" offset="0x800028B8" />\n',
 				'  </patch>\n',
 				'</wiidisc>\n']
-				xml = open(ModPath+'/Riivolution/Mod.xml','w')
+				xml = open(ModPath+'/Riivolution/'+ModName.replace(' ','')+'.xml','w')
 				xml.writelines(linestowrite)
 				xml.close()
 				print('\nPatch Creation Successful!\nExported to: '+ModPath)
+				if(input('\nWould You Like to Copy the Patch on to an SD card? [y/n] ') == 'y'):
+					letter = input('\nType the Drive Letter of the SD card: ')
+					print('\nCopying...')
+					copytree(ModPath+'/Riivolution',letter+':/Riivolution')
+					copytree(ModPath+'/'+ModName.replace(' ',''),letter+':/'+ModName.replace(' ',''))
+					print('\nSuccessfully Copied!')
 			else: break
 	elif(Selection == 5): #////////////////////////////////////////Run Game
 		FindGameFolder()
