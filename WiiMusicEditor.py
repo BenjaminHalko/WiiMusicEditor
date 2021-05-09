@@ -8,6 +8,7 @@ import pathlib
 import tempfile
 from shutil import copyfile, rmtree
 from math import floor, ceil
+import webbrowser
 
 #Special Imports
 while True:
@@ -663,7 +664,7 @@ def FindGameFolder():
 				FindWiiDiskFolder()
 				break
 			elif(os.path.isfile(GamePath)) and (pathlib.Path(GamePath).suffix in ExceptedFileExtensions):
-				print('\"'+ProgramPath+'/Helper/Wiimms/extractdisk.bat\" \"'+os.path.dirname(GamePath)+'\" \"'+os.path.splitext(os.path.basename(GamePath))[0]+'\" '+os.path.splitext(os.path.basename(GamePath))[1])
+				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/extractdisk.bat\" \"'+os.path.dirname(GamePath)+'\" \"'+os.path.splitext(os.path.basename(GamePath))[0]+'\" '+os.path.splitext(os.path.basename(GamePath))[1])
 				GamePath = os.path.dirname(GamePath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(GamePath))[0]+'/DATA'
 				SaveSetting('Paths','GamePath',GamePath)
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
@@ -857,12 +858,11 @@ def DownloadUpdate():
 		else:
 			print('\nExtracting...\n')
 			subprocess.run('tar -xf WiiMusicEditor.zip')
-			while(not os.path.isdir('WiiMusicEditorNew')):
-				newPath = 'WiiMusicEditor-main'
-				if(not os.path.isdir(newPath)):
-					newPath = 'WiiMusicEditor-beta'
-				os.rename(newPath, 'WiiMusicEditorNew')
-			time.sleep(0.5)
+			newPath = 'WiiMusicEditor-main'
+			if(not os.path.isdir(newPath)):
+				newPath = 'WiiMusicEditor-beta'
+			os.rename(newPath, 'WiiMusicEditorNew')
+			if(os.path.isfile(ProgramPath+'/WiiMusicEditorNew/.gitignore')): os.remove(ProgramPath+'/WiiMusicEditorNew/.gitignore')
 			subprocess.run(ProgramPath+'/WiiMusicEditorNew/Helper/Update/Update.bat')
 			quit()
 			return False
@@ -986,6 +986,17 @@ unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
 
 #Main Loop
 while True:
+	#Find Branch
+	if(os.path.exists('settings.ini')):
+		if(os.path.exists('README.md')):
+			readme = open('README.md')
+			if('Beta' in readme.read()):
+				beta = 1
+				SaveSetting('Updates', 'Branch', '1')
+			else:
+				beta = 0
+				SaveSetting('Updates', 'Branch', '0')
+			readme.close()
 	#Finish Updates
 	if(not uptodate):
 		if(os.path.isdir('WiiMusicEditorNew') or os.path.isfile('WiiMusicEditor.zip')):
@@ -1002,7 +1013,7 @@ while True:
 	print("//       Music Editor       //")
 	print("//                          //")
 	print("//////////////////////////////\n")
-
+	
 	#Updates
 	if(AutoUpdate) and (not uptodate):
 		uptodate = True
@@ -1025,7 +1036,7 @@ while True:
 	print("(#5) Load Wii Music")
 	print("(#6) Overwrite Save File With 100% Save")
 	print("(#7) Download Pre-Made Custom Songs")
-	print("(#8) Help (Work in Progress)")
+	print("(#8) Help")
 	print("(#9) Settings")
 	print("(#10) Credits")
 
@@ -1377,6 +1388,24 @@ while True:
 			print('Saved To: \"'+ProgramPath+'/PreMade Custom Songs\"\n')
 		except (requests.ConnectionError, requests.Timeout) as exception:
 			print('\nFailed to Download File...\n')
+	elif(Selection == 8): #////////////////////////////////////////Help
+		PrintSectionTitle('Help')
+		print("(#0) Back to Main Menu")
+		print("(#1) Open the Manual")
+		print("(#2) Open Video Guide")
+		
+		Selection = MakeSelection(['What type of help do you want',0,2])
+
+		if(Selection == 1):
+			print('\nOpening Manual...')
+			time.sleep(0.5)
+			webbrowser.open('https://github.com/BenjaminHalko/WiiMusicEditor#manual')
+		elif(Selection == 2):
+			print('\nOpening Video Guide...')
+			time.sleep(0.5)
+			webbrowser.open('thereisnovideoguideyetbecauseihaventrecordedthevideoyet.com')
+		print('')
+		time.sleep(0.5)
 	elif(Selection == 9): #////////////////////////////////////////Settings
 		while True:
 			PrintSectionTitle("Settings")
