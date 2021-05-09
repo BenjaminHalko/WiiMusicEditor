@@ -951,17 +951,12 @@ def CreateGct():
 	driver.find_element_by_id('game_id').send_keys("R64E01")
 	driver.find_element_by_id('code_title').send_keys("Code List")
 	driver.find_element_by_id('code').send_keys(codes)
-	time.sleep(1)
 	driver.find_element_by_id('add_code_b').click()
-	time.sleep(0.5)
-	while (not os.path.isfile('R64E01.gct')):
-		driver.find_element_by_id('gct_b').click()
-		time.sleep(2)
+	driver.find_element_by_id('gct_b').click()
 	driver.quit()
 
 #Default Paths
 ProgramPath = os.path.dirname(__file__).replace('\\','/')
-os.chdir(ProgramPath)
 GamePath = LoadSetting('Paths','GamePath','None')
 BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 MessagePath = GamePath+'/files/US/Message/message.carc'
