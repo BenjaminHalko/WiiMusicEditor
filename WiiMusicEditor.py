@@ -941,9 +941,9 @@ def CreateGct():
 		if(text[0].isalpha() or text[0].isnumeric()):
 			codes = codes + text
 	chromeOptions = webdriver.ChromeOptions()
-	prefs = {"download.default_directory" : ProgramPath}
+	prefs = {"download.default_directory" : ProgramPath.replace('/','\\')}
 	chromeOptions.add_experimental_option("prefs",prefs)
-	driver = webdriver.Chrome(ProgramPath+'/Helper/BrowserDrivers/chromedriver.exe',options=chromeOptions)
+	driver = webdriver.Chrome('Helper/BrowserDrivers/chromedriver.exe',options=chromeOptions)
 	driver.get('https://mkwii.com/gct/')
 	driver.find_element_by_id('game_id').send_keys("R64E01")
 	driver.find_element_by_id('code_title').send_keys("Code List")
