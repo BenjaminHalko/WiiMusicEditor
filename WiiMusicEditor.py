@@ -856,12 +856,12 @@ def DownloadUpdate():
 		else:
 			print('\nExtracting...\n')
 			subprocess.run('tar -xf WiiMusicEditor.zip')
-			while(not os.path.isdir(ProgramPath+'WiiMusicEditorNew')):
+			while(not os.path.isdir('WiiMusicEditorNew')):
 				newPath = 'WiiMusicEditor-main'
 				if(not os.path.isdir(newPath)):
 					newPath = 'WiiMusicEditor-beta'
-				os.rename(ProgramPath+newPath, ProgramPath+'WiiMusicEditorNew')
-			subprocess.Popen(ProgramPath+'WiiMusicEditorNew/Helper/Update/Update.bat')
+				os.rename(newPath, 'WiiMusicEditorNew')
+			subprocess.Popen('WiiMusicEditorNew/Helper/Update/Update.bat')
 			quit()
 			return False
 	except (requests.ConnectionError, requests.Timeout) as exception:
