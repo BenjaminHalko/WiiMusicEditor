@@ -1352,8 +1352,12 @@ while True:
 				PrintSectionTitle('Riivolution Patch')
 				FindGameFolder()
 				FindDolphinSave()
-				ModPath = GamePath[0:len(GamePath)-5:1]
-				ModPath = ModPath[0:len(ModPath)-len(os.path.basename(ModPath)):1]
+				if(GamePath[len(GamePath)-4:len(GamePath):1] == 'DATA'):
+					ModPath = GamePath[0:len(GamePath)-5:1]
+					ModPath = ModPath[0:len(ModPath)-len(os.path.basename(ModPath)):1]
+				else:
+					ModPath = GamePath[0:len(GamePath)-len(os.path.basename(GamePath)):1]
+				print(ModPath)
 				ModName = input('\nPlease Input Mod Name: ')
 				while (os.path.isdir(ModPath+ModName)):
 					ModName = input('\nDirectory Already Exists! Please Enter a Diffrent Name: ')
