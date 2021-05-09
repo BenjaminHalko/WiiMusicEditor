@@ -823,7 +823,7 @@ def CheckForUpdates(PrintMessages):
 	global beta
 	global updateUrl
 	if(PrintMessages): print('Checking for Updates...')
-	version = open(ProgramPath+'Helper/Update/Version.txt')
+	version = open(ProgramPath+'/Helper/Update/Version.txt')
 	currentVersion = version.read()
 	version.close()
 	try:
@@ -955,6 +955,7 @@ def CreateGct():
 
 #Default Paths
 ProgramPath = os.path.dirname(__file__).replace('\\','/')
+os.chdir(ProgramPath)
 GamePath = LoadSetting('Paths','GamePath','None')
 BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 MessagePath = GamePath+'/files/US/Message/message.carc'
@@ -1362,9 +1363,9 @@ while True:
 			print('\nExtracting...\n')
 			if(os.path.isdir('PreMade Custom Songs')): rmtree('PreMade Custom Songs')
 			subprocess.run('tar -xf CustomSongs.zip')
-			os.rename(ProgramPath+'Pre-Made-Songs-for-Wii-Music-main', ProgramPath+'PreMade Custom Songs')
+			os.rename('Pre-Made-Songs-for-Wii-Music-main', 'PreMade Custom Songs')
 			os.remove('CustomSongs.zip')
-			print('Saved To: \"'+ProgramPath.replace('\\','/')+'/PreMade Custom Songs\"\n')
+			print('Saved To: \"'+ProgramPath+'/PreMade Custom Songs\"\n')
 		except (requests.ConnectionError, requests.Timeout) as exception:
 			print('\nFailed to Download File...\n')
 	elif(Selection == 12): #////////////////////////////////////////Settings
