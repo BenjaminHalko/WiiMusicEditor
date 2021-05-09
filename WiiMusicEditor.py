@@ -1375,39 +1375,39 @@ while True:
 				os.mkdir(ModPath)
 				os.mkdir(ModPath+'/Riivolution')
 				os.mkdir(ModPath+'/Riivolution/codes')
-				os.mkdir(ModPath+'/files')
+				os.mkdir(ModPath+'/Mod')
 				print('\nMaking Gct...')
 				CreateGct()
 				print('\nCopying Files...')
-				copyfile(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar',ModPath+'/files/rp_Music_sound.brsar')
-				copyfile(GamePath+'/files/US/Message/message.carc',ModPath+'/files/message.carc')
+				copyfile(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar',ModPath+'/Mod/rp_Music_sound.brsar')
+				copyfile(GamePath+'/files/US/Message/message.carc',ModPath+'/Mod/message.carc')
 				copyfile(ProgramPath+'/Helper/GctFiles/codehandler.bin',ModPath+'/Riivolution/codehandler.bin')
 				os.rename(ProgramPath+'/R64E01.gct',ModPath+'/Riivolution/codes/R64E01.gct')
 				print('\nCreating XML file...')
 				linestowrite = [
-				'<wiidisc version="1" root="">',
-				'  <id game="R64" />',
-				'  <options>',
-				'    <section name="'+ModName+'">',
-				'      <option name="Load Mod">',
-				'        <choice name="Yes">',
-				'          <patch id="TheMod" />',
-				'        </choice>',
-				'      </option>',
-				'    </section>',
-				'  </options>',
-				'  <patch id="TheMod">',
-				'    <file disc="/Sound/MusicStatic/rp_Music_sound.brsar" external="/files/rp_Music_sound.brsar" offset="" />',
-				'    <file disc="/US/Message/message.carc" external="/files/message.carc" offset="" />',
-				'    <memory valuefile="codehandler.bin" offset="0x80001800" />',
-				'    <memory value="8000" offset="0x00001CDE" />',
-				'    <memory value="28B8" offset="0x00001CE2" />',
-				'    <memory value="8000" offset="0x00001F5A" />',
-				'    <memory value="28B8" offset="0x00001F5E" />',
-				'    <memory valuefile="/codes/R64E01.gct" offset="0x800028B8" />',
-				'  </patch>',
-				'</wiidisc>']
-				xml = open(ModPath+'/Riivolution/'+ModName.replace(' ','')+'.xml','w')
+				'<wiidisc version="1" root="">\n',
+				'  <id game="R64" />\n',
+				'  <options>\n',
+				'    <section name="'+ModName+'">\n',
+				'      <option name="Load Mod">\n',
+				'        <choice name="Yes">\n',
+				'          <patch id="TheMod" />\n',
+				'        </choice>\n',
+				'      </option>\n',
+				'    </section>\n',
+				'  </options>\n',
+				'  <patch id="TheMod">\n',
+				'    <file disc="/Sound/MusicStatic/rp_Music_sound.brsar" external="/Mod/rp_Music_sound.brsar" offset="" />\n',
+				'    <file disc="/US/Message/message.carc" external="/Mod/message.carc" offset="" />\n',
+				'    <memory valuefile="codehandler.bin" offset="0x80001800" />\n',
+				'    <memory value="8000" offset="0x00001CDE" />\n',
+				'    <memory value="28B8" offset="0x00001CE2" />\n',
+				'    <memory value="8000" offset="0x00001F5A" />\n',
+				'    <memory value="28B8" offset="0x00001F5E" />\n',
+				'    <memory valuefile="/codes/R64E01.gct" offset="0x800028B8" />\n',
+				'  </patch>\n',
+				'</wiidisc>\n']
+				xml = open(ModPath+'/Riivolution/Mod.xml','w')
 				xml.writelines(linestowrite)
 				xml.close()
 				print('\nPatch Creation Successful!\nExported to: '+ModPath)
