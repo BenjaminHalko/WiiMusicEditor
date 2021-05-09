@@ -823,7 +823,7 @@ def CheckForUpdates(PrintMessages):
 	global beta
 	global updateUrl
 	if(PrintMessages): print('Checking for Updates...')
-	version = open('Helper/Update/Version.txt')
+	version = open(ProgramPath+'Helper/Update/Version.txt')
 	currentVersion = version.read()
 	version.close()
 	try:
@@ -856,12 +856,12 @@ def DownloadUpdate():
 		else:
 			print('\nExtracting...\n')
 			subprocess.run('tar -xf WiiMusicEditor.zip')
-			while(not os.path.isdir('WiiMusicEditorNew')):
+			while(not os.path.isdir(ProgramPath+'WiiMusicEditorNew')):
 				newPath = 'WiiMusicEditor-main'
 				if(not os.path.isdir(newPath)):
 					newPath = 'WiiMusicEditor-beta'
-				os.rename(newPath, 'WiiMusicEditorNew')
-			subprocess.Popen('WiiMusicEditorNew/Helper/Update/Update.bat')
+				os.rename(ProgramPath+newPath, ProgramPath+'WiiMusicEditorNew')
+			subprocess.Popen(ProgramPath+'WiiMusicEditorNew/Helper/Update/Update.bat')
 			quit()
 			return False
 	except (requests.ConnectionError, requests.Timeout) as exception:
@@ -952,7 +952,7 @@ def CreateGct():
 	driver.quit()
 
 #Default Paths
-ProgramPath = os.path.dirname(__file__)
+ProgramPath = os.path.dirname(__file__).replace('\\','/')+'/'
 GamePath = LoadSetting('Paths','GamePath','None')
 BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 MessagePath = GamePath+'/files/US/Message/message.carc'
