@@ -943,7 +943,7 @@ def CreateGct():
 	chromeOptions = webdriver.ChromeOptions()
 	prefs = {"download.default_directory" : ProgramPath.replace('/','\\')}
 	chromeOptions.add_experimental_option("prefs",prefs)
-	driver = webdriver.Chrome('Helper/BrowserDrivers/chromedriver.exe',options=chromeOptions)
+	driver = webdriver.Chrome('Helper/GctFiles/chromedriver.exe',options=chromeOptions)
 	driver.get('https://mkwii.com/gct/')
 	driver.find_element_by_id('game_id').send_keys("R64E01")
 	driver.find_element_by_id('code_title').send_keys("Code List")
@@ -1284,7 +1284,7 @@ while True:
 			print("(#1) Change All Wii Music Text")
 			print("(#2) Extract/Compile Wii Music Disk")
 			print("(#3) Patch Main.dol With Gecko Codes")
-			print("(#4) Create Riivolution Patch (Work in Progress)")
+			print("(#4) Create Riivolution Patch")
 
 			Selection = MakeSelection(['Please Select an Option',0,4])
 
@@ -1348,6 +1348,55 @@ while True:
 					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section R64E01.gct',capture_output=True)
 					os.remove('R64E01.gct')
 					print('\nPatch Successful!')
+			elif(Selection == 4): #////////////////////////////////////////Riivolution Patch
+				PrintSectionTitle('Riivolution Patch')
+				FindGameFolder()
+				FindDolphinSave()
+				ModPath = GamePath[0:len(GamePath)-5:1]
+				ModPath = ModPath[0:len(ModPath)-len(os.path.basename(ModPath)):1]
+				ModName = input('\nPlease Input Mod Name: ')
+				while (os.path.isdir(ModPath+ModName)):
+					ModName = input('\nDirectory Already Exists! Please Enter a Diffrent Name: ')
+				ModPath = ModPath+ModName
+				os.mkdir(ModPath)
+				os.mkdir(ModPath+'/Riivolution')
+				os.mkdir(ModPath+'/Riivolution/codes')
+				os.mkdir(ModPath+'/files')
+				print('\nMaking Gct...')
+				CreateGct()
+				print('\nCopying Files...')
+				copyfile(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar',ModPath+'/files/rp_Music_sound.brsar')
+				copyfile(GamePath+'/files/US/Message/message.carc',ModPath+'/files/message.carc')
+				copyfile(ProgramPath+'/Helper/GctFiles/codehandler.bin',ModPath+'/Riivolution/codehandler.bin')
+				os.rename(ProgramPath+'/R64E01.gct',ModPath+'/Riivolution/codes/R64E01.gct')
+				print('\nCreating XML file...')
+				linestowrite = [
+				'<wiidisc version="1" root="">',
+				'  <id game="R64" />',
+				'  <options>',
+				'    <section name="'+ModName+'">',
+				'      <option name="Load Mod">',
+				'        <choice name="Yes">',
+				'          <patch id="TheMod" />',
+				'        </choice>',
+				'      </option>',
+				'    </section>',
+				'  </options>',
+				'  <patch id="TheMod">',
+				'    <file disc="/Sound/MusicStatic/rp_Music_sound.brsar" external="/files/rp_Music_sound.brsar" offset="" />',
+				'    <file disc="/US/Message/message.carc" external="/files/message.carc" offset="" />',
+				'    <memory valuefile="codehandler.bin" offset="0x80001800" />',
+				'    <memory value="8000" offset="0x00001CDE" />',
+				'    <memory value="28B8" offset="0x00001CE2" />',
+				'    <memory value="8000" offset="0x00001F5A" />',
+				'    <memory value="28B8" offset="0x00001F5E" />',
+				'    <memory valuefile="/codes/R64E01.gct" offset="0x800028B8" />',
+				'  </patch>',
+				'</wiidisc>']
+				xml = open(ModPath+'/Riivolution/'+ModName+'.xml','w')
+				xml.writelines(linestowrite)
+				xml.close()
+				print('\nPatch Creation Successful!')
 			else: break
 	elif(Selection == 5): #////////////////////////////////////////Run Game
 		FindGameFolder()
