@@ -941,16 +941,22 @@ def CreateGct():
 		if(text[0].isalpha() or text[0].isnumeric()):
 			codes = codes + text
 	chromeOptions = webdriver.ChromeOptions()
-	prefs = {"download.default_directory" : ProgramPath.replace('/','\\')}
+	prefs = {"download.default_directory": ProgramPath.replace('/','\\'),
+	"directory_upgrade": True,
+	"extensions_to_open": ""}
 	chromeOptions.add_experimental_option("prefs",prefs)
 	driver = webdriver.Chrome('Helper/GctFiles/chromedriver.exe',options=chromeOptions)
 	driver.get('https://mkwii.com/gct/')
+	time.sleep(1)
 	driver.find_element_by_id('game_id').send_keys("R64E01")
 	driver.find_element_by_id('code_title').send_keys("Code List")
 	driver.find_element_by_id('code').send_keys(codes)
-	driver.find_element_by_id('add_code_b').click()
-	driver.find_element_by_id('gct_b').click()
 	time.sleep(1)
+	driver.find_element_by_id('add_code_b').click()
+	time.sleep(0.5)
+	while (not os.path.isfile('R64E01.gct')):
+		driver.find_element_by_id('gct_b').click()
+		time.sleep(2)
 	driver.quit()
 
 #Default Paths
@@ -1356,6 +1362,10 @@ while True:
 					print('\nCreating Gct...')
 					CreateGct()
 					print('\nPatching Main.dol...')
+					if(not os.path.isfile(GamePath+'/sys/main.dol.backup')): copyfile(GamePath+'/sys/main.dol', GamePath+'/sys/main.dol.backup')
+					else:
+						os.remove(GamePath+'/sys/main.dol')
+						copyfile(GamePath+'/sys/main.dol.backup', GamePath+'/sys/main.dol')
 					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section R64E01.gct',capture_output=True)
 					os.remove('R64E01.gct')
 					print('\nPatch Successful!')
