@@ -987,7 +987,7 @@ unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
 #Main Loop
 while True:
 	#Find Branch
-	if(os.path.exists('settings.ini')):
+	if(not os.path.exists('settings.ini')):
 		if(os.path.exists('README.md')):
 			readme = open('README.md')
 			if('Beta' in readme.read()):
@@ -1330,6 +1330,7 @@ while True:
 							else:
 								print("\nERROR: Unable to Locate Valid Wii Music Directory")
 					else:
+						FindGameFolder()
 						if(GamePath[len(GamePath)-4:len(GamePath):1] == 'DATA'):
 							DiskPath = GamePath[0:len(GamePath)-5:1]
 						else:
