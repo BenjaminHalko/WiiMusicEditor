@@ -777,7 +777,7 @@ def InitializeBrseq():
 def ChangeName(SongToChange,newText):
 	global ProgramPath
 	TextOffset = ['c8','190','12c']
-	subprocess.run('Helper/Wiimms/decode.bat '+MessageFolder(),capture_output=True)
+	subprocess.run(ProgramPath+'/Helper/Wiimms/decode.bat '+MessageFolder(),capture_output=True)
 	for typeNum in range(3):
 		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
 		textlines = message.readlines()
