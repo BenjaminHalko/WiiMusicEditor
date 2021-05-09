@@ -1,4 +1,4 @@
-# WiiMusicEditor
+# WiiMusicEditor Beta
 
 ## Features
 
