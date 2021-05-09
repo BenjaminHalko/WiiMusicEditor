@@ -1303,9 +1303,10 @@ while True:
 				PrintSectionTitle('Extract/Compile Disk')
 				print("(#0) Back To Main Menu")
 				print("(#1) Extract Disk")
-				print("(#2) Compile Disk")
+				print("(#2) Compile Disk to .Wbfs")
+				print("(#3) Compile Disk to .Iso")
 
-				Selection = MakeSelection(['Choose an Option',0,2])
+				Selection = MakeSelection(['Choose an Option',0,3])
 				if(Selection == 1):
 					ExceptedFileExtensions = ['.iso','.wbfs']
 					while True:
@@ -1320,7 +1321,7 @@ while True:
 						BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 						MessagePath = GamePath+'/files/US/Message/message.carc'
 						SaveSetting('Paths','GamePath',GamePath)
-				elif(Selection == 2):
+				elif(Selection == 2) or (Selection == 3):
 					if(input('\nUse Game Path as Disk Directory? [y/n] ') != 'y'):
 						while True:
 							DiskPath= input("\nDrag Decompressed Wii Music Directory: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
@@ -1329,14 +1330,23 @@ while True:
 							else:
 								print("\nERROR: Unable to Locate Valid Wii Music Directory")
 					else:
-						DiskPath = GamePath[0:len(GamePath)-5:1]
+						if(GamePath[len(GamePath)-4:len(GamePath):1] == 'DATA'):
+							DiskPath = GamePath[0:len(GamePath)-5:1]
+						else:
+							DiskPath = GamePath
 					
 					DiskName = ''
 					DiskNum = 0
-					while(os.path.isfile(DiskPath+DiskName+'.wbfs')):
-						DiskNum = DiskNum+1
-						DiskName = '('+str(DiskNum)+')'
-					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+DiskName+'.wbfs\" --wbfs')
+					if(Selection == 2):
+						while(os.path.isfile(DiskPath+DiskName+'.wbfs')):
+							DiskNum = DiskNum+1
+							DiskName = '('+str(DiskNum)+')'
+						subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+DiskName+'.wbfs\" --wbfs')
+					else:
+						while(os.path.isfile(DiskPath+DiskName+'.iso')):
+							DiskNum = DiskNum+1
+							DiskName = '('+str(DiskNum)+')'
+						subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+DiskName+'.iso\" --iso')
 				print('')
 			elif(Selection == 3): #////////////////////////////////////////Patch Main.dol
 				FindGameFolder()
@@ -1357,7 +1367,6 @@ while True:
 					ModPath = ModPath[0:len(ModPath)-len(os.path.basename(ModPath)):1]
 				else:
 					ModPath = GamePath[0:len(GamePath)-len(os.path.basename(GamePath)):1]
-				print(ModPath)
 				ModName = input('\nPlease Input Mod Name: ')
 				while (os.path.isdir(ModPath+ModName)):
 					ModName = input('\nDirectory Already Exists! Please Enter a Diffrent Name: ')
@@ -1397,11 +1406,10 @@ while True:
 				'    <memory valuefile="/codes/R64E01.gct" offset="0x800028B8" />',
 				'  </patch>',
 				'</wiidisc>']
-				xml = open(ModPath+'/Riivolution/'+ModName+'.xml','w')
+				xml = open(ModPath+'/Riivolution/'+ModName.replace(' ','')+'.xml','w')
 				xml.writelines(linestowrite)
 				xml.close()
 				print('\nPatch Creation Successful!\nExported to: '+ModPath)
-
 			else: break
 	elif(Selection == 5): #////////////////////////////////////////Run Game
 		FindGameFolder()
