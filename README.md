@@ -1,3 +1,3 @@
 # WiiMusicEditor Beta
 
-This is the place to test features.
+This is the Beta
