@@ -1396,7 +1396,8 @@ while True:
 				xml = open(ModPath+'/Riivolution/'+ModName+'.xml','w')
 				xml.writelines(linestowrite)
 				xml.close()
-				print('\nPatch Creation Successful!')
+				print('\nPatch Creation Successful!\nExported to: '+ModPath)
+
 			else: break
 	elif(Selection == 5): #////////////////////////////////////////Run Game
 		FindGameFolder()
