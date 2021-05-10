@@ -295,6 +295,17 @@ ScoreFileLengths = [
 ['2960','2640','29C0','2BC0','29A0']]
 
 SongMemoryOffsets = [
+'025a08a8',
+'025a0c54',
+'025a2780',
+'025a1758',
+'025a04fc',
+'025a0674',
+'025a1df4',
+'025a1c7c',
+'025a0adc',
+'025a1d38',
+'025a283c',
 '025a1468',
 '025a1814',
 '025a1000', 
@@ -329,23 +340,12 @@ SongMemoryOffsets = [
 '025a18d0',
 '025a0d10',
 '025a12f0',
-'025a08a8',
-'025a0c54',
-'025a2780',
-'025a1758',
-'025a04fc',
-'025a0674',
-'025a1df4',
-'025a1c7c',
-'025a0adc',
-'025a1d38',
-'025a283c',
 '025a23d4',
 '025a0730',
 '025a26c4',
 '025a23d4',
 '025a0dcc',
-['8059ACB3','8059ACD7','8059ACFB','8059AD1F']]
+['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40']]
 
 StyleNames = [
 'Twinkle Twinkle Little Star',
@@ -390,6 +390,7 @@ StyleNames = [
 'Menu Style Electronic',
 'Menu Style Japanese',
 'Menu Style March',
+'Menu Style A Capella',
 'Replace All Normal Styles',
 'Replace All Menu Styles']
 
@@ -1194,7 +1195,7 @@ while True:
 		FindDolphinSave()
 		SongStyles = 27
 		NormalStyleNumber = 11
-		MenuStyles = 4
+		MenuStyles = 5
 		for num in range(len(StyleNames)):
 			if(num == 0):
 				print('\n//////////Song Specific Styles\n')
@@ -1207,7 +1208,7 @@ while True:
 			print('(#'+str(num)+') '+str(StyleNames[num]))
 			time.sleep(0.005)
 		Selection = MakeSelection(['\nWhat\'s the Style Number you want to change',0,len(StyleNames)])
-		NormalStyleSelected = (Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2)
+		NormalStyleSelected = (Selection < len(StyleNames)-7) or (Selection == len(StyleNames)-2)
 		PrintSectionTitle("Instrument List")
 		normalInstrumentNumber = 40
 		
@@ -1485,7 +1486,7 @@ while True:
 			PrintSectionTitle("Settings")
 			print("(#0) Back To Main Menu")
 			print("(#1) Change File Paths")
-			print("(#2) Toggle Warnings (remove the sub-menu yes/no things)")
+			print("(#2) Toggle Warnings")
 			print("(#3) Reset Custom Song Database")
 			print("(#4) Updates")
 			if(unsafeMode):
