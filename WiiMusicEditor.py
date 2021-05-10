@@ -239,7 +239,7 @@ SongFileLengths = [
 '1AE0',
 '1840',
 '1940',
-'0']
+'2260']
 
 ScoreFileLengths = [
 '1920',
@@ -949,20 +949,25 @@ def CreateGct():
 	for text in textlines:
 		if(text[0].isalpha() or text[0].isnumeric()):
 			codes = codes + text
-	chromeOptions = webdriver.ChromeOptions()
-	prefs = {"download.default_directory": ProgramPath.replace('/','\\'),
-	"directory_upgrade": True,
-	"extensions_to_open": ""}
-	chromeOptions.add_experimental_option("prefs",prefs)
-	driver = webdriver.Chrome('Helper/GctFiles/chromedriver.exe',options=chromeOptions)
-	driver.get('https://mkwii.com/gct/')
-	time.sleep(1)
-	driver.find_element_by_id('game_id').send_keys("R64E01")
-	driver.find_element_by_id('code_title').send_keys("Code List")
-	driver.find_element_by_id('code').send_keys(codes)
-	driver.find_element_by_id('add_code_b').click()
-	driver.find_element_by_id('gct_b').click()
-	driver.quit()
+
+	print('\n'+codes)
+	while(not os.path.isfile(ProgramPath+'/R64E01.gct')):
+		input('Take these codes and make a gct. Put it in the root directory of the Wii Music Editor and name it R64E01.gct. (Press Enter to continue)')
+
+	#chromeOptions = webdriver.ChromeOptions()
+	#prefs = {"download.default_directory": ProgramPath.replace('/','\\'),
+	#"directory_upgrade": True,
+	#"extensions_to_open": ""}
+	#chromeOptions.add_experimental_option("prefs",prefs)
+	#driver = webdriver.Chrome('Helper/GctFiles/chromedriver.exe',options=chromeOptions)
+	#driver.get('https://mkwii.com/gct/')
+	#time.sleep(1)
+	#driver.find_element_by_id('game_id').send_keys("R64E01")
+	#driver.find_element_by_id('code_title').send_keys("Code List")
+	#driver.find_element_by_id('code').send_keys(codes)
+	#driver.find_element_by_id('add_code_b').click()
+	#driver.find_element_by_id('gct_b').click()
+	#driver.quit()
 
 #Default Paths
 ProgramPath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
@@ -1209,7 +1214,7 @@ while True:
 			if(num == 0):
 				print('\n//////////Song Specific Styles\n')
 			elif(num == SongStyles):
-				print('\n//////////Normal Styles\n')
+				print('\n//////////Global Styles\n')
 			elif(num == NormalStyleNumber+SongStyles):
 				print('\n//////////Menu Styles\n')
 			elif(num == NormalStyleNumber+SongStyles+MenuStyles):
