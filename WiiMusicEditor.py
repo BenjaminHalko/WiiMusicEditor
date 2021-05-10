@@ -17,11 +17,10 @@ while True:
 		import mido
 		from colorama import Fore, Style, init
 		from tqdm import tqdm
-		from selenium import webdriver
 		break
 	except ImportError:
 		subprocess.run('python -m pip install --upgrade pip')
-		subprocess.run('pip install mido requests colorama tqdm selenium')
+		subprocess.run('pip install mido requests colorama tqdm')
 
 init(convert=True)
 
@@ -594,10 +593,6 @@ def AddPatch(PatchName,PatchInfo):
 	if(type(PatchName) == str):
 		PatchName = [PatchName]
 		PatchInfo = [PatchInfo]
-
-	#Temp
-	if(not os.path.exists(codePathInGamePath)) and (os.path.exists(CodePath)):
-		copyfile(CodePath,codePathInGamePath)
 	
 	for patchNum in range(len(PatchName)):
 		if(os.path.exists(codePathInGamePath)):
@@ -952,22 +947,7 @@ def CreateGct():
 
 	print('\n'+codes)
 	while(not os.path.isfile(ProgramPath+'/R64E01.gct')):
-		input('Take these codes and make a gct. Use this website: https://mkwii.com/gct/\nPut it in the root directory of the Wii Music Editor and name it R64E01.gct. (Press Enter to continue) ')
-
-	#chromeOptions = webdriver.ChromeOptions()
-	#prefs = {"download.default_directory": ProgramPath.replace('/','\\'),
-	#"directory_upgrade": True,
-	#"extensions_to_open": ""}
-	#chromeOptions.add_experimental_option("prefs",prefs)
-	#driver = webdriver.Chrome('Helper/GctFiles/chromedriver.exe',options=chromeOptions)
-	#driver.get('https://mkwii.com/gct/')
-	#time.sleep(1)
-	#driver.find_element_by_id('game_id').send_keys("R64E01")
-	#driver.find_element_by_id('code_title').send_keys("Code List")
-	#driver.find_element_by_id('code').send_keys(codes)
-	#driver.find_element_by_id('add_code_b').click()
-	#driver.find_element_by_id('gct_b').click()
-	#driver.quit()
+		input('Take these codes and make a gct. Use this website: https://mkwii.com/gct/\nIn the Game Id window put \"R64E01\" and in the Code Title window put whatever you want.\nPut it in the root directory of the Wii Music Editor and name it R64E01.gct. (Press Enter to continue) ')
 
 #Default Paths
 ProgramPath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
