@@ -952,7 +952,7 @@ def CreateGct():
 
 	print('\n'+codes)
 	while(not os.path.isfile(ProgramPath+'/R64E01.gct')):
-		input('Take these codes and make a gct. Put it in the root directory of the Wii Music Editor and name it R64E01.gct. (Press Enter to continue)')
+		input('Take these codes and make a gct. Use this website: https://mkwii.com/gct/\nPut it in the root directory of the Wii Music Editor and name it R64E01.gct. (Press Enter to continue) ')
 
 	#chromeOptions = webdriver.ChromeOptions()
 	#prefs = {"download.default_directory": ProgramPath.replace('/','\\'),
