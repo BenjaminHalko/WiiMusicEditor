@@ -590,12 +590,18 @@ def AddPatch(PatchName,PatchInfo):
 	global CodePath
 	global DefaultStyleMethod
 	global ProgramPath
+	codePathInGamePath = GamePath+'/GeckoCodes.ini'
 	if(type(PatchName) == str):
 		PatchName = [PatchName]
 		PatchInfo = [PatchInfo]
+
+	#Temp
+	if(not os.path.exists(codePathInGamePath)) and (os.path.exists(CodePath)):
+		copyfile(CodePath,codePathInGamePath)
+	
 	for patchNum in range(len(PatchName)):
-		if(os.path.exists(CodePath)):
-			codes = open(CodePath,'r')
+		if(os.path.exists(codePathInGamePath)):
+			codes = open(codePathInGamePath,'r')
 			lineText = codes.readlines()
 			codes.close()
 			geckoExists = -1
@@ -633,17 +639,19 @@ def AddPatch(PatchName,PatchInfo):
 			elif(songEnabled == -1):
 				lineText.insert(geckoEnabled+1,'$'+PatchName[patchNum]+'\n')
 			
-			codes = open(CodePath,'w')
+			codes = open(codePathInGamePath,'w')
 			codes.writelines(lineText)
 			codes.close()
 		else:
-			codes = open(CodePath,'w')
+			codes = open(codePathInGamePath,'w')
 			codes.write('[Gecko]\n')
 			codes.write('$'+PatchName[patchNum]+' [WiiMusicEditor]\n')
 			codes.write(PatchInfo[patchNum])
 			codes.write('[Gecko_Enabled]\n')
 			codes.write('$'+PatchName[patchNum]+'\n')
 			codes.close()
+		if(os.path.isfile(CodePath)): os.remove(CodePath)
+		copyfile(codePathInGamePath,CodePath)
 
 def FindGameFolder():
 	global GamePath
@@ -1051,7 +1059,14 @@ while True:
 		InitializeBrseq()
 
 		#Applied Custom Songs
-		appliedCustomSongs = list(LoadSetting('Applied Custom Songs', WiiDiskFolder, '').split(','))
+		appliedCustomSongs = []
+		if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+			codes = open(GamePath+'/GeckoCodes.ini')
+			textlines = codes.readlines()
+			codes.close()
+			for text in textlines:
+				if('[WiiMusicEditor]' in text) and ('Style' not in text):
+					appliedCustomSongs.append(text[1:len(text)-29:1])
 
 		#Song List
 		LowestSong = -1
@@ -1160,16 +1175,10 @@ while True:
 				brsar.write(BrseqInfo)
 			brsar.close()
 			if(SongSelected != 50): AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
-			if(SongNames[SongSelected] not in appliedCustomSongs):
-				if(appliedCustomSongs[0] == ''):
-					appliedCustomSongs = [SongNames[SongSelected]]
-				else:
-					appliedCustomSongs.append(SongNames[SongSelected])
-				SaveSetting('Applied Custom Songs', WiiDiskFolder, ','.join([str(elem) for elem in appliedCustomSongs]))
 			print("\nPatch Complete!")
 			time.sleep(0.5)
 			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
-				ChangeName(SongSelected,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \n for new lines): (Use \\n For New Line) '),input('\nWhat\'s the genre of your Song: ')])
+				ChangeName(SongSelected,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 				print("\nEditing Successful!\n")
 			else: print('')
 		else:
@@ -1188,7 +1197,7 @@ while True:
 		PrintSectionTitle("Song Selection")
 		Selection = MakeSelection(['\nWhich Song Do You Want To Change The Name Of',0,len(SongNames)-1])
 		
-		ChangeName(Selection,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \n for new lines): (Use \\n For New Line) '),input('\nWhat\'s the genre of your Song: ')])
+		ChangeName(Selection,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 		print("\nEditing Successful!\n")
 	elif(Selection == 3): #////////////////////////////////////////Change Style
 		PrintSectionTitle("Style List")
@@ -1428,10 +1437,9 @@ while True:
 		FindGameFolder()
 		FindDolphin()
 		PrintSectionTitle("Running Dolphin")
-		if(os.path.isfile(GamePath)):
-			subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'\"')
-		else:
-			subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
+		if(os.path.isfile(CodePath)): os.remove(CodePath)
+		copyfile(GamePath+'/GeckoCodes.ini',CodePath)
+		subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
 		time.sleep(1)
 		print("")
 	elif(Selection == 6): #////////////////////////////////////////100% Save File
@@ -1487,14 +1495,13 @@ while True:
 			print("(#0) Back To Main Menu")
 			print("(#1) Change File Paths")
 			print("(#2) Toggle Warnings")
-			print("(#3) Reset Custom Song Database")
-			print("(#4) Updates")
+			print("(#3) Updates")
 			if(unsafeMode):
-				print("(#5) Switch to Safe Mode")
+				print("(#4) Switch to Safe Mode")
 			else:
-				print("(#5) Switch to Unsafe Mode")
+				print("(#4) Switch to Unsafe Mode")
 
-			Selection = MakeSelection(['Which Setting Do You Want to Change',0,5])
+			Selection = MakeSelection(['Which Setting Do You Want to Change',0,4])
 
 			if(Selection == 1):
 				while True:
@@ -1537,13 +1544,6 @@ while True:
 						DefaultReplaceSongNames = ChangeDefaultAnswer(['Ask','Yes','No'],['Replace Song Names'])
 					else: break
 			elif(Selection == 3):
-				FindGameFolder()
-				if(input("\nAre You Sure You Want to Reset the Replaced Song Database? [y/n] ") == 'y'):
-					SaveSetting('Applied Custom Songs', WiiDiskFolder, '')
-					print('\nReset Successful!\n')
-				else:
-					print('')
-			elif(Selection == 4):
 				while True:
 					PrintSectionTitle('Updates')
 					print("(#0) Back To Settings")
@@ -1572,7 +1572,7 @@ while True:
 							beta = int(not bool(beta))
 							SaveSetting('Updates', 'Branch', str(beta))
 					else: break
-			elif(Selection == 5):
+			elif(Selection == 4):
 				if((not unsafeMode) and (input('\nAre You Sure You Want to Turn on Unsafe Mode? [y/n] ') == 'y')) or (unsafeMode):
 					unsafeMode = not unsafeMode
 					SaveSetting('Unsafe Mode','Unsafe Mode',str(int(unsafeMode)))
