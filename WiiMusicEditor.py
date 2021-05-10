@@ -743,7 +743,7 @@ def InitializeBrseq():
 		BrseqPath = sys.argv[1]
 	if(not os.path.isfile(BrseqPath)) or (not pathlib.Path(BrseqPath).suffix in ExceptedSongExtensions):
 		while True:
-			BrseqPath = input("\nDrag Song File Over Window [.midi, .mid, .brseq, .rseq] (Or Drag It On The .Bat File): ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			BrseqPath = input("\nDrag File to Batch (MIDIs, BRSEQ, & RSEQ Files only): ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isfile(BrseqPath)) and (pathlib.Path(BrseqPath).suffix in ExceptedSongExtensions):
 				break
 			else:
@@ -880,7 +880,7 @@ def SelectStyleInstrument(PartString,IsPercussion):
 	global NormalStyleSelected
 	print('')
 	while True:
-		PartType = input("Enter The Instrument Number You Want For "+PartString+": ")
+		PartType = input("What\'s the Instrument Number you want for the "+PartString+": ")
 		if(PartType.isnumeric()):
 			PartType = int(PartType)
 			if(IsPercussion) and (not unsafeMode): PartType = PartType + normalInstrumentNumber
@@ -956,7 +956,7 @@ def CreateGct():
 	driver.quit()
 
 #Default Paths
-ProgramPath = os.path.dirname(__file__).replace('\\','/')
+ProgramPath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
 GamePath = LoadSetting('Paths','GamePath','None')
 BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 MessagePath = GamePath+'/files/US/Message/message.carc'
@@ -1085,7 +1085,7 @@ while True:
 		#Song Selection
 		PrintSectionTitle('Song Selection')
 		while True:
-			SongSelected = input("Enter The Song Number You Want To Replace: ")
+			SongSelected = input("Enter the Song Number you want to Replace: ")
 			if(SongSelected.isnumeric()) and (int(SongSelected) < len(SongNames)):
 				SongSelected = int(SongSelected)
 				if(int(BrseqLength,16) <= SongMinLength[SongSelected]):
@@ -1108,11 +1108,11 @@ while True:
 				if(Tempo != 'Could Not Locate'):
 					if(MetaDataFound == ''): MetaDataFound = 'Tempo'
 					else: MetaDataFound = MetaDataFound+', Tempo'
-				print('Meta Data Found: '+MetaDataFound)
+				print('Metadata Found: '+MetaDataFound)
 				if(DefaultUseAutoLengthTempo == 'Yes'):
 					AutoFill = 'y'
 				else:
-					AutoFill = input("\nWe Have Automatically Located Some Meta Data! Would You Like To Autofill It: [y/n] ")
+					AutoFill = input("\nI've found some Metadata for you! Would you like to Autofill? [y/n] ")
 			
 			if(AutoFill != 'y') or (Length == '0'):
 				Length = MakeSelection(['\nHow Many Measures in Your Song'])
@@ -1125,7 +1125,7 @@ while True:
 			Tempo = format(int(Tempo),'x').upper()
 
 			while True:
-				TimeSignature = input("\nWhat Time Signature is Your Song? (4 = 4/4, 3 = 3/4): ")
+				TimeSignature = input("\nWhat's the Time Signature of your Song? (4 = 4/4, 3 = 3/4): ")
 				if(TimeSignature == '3') or (TimeSignature == '4'):
 					break
 				else:
@@ -1139,7 +1139,7 @@ while True:
 			TempoCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
 			TimeCode = SongMemoryOffsets[SongSelected]+' 00000'+TimeSignature+'00\n'
 
-		if(DefaultWantToReplaceSong == 'No') or (input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou Will NOT Be Able to Restore the Song Unless You Have Made a Backup! [y/n] ') == 'y'):
+		if(DefaultWantToReplaceSong == 'No') or (input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou CANNOT restore the song if you don\'t have a backup! [y/n] ') == 'y'):
 			#Brsar Writing
 			brsar = open(BrsarPath, "r+b")
 			brsar.seek(int(SongOffsets[SongSelected],16))
@@ -1165,10 +1165,10 @@ while True:
 				else:
 					appliedCustomSongs.append(SongNames[SongSelected])
 				SaveSetting('Applied Custom Songs', WiiDiskFolder, ','.join([str(elem) for elem in appliedCustomSongs]))
-			print("\nPatch Complete")
+			print("\nPatch Complete!")
 			time.sleep(0.5)
-			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould Like to Change the Song Text? [y/n] ') == 'y')):
-				ChangeName(SongSelected,[input('\nPlease Input the New Song Title: '),input('\nPlease Input the New Song Description: (Use \\n For New Line) '),input('\nPlease Input the New Song Genre: ')])
+			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
+				ChangeName(SongSelected,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \n for new lines): (Use \\n For New Line) '),input('\nWhat\'s the genre of your Song: ')])
 				print("\nEditing Successful!\n")
 			else: print('')
 		else:
@@ -1187,7 +1187,7 @@ while True:
 		PrintSectionTitle("Song Selection")
 		Selection = MakeSelection(['\nWhich Song Do You Want To Change The Name Of',0,len(SongNames)-1])
 		
-		ChangeName(Selection,[input('\nPlease Input the New Song Title: '),input('\nPlease Input the New Song Description: (Use \\n For New Line) '),input('\nPlease Input the New Song Genre: ')])
+		ChangeName(Selection,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \n for new lines): (Use \\n For New Line) '),input('\nWhat\'s the genre of your Song: ')])
 		print("\nEditing Successful!\n")
 	elif(Selection == 3): #////////////////////////////////////////Change Style
 		PrintSectionTitle("Style List")
@@ -1206,7 +1206,7 @@ while True:
 				print('\n//////////Replace All Styles\n')
 			print('(#'+str(num)+') '+str(StyleNames[num]))
 			time.sleep(0.005)
-		Selection = MakeSelection(['\nEnter the Style Number You Want to Change',0,len(StyleNames)])
+		Selection = MakeSelection(['\nWhat\'s the Style Number you want to change',0,len(StyleNames)])
 		NormalStyleSelected = (Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2)
 		PrintSectionTitle("Instrument List")
 		normalInstrumentNumber = 40
@@ -1275,7 +1275,7 @@ while True:
 		else:
 			AddPatch(StyleNames[Selection]+' Style Patch',StyleMemoryOffsets[Selection]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 
-		print("\nPatch Complete")
+		print("\nPatch Complete!")
 		time.sleep(0.5)
 		print("")
 	elif(Selection == 4): #////////////////////////////////////////Advanced Tools
@@ -1283,7 +1283,7 @@ while True:
 			PrintSectionTitle('Advanced Tools')
 			print("(#0) Back to Main Menu")
 			print("(#1) Change All Wii Music Text")
-			print("(#2) Extract/Compile Wii Music Disk")
+			print("(#2) Extract/Pack Wii Music ROM")
 			print("(#3) Patch Main.dol With Gecko Codes")
 			print("(#4) Create Riivolution Patch")
 
@@ -1296,7 +1296,7 @@ while True:
 				#Run Notepad
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
 				time.sleep(0.5)
-				print("\nWaiting For User to Finish Editing and for Notepad to Close...")
+				print("\nWaiting for Notepad to close...")
 				subprocess.run('notepad \"'+MessageFolder().replace('\"','')+'/message.d/new_music_message.txt\"',capture_output=True)
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 				print("\nEditing Successful!\n")
@@ -1485,8 +1485,8 @@ while True:
 			PrintSectionTitle("Settings")
 			print("(#0) Back To Main Menu")
 			print("(#1) Change File Paths")
-			print("(#2) Change Default Answers")
-			print("(#3) Reset Replaced Song Database")
+			print("(#2) Toggle Warnings (remove the sub-menu yes/no things)")
+			print("(#3) Reset Custom Song Database")
 			print("(#4) Updates")
 			if(unsafeMode):
 				print("(#5) Switch to Safe Mode")
