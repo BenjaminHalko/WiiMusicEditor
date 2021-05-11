@@ -1286,7 +1286,7 @@ while True:
 			print("(#4) Patch Main.dol With Gecko Codes")
 			print("(#5) Create Riivolution Patch")
 
-			Selection = MakeSelection(['Please Select an Option',0,4])
+			Selection = MakeSelection(['Please Select an Option',0,5])
 
 			if(Selection == 1): #////////////////////////////////////////Change Text
 				#Load Files
@@ -1306,7 +1306,7 @@ while True:
 				for num in range(len(SongNames)-1):
 					print('(#'+str(num)+') '+str(SongNames[num]))
 					time.sleep(0.005)
-					
+
 				Selection = SongMemoryOrder.index(SongNames[MakeSelection(['Please Select a Song to Remove',0,len(SongNames)-1])])
 
 				#Find Offset
@@ -1322,6 +1322,8 @@ while True:
 				brsar.seek(offset)
 				brsar.write(bytes.fromhex('ff'*int(length,16)))
 				brsar.close()
+
+				print('\nEradication Complete!')
 			elif(Selection == 3): #////////////////////////////////////////Extract/Compile Disk
 				PrintSectionTitle('Extract/Compile Disk')
 				print("(#0) Back To Main Menu")
