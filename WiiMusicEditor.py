@@ -583,6 +583,9 @@ SongMemoryOrder = [
 'Animal Crossing',
 'F-Zero']
 
+MainDolOffsets = ['59C520','B0','B8','C0']
+
+
 #Functions
 def AddPatch(PatchName,PatchInfo):
 	global GamePath
@@ -1278,9 +1281,10 @@ while True:
 			PrintSectionTitle('Advanced Tools')
 			print("(#0) Back to Main Menu")
 			print("(#1) Change All Wii Music Text")
-			print("(#2) Extract/Pack Wii Music ROM")
-			print("(#3) Patch Main.dol With Gecko Codes")
-			print("(#4) Create Riivolution Patch")
+			print("(#2) Remove Song")
+			print("(#3) Extract/Pack Wii Music ROM")
+			print("(#4) Patch Main.dol With Gecko Codes")
+			print("(#5) Create Riivolution Patch")
 
 			Selection = MakeSelection(['Please Select an Option',0,4])
 
@@ -1295,7 +1299,30 @@ while True:
 				subprocess.run('notepad \"'+MessageFolder().replace('\"','')+'/message.d/new_music_message.txt\"',capture_output=True)
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 				print("\nEditing Successful!\n")
-			elif(Selection == 2): #////////////////////////////////////////Extract/Compile Disk
+			elif(Selection == 2): #////////////////////////////////////////Remove Song
+				FindGameFolder()
+				FindDolphinSave()
+				PrintSectionTitle('Remove Song')
+				for num in range(len(SongNames)-1):
+					print('(#'+str(num)+') '+str(SongNames[num]))
+					time.sleep(0.005)
+					
+				Selection = SongMemoryOrder.index(SongNames[MakeSelection(['Please Select a Song to Remove',0,len(SongNames)-1])])
+
+				#Find Offset
+				offset = MainDolOffsets[0]
+				length = MainDolOffsets[1]
+
+				if(Selection != 0):
+					offset = int(offset,16)+int(MainDolOffsets[1],16)+int(MainDolOffsets[2],16)*floor(Selection/2)+int(MainDolOffsets[2],16)*max(0,ceil(Selection/2)-1)
+					length = MainDolOffsets[int(floor(Selection/2) == (Selection/2))+2]
+
+				#Brsar Writing
+				brsar = open(GamePath+'/sys/main.dol', "r+b")
+				brsar.seek(offset)
+				brsar.write(bytes.fromhex('ff'*int(length,16)))
+				brsar.close()
+			elif(Selection == 3): #////////////////////////////////////////Extract/Compile Disk
 				PrintSectionTitle('Extract/Compile Disk')
 				print("(#0) Back To Main Menu")
 				print("(#1) Extract Disk")
@@ -1345,7 +1372,7 @@ while True:
 							DiskName = '('+str(DiskNum)+')'
 						subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+DiskName+'.iso\" --iso')
 				print('')
-			elif(Selection == 3): #////////////////////////////////////////Patch Main.dol
+			elif(Selection == 4): #////////////////////////////////////////Patch Main.dol
 				FindGameFolder()
 				FindDolphinSave()
 				if(input('\nAre you sure you want to patch Main.dol? [y/n] ') == 'y'):
@@ -1359,7 +1386,7 @@ while True:
 					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section R64E01.gct',capture_output=True)
 					os.remove('R64E01.gct')
 					print('\nPatch Successful!')
-			elif(Selection == 4): #////////////////////////////////////////Riivolution Patch
+			elif(Selection == 5): #////////////////////////////////////////Riivolution Patch
 				PrintSectionTitle('Riivolution Patch')
 				FindGameFolder()
 				FindDolphinSave()
