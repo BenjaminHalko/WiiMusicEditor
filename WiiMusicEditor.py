@@ -1483,8 +1483,9 @@ while True:
 		FindGameFolder()
 		FindDolphin()
 		PrintSectionTitle("Running Dolphin")
-		if(os.path.isfile(CodePath)): os.remove(CodePath)
-		copyfile(GamePath+'/GeckoCodes.ini',CodePath)
+		if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+			if(os.path.isfile(CodePath)): os.remove(CodePath)
+			copyfile(GamePath+'/GeckoCodes.ini',CodePath)
 		subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
 		time.sleep(1)
 		print("")
