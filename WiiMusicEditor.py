@@ -1347,9 +1347,6 @@ while True:
 							else:
 								length = MainDolOffsets[int(floor(number/2) == (number/2))+2]
 
-						print(format(offset,'x').lower())
-						print(length)
-						
 						#Brsar Writing
 						brsar = open(GamePath+'/sys/main.dol', "r+b")
 						brsar.seek(offset)
