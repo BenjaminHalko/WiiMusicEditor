@@ -938,10 +938,10 @@ def ChangeDefaultAnswer(ResponseOptions,iniKey):
 	return ResponseOptions[Selection]
 
 def CreateGct():
-	global CodePath
+	global GamePath
 	global ProgramPath
 	if(os.path.isfile('R64E01.gct')): os.remove('R64E01.gct')
-	patches = open(CodePath)
+	patches = open(GamePath+'/GeckoCodes.ini')
 	textlines = patches.readlines()
 	patches.close()
 	codes = ''
