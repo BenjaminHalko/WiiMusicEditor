@@ -583,7 +583,8 @@ SongMemoryOrder = [
 'Animal Crossing',
 'F-Zero']
 
-MainDolOffsets = ['59C520','B0','B8','C0']
+MainDolOffsets = ['59C520','B0','B8','C0','BC']
+MainDolWeirdOffsets = [5,6,7,32]
 
 
 #Functions
@@ -1306,22 +1307,56 @@ while True:
 				for num in range(len(SongNames)-1):
 					print('(#'+str(num)+') '+str(SongNames[num]))
 					time.sleep(0.005)
+				print('(#'+str(len(SongNames)-1)+') Remove All Non-Custom Songs')
+				
+				Selection = MakeSelection(['Please Select a Song to Remove',0,len(SongNames)-1])
 
-				Selection = SongMemoryOrder.index(SongNames[MakeSelection(['Please Select a Song to Remove',0,len(SongNames)-1])])
+				if(Selection == len(SongNames)-1):
+					appliedCustomSongs = []
+					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+						codes = open(GamePath+'/GeckoCodes.ini')
+						textlines = codes.readlines()
+						codes.close()
+						for text in textlines:
+							if('[WiiMusicEditor]' in text) and ('Style' not in text):
+								appliedCustomSongs.append(text[1:len(text)-29:1])
+				
+				for number in range(len(SongNames)-1):
+					if(Selection != len(SongNames)-1):
+						number = SongMemoryOrder.index(SongNames[Selection])
+					
+					if(Selection != len(SongNames)-1) or (SongMemoryOrder[number] not in appliedCustomSongs):
+						#Find Offset
+						offset = int(MainDolOffsets[0],16)
+						length = MainDolOffsets[1]
 
-				#Find Offset
-				offset = MainDolOffsets[0]
-				length = MainDolOffsets[1]
+						if(number != 0):
+							extraOffset = int(MainDolOffsets[2],16)*floor(number/2)+int(MainDolOffsets[3],16)*max(0,ceil(number/2)-1)
+							for num in MainDolWeirdOffsets:
+								if(num >= number): break
+								else:
+									if(floor(num/2) == (num/2)):
+										extraOffset = extraOffset - int(MainDolOffsets[2],16)
+									else:
+										extraOffset = extraOffset - int(MainDolOffsets[3],16)
+									extraOffset = extraOffset + int(MainDolOffsets[4],16)
+									
+							offset = offset+int(MainDolOffsets[1],16)+extraOffset
+							if(number in MainDolWeirdOffsets):
+								length = MainDolOffsets[4]
+							else:
+								length = MainDolOffsets[int(floor(number/2) == (number/2))+2]
 
-				if(Selection != 0):
-					offset = int(offset,16)+int(MainDolOffsets[1],16)+int(MainDolOffsets[2],16)*floor(Selection/2)+int(MainDolOffsets[2],16)*max(0,ceil(Selection/2)-1)
-					length = MainDolOffsets[int(floor(Selection/2) == (Selection/2))+2]
+						print(format(offset,'x').lower())
+						print(length)
+						
+						#Brsar Writing
+						brsar = open(GamePath+'/sys/main.dol', "r+b")
+						brsar.seek(offset)
+						brsar.write(bytes.fromhex('ff'*int(length,16)))
+						brsar.close()
 
-				#Brsar Writing
-				brsar = open(GamePath+'/sys/main.dol', "r+b")
-				brsar.seek(offset)
-				brsar.write(bytes.fromhex('ff'*int(length,16)))
-				brsar.close()
+						if(Selection != len(SongNames)-1): break
 
 				print('\nEradication Complete!')
 			elif(Selection == 3): #////////////////////////////////////////Extract/Compile Disk
