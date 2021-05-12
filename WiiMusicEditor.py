@@ -8,6 +8,7 @@ import pathlib
 import tempfile
 from shutil import copyfile, rmtree, copytree
 from math import floor, ceil
+from typing import ByteString
 import webbrowser
 
 #Special Imports
@@ -681,6 +682,9 @@ def FindGameFolder():
 				break
 			else:
 				print("\nERROR: Unable to Locate Valid Wii Music Directory")
+	if(not os.path.isfile(BrsarPath+'.backup')): copyfile(BrsarPath,BrsarPath+'.backup')
+	if(not os.path.isfile(MessagePath+'.backup')): copyfile(MessagePath,MessagePath+'.backup')
+	if(not os.path.isfile(GamePath+'/sys/main.dol.backup')): copyfile(GamePath+'/sys/main.dol',GamePath+'/sys/main.dol.backup')
 
 def FindWiiDiskFolder():
 	global GamePath
@@ -1033,13 +1037,14 @@ while True:
 	print("(#3) Edit Styles")
 	print("(#4) Advanced Tools")
 	print("(#5) Load Wii Music")
-	print("(#6) Overwrite Save File With 100% Save")
-	print("(#7) Download Pre-Made Custom Songs")
-	print("(#8) Help")
-	print("(#9) Settings")
-	print("(#10) Credits")
+	print("(#6) Revert Changes")
+	print("(#7) Overwrite Save File With 100% Save")
+	print("(#8) Download Pre-Made Custom Songs")
+	print("(#9) Help")
+	print("(#10) Settings")
+	print("(#11) Credits")
 
-	Selection = MakeSelection(['Please Select an Option',1,10])
+	Selection = MakeSelection(['Please Select an Option',1,11])
 
 	if(Selection == 1): #////////////////////////////////////////Add Custom Song
 		#Load Files
@@ -1489,14 +1494,85 @@ while True:
 		subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
 		time.sleep(1)
 		print("")
-	elif(Selection == 6): #////////////////////////////////////////100% Save File
+	elif(Selection == 6): #////////////////////////////////////////Revert Changes
+		while True:
+			PrintSectionTitle('Revert Changes')
+			print("(#0) Back to Main Menu")
+			print("(#1) Revert Songs")
+			print("(#2) Revert Text")
+			print("(#3) Revert Styles")
+			print("(#4) Revert Main.dol")
+			print("(#5) Revert All")
+
+			Selection = MakeSelection(['Select An Option',0,5])
+
+			if(Selection != 0):
+				for num in range(1,5):
+					if(Selection != 5):
+						num = Selection
+
+					if(num == 1):
+						if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+							codes = open(GamePath+'/GeckoCodes.ini')
+							textlines = codes.readlines()
+							codes.close()
+							linenum = 0
+							while linenum < len(textlines):
+								if('Song' in textlines[linenum]):
+									textlines.pop(linenum)
+									while(len(textlines) > linenum) and (textlines[linenum][0].isnumeric() or textlines[linenum][0].isalpha()):
+										textlines.pop(linenum)
+								else:
+									linenum = linenum+1					
+							codes = open(GamePath+'/GeckoCodes.ini','w')
+							codes.writelines(textlines)
+							codes.close()
+						if(os.path.isfile(BrsarPath+'.backup')):
+							os.remove(BrsarPath)
+							copyfile(BrsarPath+'.backup',BrsarPath)
+							print('\nSongs Reverted')
+						else:
+							print('\nERROR: Backup not found')
+					elif(num == 2):
+						if(os.path.isfile(MessagePath+'.backup')):
+							os.remove(MessagePath)
+							copyfile(MessagePath+'.backup',MessagePath)
+							print('\nText Reverted')
+						else:
+							print('\nERROR: Backup not found')
+					elif(num == 3):
+						if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+							codes = open(GamePath+'/GeckoCodes.ini')
+							textlines = codes.readlines()
+							codes.close()
+							for linenum in range(len(textlines)):
+								if(linenum < len(textlines)):
+									if('Style' in textlines[linenum]):
+										textlines.pop(linenum)
+										while(len(textlines) > linenum) and (textlines[linenum][0].isnumeric() or textlines[linenum][0].isalpha()):
+											textlines.pop(linenum)
+							codes = open(GamePath+'/GeckoCodes.ini','w')
+							codes.writelines(textlines)
+							codes.close()
+						print('\nStyles Reverted')
+					elif(num == 4):
+						if(os.path.isfile(GamePath+'/sys/main.dol.backup')):
+							os.remove(GamePath+'/sys/main.dol')
+							copyfile(GamePath+'/sys/main.dol.backup',GamePath+'/sys/main.dol')
+							print('\nMain.dol Reverted')
+						else:
+							print('\nERROR: Backup not found')
+
+					if(Selection != 5): break
+			else: break
+	elif(Selection == 7): #////////////////////////////////////////100% Save File
 		FindDolphinSave()
 		if(input("\nAre You Sure You Want To Overwrite Your Save Data? [y/n] ") == 'y'):
 			subprocess.run('robocopy \"'+ProgramPath+'/Helper/WiiMusicSave\" \"'+SaveDataPath+'\" /MIR /E',capture_output=True)
 			print("\nOverwrite Successfull\n")
 		else:
 			print("\nAborted...\n")
-	elif(Selection == 7): #////////////////////////////////////////Download Pre-Made Custom Songs
+	elif(Selection == 8): #////////////////////////////////////////Download Pre-Made Custom Songs
 		print('\nDownloading...')
 		try:
 			response = requests.get('https://github.com/BenjaminHalko/Pre-Made-Songs-for-Wii-Music/archive/refs/heads/main.zip', stream=True)
@@ -1518,7 +1594,7 @@ while True:
 			print('Saved To: \"'+ProgramPath+'/PreMade Custom Songs\"\n')
 		except (requests.ConnectionError, requests.Timeout) as exception:
 			print('\nFailed to Download File...\n')
-	elif(Selection == 8): #////////////////////////////////////////Help
+	elif(Selection == 9): #////////////////////////////////////////Help
 		PrintSectionTitle('Help')
 		print("(#0) Back to Main Menu")
 		print("(#1) Open the Manual")
@@ -1536,7 +1612,7 @@ while True:
 			webbrowser.open('thereisnovideoguideyetbecauseihaventrecordedthevideoyet.com')
 		print('')
 		time.sleep(0.5)
-	elif(Selection == 9): #////////////////////////////////////////Settings
+	elif(Selection == 10): #////////////////////////////////////////Settings
 		while True:
 			PrintSectionTitle("Settings")
 			print("(#0) Back To Main Menu")
@@ -1625,7 +1701,7 @@ while True:
 					SaveSetting('Unsafe Mode','Unsafe Mode',str(int(unsafeMode)))
 				print('')
 			else: break
-	elif(Selection == 10): #////////////////////////////////////////Credits
+	elif(Selection == 11): #////////////////////////////////////////Credits
 		PrintSectionTitle('Credits')
 		print('\n-----Created By:-----')
 		print('- Benjamin Halko')
