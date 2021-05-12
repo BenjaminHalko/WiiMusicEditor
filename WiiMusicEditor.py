@@ -1361,12 +1361,12 @@ while True:
 						if(Selection != len(SongNames)-1): break
 
 				print('\nEradication Complete!')
-			elif(Selection == 3): #////////////////////////////////////////Extract/Compile Disk
-				PrintSectionTitle('Extract/Compile Disk')
+			elif(Selection == 3): #////////////////////////////////////////Extract/Pack Wii Music ROM
+				PrintSectionTitle('Extract/Pack Wii Music ROM')
 				print("(#0) Back To Main Menu")
-				print("(#1) Extract Disk")
-				print("(#2) Compile Disk to .Wbfs")
-				print("(#3) Compile Disk to .Iso")
+				print("(#1) Extract ROM Filesystem")
+				print("(#2) Pack Filesystem to .wbfs")
+				print("(#3) Pack Filesystem to .iso")
 
 				Selection = MakeSelection(['Choose an Option',0,3])
 				if(Selection == 1):
@@ -1651,7 +1651,7 @@ while True:
 				while True:
 					PrintSectionTitle('Default Answers')
 					print("(#0) Back To Settings")
-					print("(#1) Always Ask \"Are You Sure You Want To Replace Song\": "+DefaultWantToReplaceSong)
+					print("(#1) Replace Sound Warnings: "+DefaultWantToReplaceSong)
 					print("(#2) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
 					print("(#3) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
 					print("(#4) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
