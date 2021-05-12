@@ -436,7 +436,8 @@ StyleMemoryOffsets = [
 '0659ACB0',
 '0659ACD4',
 '0659ACF8',
-'0659AD1C']
+'0659AD1C',
+'8059AD40']
 
 InstrumentNames = [
 'Piano',
@@ -1265,14 +1266,14 @@ while True:
 		if(Selection == len(StyleNames)-2):
 			PatchName = []
 			PatchInfo = []
-			for num in range(len(StyleNames)-6):
+			for num in range(len(StyleNames)-7):
 				PatchName.append(StyleNames[num]+' Style Patch')
 				PatchInfo.append(StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 			AddPatch(PatchName,PatchInfo)
-		elif(Selection >= len(StyleNames)-6):
+		elif(Selection >= len(StyleNames)-7):
 			PatchName = []
 			PatchInfo = []
-			for num in range(len(StyleNames)-6,len(StyleNames)-2):
+			for num in range(len(StyleNames)-7,len(StyleNames)-2):
 				PatchName.append(StyleNames[num]+' Style Patch')
 				PatchInfo.append(StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 			AddPatch(PatchName,PatchInfo)
@@ -1418,12 +1419,8 @@ while True:
 					print('\nCreating Gct...')
 					CreateGct()
 					print('\nPatching Main.dol...')
-					if(not os.path.isfile(GamePath+'/sys/main.dol.backup')): copyfile(GamePath+'/sys/main.dol', GamePath+'/sys/main.dol.backup')
-					else:
-						os.remove(GamePath+'/sys/main.dol')
-						copyfile(GamePath+'/sys/main.dol.backup', GamePath+'/sys/main.dol')
-					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section R64E01.gct',capture_output=True)
-					os.remove('R64E01.gct')
+					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section \"'+ProgramPath+'/R64E01.gct\"',capture_output=True)
+					os.remove(ProgramPath+'/R64E01.gct')
 					print('\nPatch Successful!')
 			elif(Selection == 5): #////////////////////////////////////////Riivolution Patch
 				PrintSectionTitle('Riivolution Patch')
