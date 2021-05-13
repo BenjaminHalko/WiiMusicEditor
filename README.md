@@ -16,6 +16,8 @@
 
 - Run Wii Music From Inside The Program
 
+- Menu Song Replacement
+
 # Manual
  ## Section 1 - Setup
 1. Obtain a Wii Music ROM (The format MUST be ISO or WBFS!)
