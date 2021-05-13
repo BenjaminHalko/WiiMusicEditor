@@ -39,18 +39,3 @@ You can easily look up a MIDI for a song. Just search that song and add MIDI to 
 Once you've found a MIDI that you want to use, you'll need to check if it's Wii Music-ready. Unfortunately, there are some limitations. Here's what's needed to quality for a Wii Music-ready song:
 - The MIDI MUST have 4 tracks.
 - The MIDI CANNOT be above a certain file size (File sizes depend on the songs).
-
-
-## Songs That Don't Work Yet:
-
-Sakura Sakura
-
-Jingle Bell Rock
-
-Ode to Joy
-
-## Things to Add:
-
-Rapper Crash Fix
-
-Riivolution Patching
