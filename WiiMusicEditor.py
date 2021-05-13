@@ -812,21 +812,23 @@ def MessageFolder():
 	return '\"'+(os.path.dirname(MessagePath))+'\"'
 
 def LoadSetting(section,key,default):
+	global ProgramPath
 	ini = configparser.ConfigParser()
-	ini.read('settings.ini')
+	ini.read(ProgramPath+'/settings.ini')
 	if(ini.has_option(section, key)):
 		return ini[section][key]
 	else:
 		return default
 
 def SaveSetting(section,key,value):
+	global ProgramPath
 	ini = configparser.ConfigParser()
-	ini.read('settings.ini')
+	ini.read(ProgramPath+'/settings.ini')
 	if(not ini.has_section(section)):
 		ini.add_section(section)
 	ini.set(section,key,value)
 	print(str(ini))
-	with open('settings.ini', 'w') as inifile:
+	with open(ProgramPath+'/settings.ini', 'w') as inifile:
 		ini.write(inifile)
 
 def PrintSectionTitle(Text):
