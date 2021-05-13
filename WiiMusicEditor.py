@@ -6,8 +6,9 @@ import subprocess
 import configparser
 import pathlib
 import tempfile
-from shutil import copyfile, rmtree
+from shutil import copyfile, rmtree, copytree
 from math import floor, ceil
+from typing import ByteString
 import webbrowser
 
 #Special Imports
@@ -17,11 +18,10 @@ while True:
 		import mido
 		from colorama import Fore, Style, init
 		from tqdm import tqdm
-		from selenium import webdriver
 		break
 	except ImportError:
 		subprocess.run('python -m pip install --upgrade pip')
-		subprocess.run('pip install mido requests colorama tqdm selenium')
+		subprocess.run('pip install mido requests colorama tqdm')
 
 init(convert=True)
 
@@ -133,7 +133,7 @@ SongOffsets = [
 '67D360',
 '66F780',
 '61F620',
-'72BA40']
+'19AF7A0']
 
 ScoreOffsets = [
 '60C660',
@@ -186,7 +186,7 @@ ScoreOffsets = [
 '67EE40',
 '670FC0',
 '620F60',
-['72DCA0','730600','732C40','735600','7381C0']]
+['19ABD00','19B1A00','19B4360','19B69A0','19B9360','19BBF20']]
 
 SongFileLengths = [
 '1F50',
@@ -215,7 +215,7 @@ SongFileLengths = [
 '1920',
 '16C0',
 'FC0',
-'0', #1940
+'1940',
 '1740',
 '1920',
 '1C60',
@@ -239,7 +239,7 @@ SongFileLengths = [
 '1AE0',
 '1840',
 '1940',
-'0']
+'2260']
 
 ScoreFileLengths = [
 '1920',
@@ -292,9 +292,20 @@ ScoreFileLengths = [
 '1940',
 '1240',
 '1880',
-['2960','2640','29C0','2BC0','29A0']]
+['3AA0','2960','2640','29C0','2BC0','29A0']]
 
 SongMemoryOffsets = [
+'025a08a8',
+'025a0c54',
+'025a2780',
+'025a1758',
+'025a04fc',
+'025a0674',
+'025a1df4',
+'025a1c7c',
+'025a0adc',
+'025a1d38',
+'025a283c',
 '025a1468',
 '025a1814',
 '025a1000', 
@@ -310,7 +321,7 @@ SongMemoryOffsets = [
 '025a0964',
 '025a0f44',
 '025a15e0',
-'',
+'025a0440',
 '025a0e88',
 '025a1a48',
 '025a1f6c',
@@ -329,23 +340,12 @@ SongMemoryOffsets = [
 '025a18d0',
 '025a0d10',
 '025a12f0',
-'025a08a8',
-'025a0c54',
-'025a2780',
-'025a1758',
-'025a04fc',
-'025a0674',
-'025a1df4',
-'025a1c7c',
-'025a0adc',
-'025a1d38',
-'025a283c',
 '025a23d4',
 '025a0730',
 '025a26c4',
 '025a23d4',
 '025a0dcc',
-['8059ACB3','8059ACD7','8059ACFB','8059AD1F']]
+['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40']]
 
 StyleNames = [
 'Twinkle Twinkle Little Star',
@@ -390,6 +390,7 @@ StyleNames = [
 'Menu Style Electronic',
 'Menu Style Japanese',
 'Menu Style March',
+'Menu Style A Capella',
 'Replace All Normal Styles',
 'Replace All Menu Styles']
 
@@ -435,7 +436,8 @@ StyleMemoryOffsets = [
 '0659ACB0',
 '0659ACD4',
 '0659ACF8',
-'0659AD1C']
+'0659AD1C',
+'8059AD40']
 
 InstrumentNames = [
 'Piano',
@@ -583,18 +585,24 @@ SongMemoryOrder = [
 'Animal Crossing',
 'F-Zero']
 
+MainDolOffsets = ['59C520','B0','B8','C0','BC']
+MainDolWeirdOffsets = [5,6,7,32]
+
+
 #Functions
 def AddPatch(PatchName,PatchInfo):
 	global GamePath
 	global CodePath
 	global DefaultStyleMethod
 	global ProgramPath
+	codePathInGamePath = GamePath+'/GeckoCodes.ini'
 	if(type(PatchName) == str):
 		PatchName = [PatchName]
 		PatchInfo = [PatchInfo]
+	
 	for patchNum in range(len(PatchName)):
-		if(os.path.exists(CodePath)):
-			codes = open(CodePath,'r')
+		if(os.path.exists(codePathInGamePath)):
+			codes = open(codePathInGamePath,'r')
 			lineText = codes.readlines()
 			codes.close()
 			geckoExists = -1
@@ -632,17 +640,19 @@ def AddPatch(PatchName,PatchInfo):
 			elif(songEnabled == -1):
 				lineText.insert(geckoEnabled+1,'$'+PatchName[patchNum]+'\n')
 			
-			codes = open(CodePath,'w')
+			codes = open(codePathInGamePath,'w')
 			codes.writelines(lineText)
 			codes.close()
 		else:
-			codes = open(CodePath,'w')
+			codes = open(codePathInGamePath,'w')
 			codes.write('[Gecko]\n')
 			codes.write('$'+PatchName[patchNum]+' [WiiMusicEditor]\n')
 			codes.write(PatchInfo[patchNum])
 			codes.write('[Gecko_Enabled]\n')
 			codes.write('$'+PatchName[patchNum]+'\n')
 			codes.close()
+		if(os.path.isfile(CodePath)): os.remove(CodePath)
+		copyfile(codePathInGamePath,CodePath)
 
 def FindGameFolder():
 	global GamePath
@@ -673,6 +683,9 @@ def FindGameFolder():
 				break
 			else:
 				print("\nERROR: Unable to Locate Valid Wii Music Directory")
+	if(not os.path.isfile(BrsarPath+'.backup')): copyfile(BrsarPath,BrsarPath+'.backup')
+	if(not os.path.isfile(MessagePath+'.backup')): copyfile(MessagePath,MessagePath+'.backup')
+	if(not os.path.isfile(GamePath+'/sys/main.dol.backup')): copyfile(GamePath+'/sys/main.dol',GamePath+'/sys/main.dol.backup')
 
 def FindWiiDiskFolder():
 	global GamePath
@@ -743,7 +756,7 @@ def InitializeBrseq():
 		BrseqPath = sys.argv[1]
 	if(not os.path.isfile(BrseqPath)) or (not pathlib.Path(BrseqPath).suffix in ExceptedSongExtensions):
 		while True:
-			BrseqPath = input("\nDrag Song File Over Window [.midi, .mid, .brseq, .rseq] (Or Drag It On The .Bat File): ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			BrseqPath = input("\nDrag File to Batch (MIDIs, BRSEQ, & RSEQ Files only): ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isfile(BrseqPath)) and (pathlib.Path(BrseqPath).suffix in ExceptedSongExtensions):
 				break
 			else:
@@ -777,7 +790,7 @@ def InitializeBrseq():
 def ChangeName(SongToChange,newText):
 	global ProgramPath
 	TextOffset = ['c8','190','12c']
-	subprocess.run('Helper/Wiimms/decode.bat '+MessageFolder(),capture_output=True)
+	subprocess.run(ProgramPath+'/Helper/Wiimms/decode.bat '+MessageFolder(),capture_output=True)
 	for typeNum in range(3):
 		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
 		textlines = message.readlines()
@@ -796,7 +809,7 @@ def ChangeName(SongToChange,newText):
 	subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 
 def MessageFolder():
-	return '\"'+(os.path.dirname(MessagePath)).replace('/','\\')+'\"'
+	return '\"'+(os.path.dirname(MessagePath))+'\"'
 
 def LoadSetting(section,key,default):
 	ini = configparser.ConfigParser()
@@ -880,7 +893,7 @@ def SelectStyleInstrument(PartString,IsPercussion):
 	global NormalStyleSelected
 	print('')
 	while True:
-		PartType = input("Enter The Instrument Number You Want For "+PartString+": ")
+		PartType = input("What\'s the Instrument Number you want for the "+PartString+": ")
 		if(PartType.isnumeric()):
 			PartType = int(PartType)
 			if(IsPercussion) and (not unsafeMode): PartType = PartType + normalInstrumentNumber
@@ -930,32 +943,23 @@ def ChangeDefaultAnswer(ResponseOptions,iniKey):
 	return ResponseOptions[Selection]
 
 def CreateGct():
-	global CodePath
+	global GamePath
 	global ProgramPath
 	if(os.path.isfile('R64E01.gct')): os.remove('R64E01.gct')
-	patches = open(CodePath)
+	patches = open(GamePath+'/GeckoCodes.ini')
 	textlines = patches.readlines()
 	patches.close()
 	codes = ''
 	for text in textlines:
 		if(text[0].isalpha() or text[0].isnumeric()):
 			codes = codes + text
-	chromeOptions = webdriver.ChromeOptions()
-	prefs = {"download.default_directory" : ProgramPath.replace('/','\\')}
-	chromeOptions.add_experimental_option("prefs",prefs)
-	driver = webdriver.Chrome('Helper/BrowserDrivers/chromedriver.exe',options=chromeOptions)
-	driver.get('https://mkwii.com/gct/')
-	driver.find_element_by_id('game_id').send_keys("R64E01")
-	driver.find_element_by_id('code_title').send_keys("Code List")
-	driver.find_element_by_id('code').send_keys(codes)
-	driver.find_element_by_id('add_code_b').click()
-	driver.find_element_by_id('gct_b').click()
-	time.sleep(1)
-	driver.quit()
+
+	print('\n'+codes)
+	while(not os.path.isfile(ProgramPath+'/R64E01.gct')):
+		input('Take these codes and make a gct. Use this website: https://mkwii.com/gct/\nIn the Game Id window put \"R64E01\" and in the Code Title window put whatever you want.\nPut it in the root directory of the Wii Music Editor and name it R64E01.gct. (Press Enter to continue) ')
 
 #Default Paths
-ProgramPath = os.path.dirname(__file__).replace('\\','/')
-os.chdir(ProgramPath)
+ProgramPath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
 GamePath = LoadSetting('Paths','GamePath','None')
 BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 MessagePath = GamePath+'/files/US/Message/message.carc'
@@ -987,7 +991,7 @@ unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
 #Main Loop
 while True:
 	#Find Branch
-	if(os.path.exists('settings.ini')):
+	if(not os.path.exists('settings.ini')):
 		if(os.path.exists('README.md')):
 			readme = open('README.md')
 			if('Beta' in readme.read()):
@@ -1034,13 +1038,14 @@ while True:
 	print("(#3) Edit Styles")
 	print("(#4) Advanced Tools")
 	print("(#5) Load Wii Music")
-	print("(#6) Overwrite Save File With 100% Save")
-	print("(#7) Download Pre-Made Custom Songs")
-	print("(#8) Help")
-	print("(#9) Settings")
-	print("(#10) Credits")
+	print("(#6) Revert Changes")
+	print("(#7) Overwrite Save File With 100% Save")
+	print("(#8) Download Pre-Made Custom Songs")
+	print("(#9) Help")
+	print("(#10) Settings")
+	print("(#11) Credits")
 
-	Selection = MakeSelection(['Please Select an Option',1,10])
+	Selection = MakeSelection(['Please Select an Option',1,11])
 
 	if(Selection == 1): #////////////////////////////////////////Add Custom Song
 		#Load Files
@@ -1049,7 +1054,14 @@ while True:
 		InitializeBrseq()
 
 		#Applied Custom Songs
-		appliedCustomSongs = list(LoadSetting('Applied Custom Songs', WiiDiskFolder, '').split(','))
+		appliedCustomSongs = []
+		if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+			codes = open(GamePath+'/GeckoCodes.ini')
+			textlines = codes.readlines()
+			codes.close()
+			for text in textlines:
+				if('[WiiMusicEditor]' in text) and ('Style' not in text):
+					appliedCustomSongs.append(text[1:len(text)-29:1])
 
 		#Song List
 		LowestSong = -1
@@ -1084,7 +1096,7 @@ while True:
 		#Song Selection
 		PrintSectionTitle('Song Selection')
 		while True:
-			SongSelected = input("Enter The Song Number You Want To Replace: ")
+			SongSelected = input("Enter the Song Number you want to Replace: ")
 			if(SongSelected.isnumeric()) and (int(SongSelected) < len(SongNames)):
 				SongSelected = int(SongSelected)
 				if(int(BrseqLength,16) <= SongMinLength[SongSelected]):
@@ -1107,11 +1119,11 @@ while True:
 				if(Tempo != 'Could Not Locate'):
 					if(MetaDataFound == ''): MetaDataFound = 'Tempo'
 					else: MetaDataFound = MetaDataFound+', Tempo'
-				print('Meta Data Found: '+MetaDataFound)
+				print('Metadata Found: '+MetaDataFound)
 				if(DefaultUseAutoLengthTempo == 'Yes'):
 					AutoFill = 'y'
 				else:
-					AutoFill = input("\nWe Have Automatically Located Some Meta Data! Would You Like To Autofill It: [y/n] ")
+					AutoFill = input("\nI've found some Metadata for you! Would you like to Autofill? [y/n] ")
 			
 			if(AutoFill != 'y') or (Length == '0'):
 				Length = MakeSelection(['\nHow Many Measures in Your Song'])
@@ -1124,7 +1136,7 @@ while True:
 			Tempo = format(int(Tempo),'x').upper()
 
 			while True:
-				TimeSignature = input("\nWhat Time Signature is Your Song? (4 = 4/4, 3 = 3/4): ")
+				TimeSignature = input("\nWhat's the Time Signature of your Song? (4 = 4/4, 3 = 3/4): ")
 				if(TimeSignature == '3') or (TimeSignature == '4'):
 					break
 				else:
@@ -1138,7 +1150,7 @@ while True:
 			TempoCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
 			TimeCode = SongMemoryOffsets[SongSelected]+' 00000'+TimeSignature+'00\n'
 
-		if(DefaultWantToReplaceSong == 'No') or (input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou Will NOT Be Able to Restore the Song Unless You Have Made a Backup! [y/n] ') == 'y'):
+		if(DefaultWantToReplaceSong == 'No') or (input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou CANNOT restore the song if you don\'t have a backup! [y/n] ') == 'y'):
 			#Brsar Writing
 			brsar = open(BrsarPath, "r+b")
 			brsar.seek(int(SongOffsets[SongSelected],16))
@@ -1158,16 +1170,10 @@ while True:
 				brsar.write(BrseqInfo)
 			brsar.close()
 			if(SongSelected != 50): AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
-			if(SongNames[SongSelected] not in appliedCustomSongs):
-				if(appliedCustomSongs[0] == ''):
-					appliedCustomSongs = [SongNames[SongSelected]]
-				else:
-					appliedCustomSongs.append(SongNames[SongSelected])
-				SaveSetting('Applied Custom Songs', WiiDiskFolder, ','.join([str(elem) for elem in appliedCustomSongs]))
-			print("\nPatch Complete")
+			print("\nPatch Complete!")
 			time.sleep(0.5)
-			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould Like to Change the Song Text? [y/n] ') == 'y')):
-				ChangeName(SongSelected,[input('\nPlease Input the New Song Title: '),input('\nPlease Input the New Song Description: (Use \\n For New Line) '),input('\nPlease Input the New Song Genre: ')])
+			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
+				ChangeName(SongSelected,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 				print("\nEditing Successful!\n")
 			else: print('')
 		else:
@@ -1186,27 +1192,27 @@ while True:
 		PrintSectionTitle("Song Selection")
 		Selection = MakeSelection(['\nWhich Song Do You Want To Change The Name Of',0,len(SongNames)-1])
 		
-		ChangeName(Selection,[input('\nPlease Input the New Song Title: '),input('\nPlease Input the New Song Description: (Use \\n For New Line) '),input('\nPlease Input the New Song Genre: ')])
+		ChangeName(Selection,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 		print("\nEditing Successful!\n")
 	elif(Selection == 3): #////////////////////////////////////////Change Style
 		PrintSectionTitle("Style List")
 		FindDolphinSave()
 		SongStyles = 27
 		NormalStyleNumber = 11
-		MenuStyles = 4
+		MenuStyles = 5
 		for num in range(len(StyleNames)):
 			if(num == 0):
 				print('\n//////////Song Specific Styles\n')
 			elif(num == SongStyles):
-				print('\n//////////Normal Styles\n')
+				print('\n//////////Global Styles\n')
 			elif(num == NormalStyleNumber+SongStyles):
 				print('\n//////////Menu Styles\n')
 			elif(num == NormalStyleNumber+SongStyles+MenuStyles):
 				print('\n//////////Replace All Styles\n')
 			print('(#'+str(num)+') '+str(StyleNames[num]))
 			time.sleep(0.005)
-		Selection = MakeSelection(['\nEnter the Style Number You Want to Change',0,len(StyleNames)])
-		NormalStyleSelected = (Selection < len(StyleNames)-6) or (Selection == len(StyleNames)-2)
+		Selection = MakeSelection(['\nWhat\'s the Style Number you want to change',0,len(StyleNames)])
+		NormalStyleSelected = (Selection < len(StyleNames)-7) or (Selection == len(StyleNames)-2)
 		PrintSectionTitle("Instrument List")
 		normalInstrumentNumber = 40
 		
@@ -1260,21 +1266,21 @@ while True:
 		if(Selection == len(StyleNames)-2):
 			PatchName = []
 			PatchInfo = []
-			for num in range(len(StyleNames)-6):
+			for num in range(len(StyleNames)-7):
 				PatchName.append(StyleNames[num]+' Style Patch')
 				PatchInfo.append(StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 			AddPatch(PatchName,PatchInfo)
-		elif(Selection >= len(StyleNames)-6):
+		elif(Selection >= len(StyleNames)-7):
 			PatchName = []
 			PatchInfo = []
-			for num in range(len(StyleNames)-6,len(StyleNames)-2):
+			for num in range(len(StyleNames)-7,len(StyleNames)-2):
 				PatchName.append(StyleNames[num]+' Style Patch')
 				PatchInfo.append(StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 			AddPatch(PatchName,PatchInfo)
 		else:
 			AddPatch(StyleNames[Selection]+' Style Patch',StyleMemoryOffsets[Selection]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 
-		print("\nPatch Complete")
+		print("\nPatch Complete!")
 		time.sleep(0.5)
 		print("")
 	elif(Selection == 4): #////////////////////////////////////////Advanced Tools
@@ -1282,11 +1288,12 @@ while True:
 			PrintSectionTitle('Advanced Tools')
 			print("(#0) Back to Main Menu")
 			print("(#1) Change All Wii Music Text")
-			print("(#2) Extract/Compile Wii Music Disk")
-			print("(#3) Patch Main.dol With Gecko Codes")
-			print("(#4) Create Riivolution Patch (Work in Progress)")
+			print("(#2) Remove Song")
+			print("(#3) Extract/Pack Wii Music ROM")
+			print("(#4) Patch Main.dol With Gecko Codes")
+			print("(#5) Create Riivolution Patch")
 
-			Selection = MakeSelection(['Please Select an Option',0,4])
+			Selection = MakeSelection(['Please Select an Option',0,5])
 
 			if(Selection == 1): #////////////////////////////////////////Change Text
 				#Load Files
@@ -1295,17 +1302,74 @@ while True:
 				#Run Notepad
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
 				time.sleep(0.5)
-				print("\nWaiting For User to Finish Editing and for Notepad to Close...")
+				print("\nWaiting for Notepad to close...")
 				subprocess.run('notepad \"'+MessageFolder().replace('\"','')+'/message.d/new_music_message.txt\"',capture_output=True)
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 				print("\nEditing Successful!\n")
-			elif(Selection == 2): #////////////////////////////////////////Extract/Compile Disk
-				PrintSectionTitle('Extract/Compile Disk')
-				print("(#0) Back To Main Menu")
-				print("(#1) Extract Disk")
-				print("(#2) Compile Disk")
+			elif(Selection == 2): #////////////////////////////////////////Remove Song
+				FindGameFolder()
+				FindDolphinSave()
+				PrintSectionTitle('Remove Song')
+				for num in range(len(SongNames)-1):
+					print('(#'+str(num)+') '+str(SongNames[num]))
+					time.sleep(0.005)
+				print('(#'+str(len(SongNames)-1)+') Remove All Non-Custom Songs')
+				
+				Selection = MakeSelection(['Please Select a Song to Remove',0,len(SongNames)-1])
 
-				Selection = MakeSelection(['Choose an Option',0,2])
+				if(Selection == len(SongNames)-1):
+					appliedCustomSongs = []
+					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+						codes = open(GamePath+'/GeckoCodes.ini')
+						textlines = codes.readlines()
+						codes.close()
+						for text in textlines:
+							if('[WiiMusicEditor]' in text) and ('Style' not in text):
+								appliedCustomSongs.append(text[1:len(text)-29:1])
+				
+				for number in range(len(SongNames)-1):
+					if(Selection != len(SongNames)-1):
+						number = SongMemoryOrder.index(SongNames[Selection])
+					
+					if(Selection != len(SongNames)-1) or (SongMemoryOrder[number] not in appliedCustomSongs):
+						#Find Offset
+						offset = int(MainDolOffsets[0],16)
+						length = MainDolOffsets[1]
+
+						if(number != 0):
+							extraOffset = int(MainDolOffsets[2],16)*floor(number/2)+int(MainDolOffsets[3],16)*max(0,ceil(number/2)-1)
+							for num in MainDolWeirdOffsets:
+								if(num >= number): break
+								else:
+									if(floor(num/2) == (num/2)):
+										extraOffset = extraOffset - int(MainDolOffsets[2],16)
+									else:
+										extraOffset = extraOffset - int(MainDolOffsets[3],16)
+									extraOffset = extraOffset + int(MainDolOffsets[4],16)
+									
+							offset = offset+int(MainDolOffsets[1],16)+extraOffset
+							if(number in MainDolWeirdOffsets):
+								length = MainDolOffsets[4]
+							else:
+								length = MainDolOffsets[int(floor(number/2) == (number/2))+2]
+
+						#Brsar Writing
+						brsar = open(GamePath+'/sys/main.dol', "r+b")
+						brsar.seek(offset)
+						brsar.write(bytes.fromhex('ff'*int(length,16)))
+						brsar.close()
+
+						if(Selection != len(SongNames)-1): break
+
+				print('\nEradication Complete!')
+			elif(Selection == 3): #////////////////////////////////////////Extract/Pack Wii Music ROM
+				PrintSectionTitle('Extract/Pack Wii Music ROM')
+				print("(#0) Back To Main Menu")
+				print("(#1) Extract ROM Filesystem")
+				print("(#2) Pack Filesystem to .wbfs")
+				print("(#3) Pack Filesystem to .iso")
+
+				Selection = MakeSelection(['Choose an Option',0,3])
 				if(Selection == 1):
 					ExceptedFileExtensions = ['.iso','.wbfs']
 					while True:
@@ -1320,7 +1384,7 @@ while True:
 						BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 						MessagePath = GamePath+'/files/US/Message/message.carc'
 						SaveSetting('Paths','GamePath',GamePath)
-				elif(Selection == 2):
+				elif(Selection == 2) or (Selection == 3):
 					if(input('\nUse Game Path as Disk Directory? [y/n] ') != 'y'):
 						while True:
 							DiskPath= input("\nDrag Decompressed Wii Music Directory: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
@@ -1329,44 +1393,183 @@ while True:
 							else:
 								print("\nERROR: Unable to Locate Valid Wii Music Directory")
 					else:
-						DiskPath = GamePath[0:len(GamePath)-5:1]
+						FindGameFolder()
+						if(GamePath[len(GamePath)-4:len(GamePath):1] == 'DATA'):
+							DiskPath = GamePath[0:len(GamePath)-5:1]
+						else:
+							DiskPath = GamePath
 					
 					DiskName = ''
 					DiskNum = 0
-					while(os.path.isfile(DiskPath+DiskName+'.wbfs')):
-						DiskNum = DiskNum+1
-						DiskName = '('+str(DiskNum)+')'
-					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+DiskName+'.wbfs\" --wbfs')
+					if(Selection == 2):
+						while(os.path.isfile(DiskPath+DiskName+'.wbfs')):
+							DiskNum = DiskNum+1
+							DiskName = '('+str(DiskNum)+')'
+						subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+DiskName+'.wbfs\" --wbfs')
+					else:
+						while(os.path.isfile(DiskPath+DiskName+'.iso')):
+							DiskNum = DiskNum+1
+							DiskName = '('+str(DiskNum)+')'
+						subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+DiskName+'.iso\" --iso')
 				print('')
-			elif(Selection == 3): #////////////////////////////////////////Patch Main.dol
+			elif(Selection == 4): #////////////////////////////////////////Patch Main.dol
 				FindGameFolder()
 				FindDolphinSave()
 				if(input('\nAre you sure you want to patch Main.dol? [y/n] ') == 'y'):
 					print('\nCreating Gct...')
 					CreateGct()
 					print('\nPatching Main.dol...')
-					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section R64E01.gct',capture_output=True)
-					os.remove('R64E01.gct')
+					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section \"'+ProgramPath+'/R64E01.gct\"',capture_output=True)
+					os.remove(ProgramPath+'/R64E01.gct')
 					print('\nPatch Successful!')
+			elif(Selection == 5): #////////////////////////////////////////Riivolution Patch
+				PrintSectionTitle('Riivolution Patch')
+				FindGameFolder()
+				FindDolphinSave()
+				if(GamePath[len(GamePath)-4:len(GamePath):1] == 'DATA'):
+					ModPath = GamePath[0:len(GamePath)-5:1]
+					ModPath = ModPath[0:len(ModPath)-len(os.path.basename(ModPath)):1]
+				else:
+					ModPath = GamePath[0:len(GamePath)-len(os.path.basename(GamePath)):1]
+				ModName = input('\nPlease Input Mod Name: ')
+				while (os.path.isdir(ModPath+ModName)):
+					ModName = input('\nDirectory Already Exists! Please Enter a Diffrent Name: ')
+				ModPath = ModPath+ModName
+				os.mkdir(ModPath)
+				os.mkdir(ModPath+'/Riivolution')
+				os.mkdir(ModPath+'/Riivolution/codes')
+				os.mkdir(ModPath+'/'+ModName.replace(' ',''))
+				print('\nMaking Gct...')
+				CreateGct()
+				print('\nCopying Files...')
+				copyfile(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar',ModPath+'/'+ModName.replace(' ','')+'/rp_Music_sound.brsar')
+				copyfile(GamePath+'/files/US/Message/message.carc',ModPath+'/'+ModName.replace(' ','')+'/message.carc')
+				copyfile(ProgramPath+'/Helper/GctFiles/codehandler.bin',ModPath+'/Riivolution/codehandler.bin')
+				os.rename(ProgramPath+'/R64E01.gct',ModPath+'/Riivolution/codes/R64E01.gct')
+				print('\nCreating XML file...')
+				linestowrite = [
+				'<wiidisc version="1" root="">\n',
+				'  <id game="R64" />\n',
+				'  <options>\n',
+				'    <section name="'+ModName+'">\n',
+				'      <option name="Load Mod">\n',
+				'        <choice name="Yes">\n',
+				'          <patch id="TheMod" />\n',
+				'        </choice>\n',
+				'      </option>\n',
+				'    </section>\n',
+				'  </options>\n',
+				'  <patch id="TheMod">\n',
+				'    <file disc="/Sound/MusicStatic/rp_Music_sound.brsar" external="/'+ModName.replace(' ','')+'/rp_Music_sound.brsar" offset="" />\n',
+				'    <file disc="/US/Message/message.carc" external="/'+ModName.replace(' ','')+'/message.carc" offset="" />\n',
+				'    <memory valuefile="codehandler.bin" offset="0x80001800" />\n',
+				'    <memory value="8000" offset="0x00001CDE" />\n',
+				'    <memory value="28B8" offset="0x00001CE2" />\n',
+				'    <memory value="8000" offset="0x00001F5A" />\n',
+				'    <memory value="28B8" offset="0x00001F5E" />\n',
+				'    <memory valuefile="/codes/R64E01.gct" offset="0x800028B8" />\n',
+				'  </patch>\n',
+				'</wiidisc>\n']
+				xml = open(ModPath+'/Riivolution/'+ModName.replace(' ','')+'.xml','w')
+				xml.writelines(linestowrite)
+				xml.close()
+				print('\nPatch Creation Successful!\nExported to: '+ModPath)
+				if(input('\nWould You Like to Copy the Patch on to an SD card? [y/n] ') == 'y'):
+					letter = input('\nType the Drive Letter of the SD card: ')
+					print('\nCopying...')
+					copytree(ModPath+'/Riivolution',letter+':/Riivolution')
+					copytree(ModPath+'/'+ModName.replace(' ',''),letter+':/'+ModName.replace(' ',''))
+					print('\nSuccessfully Copied!')
 			else: break
 	elif(Selection == 5): #////////////////////////////////////////Run Game
 		FindGameFolder()
 		FindDolphin()
 		PrintSectionTitle("Running Dolphin")
-		if(os.path.isfile(GamePath)):
-			subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'\"')
-		else:
-			subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
+		if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+			if(os.path.isfile(CodePath)): os.remove(CodePath)
+			copyfile(GamePath+'/GeckoCodes.ini',CodePath)
+		subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
 		time.sleep(1)
 		print("")
-	elif(Selection == 6): #////////////////////////////////////////100% Save File
+	elif(Selection == 6): #////////////////////////////////////////Revert Changes
+		while True:
+			PrintSectionTitle('Revert Changes')
+			print("(#0) Back to Main Menu")
+			print("(#1) Revert Songs")
+			print("(#2) Revert Text")
+			print("(#3) Revert Styles")
+			print("(#4) Revert Main.dol")
+			print("(#5) Revert All")
+
+			Selection = MakeSelection(['Select An Option',0,5])
+
+			if(Selection != 0):
+				for num in range(1,5):
+					if(Selection != 5):
+						num = Selection
+
+					if(num == 1):
+						if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+							codes = open(GamePath+'/GeckoCodes.ini')
+							textlines = codes.readlines()
+							codes.close()
+							linenum = 0
+							while linenum < len(textlines):
+								if('Song' in textlines[linenum]):
+									textlines.pop(linenum)
+									while(len(textlines) > linenum) and (textlines[linenum][0].isnumeric() or textlines[linenum][0].isalpha()):
+										textlines.pop(linenum)
+								else:
+									linenum = linenum+1					
+							codes = open(GamePath+'/GeckoCodes.ini','w')
+							codes.writelines(textlines)
+							codes.close()
+						if(os.path.isfile(BrsarPath+'.backup')):
+							os.remove(BrsarPath)
+							copyfile(BrsarPath+'.backup',BrsarPath)
+							print('\nSongs Reverted')
+						else:
+							print('\nERROR: Backup not found')
+					elif(num == 2):
+						if(os.path.isfile(MessagePath+'.backup')):
+							os.remove(MessagePath)
+							copyfile(MessagePath+'.backup',MessagePath)
+							print('\nText Reverted')
+						else:
+							print('\nERROR: Backup not found')
+					elif(num == 3):
+						if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+							codes = open(GamePath+'/GeckoCodes.ini')
+							textlines = codes.readlines()
+							codes.close()
+							for linenum in range(len(textlines)):
+								if(linenum < len(textlines)):
+									if('Style' in textlines[linenum]):
+										textlines.pop(linenum)
+										while(len(textlines) > linenum) and (textlines[linenum][0].isnumeric() or textlines[linenum][0].isalpha()):
+											textlines.pop(linenum)
+							codes = open(GamePath+'/GeckoCodes.ini','w')
+							codes.writelines(textlines)
+							codes.close()
+						print('\nStyles Reverted')
+					elif(num == 4):
+						if(os.path.isfile(GamePath+'/sys/main.dol.backup')):
+							os.remove(GamePath+'/sys/main.dol')
+							copyfile(GamePath+'/sys/main.dol.backup',GamePath+'/sys/main.dol')
+							print('\nMain.dol Reverted')
+						else:
+							print('\nERROR: Backup not found')
+
+					if(Selection != 5): break
+			else: break
+	elif(Selection == 7): #////////////////////////////////////////100% Save File
 		FindDolphinSave()
 		if(input("\nAre You Sure You Want To Overwrite Your Save Data? [y/n] ") == 'y'):
 			subprocess.run('robocopy \"'+ProgramPath+'/Helper/WiiMusicSave\" \"'+SaveDataPath+'\" /MIR /E',capture_output=True)
 			print("\nOverwrite Successfull\n")
 		else:
 			print("\nAborted...\n")
-	elif(Selection == 7): #////////////////////////////////////////Download Pre-Made Custom Songs
+	elif(Selection == 8): #////////////////////////////////////////Download Pre-Made Custom Songs
 		print('\nDownloading...')
 		try:
 			response = requests.get('https://github.com/BenjaminHalko/Pre-Made-Songs-for-Wii-Music/archive/refs/heads/main.zip', stream=True)
@@ -1388,7 +1591,7 @@ while True:
 			print('Saved To: \"'+ProgramPath+'/PreMade Custom Songs\"\n')
 		except (requests.ConnectionError, requests.Timeout) as exception:
 			print('\nFailed to Download File...\n')
-	elif(Selection == 8): #////////////////////////////////////////Help
+	elif(Selection == 9): #////////////////////////////////////////Help
 		PrintSectionTitle('Help')
 		print("(#0) Back to Main Menu")
 		print("(#1) Open the Manual")
@@ -1406,20 +1609,19 @@ while True:
 			webbrowser.open('thereisnovideoguideyetbecauseihaventrecordedthevideoyet.com')
 		print('')
 		time.sleep(0.5)
-	elif(Selection == 9): #////////////////////////////////////////Settings
+	elif(Selection == 10): #////////////////////////////////////////Settings
 		while True:
 			PrintSectionTitle("Settings")
 			print("(#0) Back To Main Menu")
 			print("(#1) Change File Paths")
-			print("(#2) Change Default Answers")
-			print("(#3) Reset Replaced Song Database")
-			print("(#4) Updates")
+			print("(#2) Toggle Warnings")
+			print("(#3) Updates")
 			if(unsafeMode):
-				print("(#5) Switch to Safe Mode")
+				print("(#4) Switch to Safe Mode")
 			else:
-				print("(#5) Switch to Unsafe Mode")
+				print("(#4) Switch to Unsafe Mode")
 
-			Selection = MakeSelection(['Which Setting Do You Want to Change',0,5])
+			Selection = MakeSelection(['Which Setting Do You Want to Change',0,4])
 
 			if(Selection == 1):
 				while True:
@@ -1446,7 +1648,7 @@ while True:
 				while True:
 					PrintSectionTitle('Default Answers')
 					print("(#0) Back To Settings")
-					print("(#1) Always Ask \"Are You Sure You Want To Replace Song\": "+DefaultWantToReplaceSong)
+					print("(#1) Replace Sound Warnings: "+DefaultWantToReplaceSong)
 					print("(#2) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
 					print("(#3) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
 					print("(#4) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
@@ -1462,13 +1664,6 @@ while True:
 						DefaultReplaceSongNames = ChangeDefaultAnswer(['Ask','Yes','No'],['Replace Song Names'])
 					else: break
 			elif(Selection == 3):
-				FindGameFolder()
-				if(input("\nAre You Sure You Want to Reset the Replaced Song Database? [y/n] ") == 'y'):
-					SaveSetting('Applied Custom Songs', WiiDiskFolder, '')
-					print('\nReset Successful!\n')
-				else:
-					print('')
-			elif(Selection == 4):
 				while True:
 					PrintSectionTitle('Updates')
 					print("(#0) Back To Settings")
@@ -1497,13 +1692,13 @@ while True:
 							beta = int(not bool(beta))
 							SaveSetting('Updates', 'Branch', str(beta))
 					else: break
-			elif(Selection == 5):
+			elif(Selection == 4):
 				if((not unsafeMode) and (input('\nAre You Sure You Want to Turn on Unsafe Mode? [y/n] ') == 'y')) or (unsafeMode):
 					unsafeMode = not unsafeMode
 					SaveSetting('Unsafe Mode','Unsafe Mode',str(int(unsafeMode)))
 				print('')
 			else: break
-	elif(Selection == 10): #////////////////////////////////////////Credits
+	elif(Selection == 11): #////////////////////////////////////////Credits
 		PrintSectionTitle('Credits')
 		print('\n-----Created By:-----')
 		print('- Benjamin Halko')

@@ -7,4 +7,4 @@ cd..
 
 robocopy "%CD%\WiiMusicEditorNew" "%CD%" /MIR /XF settings.ini /XD .git WiiMusicEditorNew > nul
 
-python "WiiMusicEditor.py"
+WiiMusicEditor.bat
