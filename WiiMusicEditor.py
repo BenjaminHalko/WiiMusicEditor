@@ -1492,13 +1492,13 @@ while True:
 								Length = codelist[textnum+1][len(codelist[textnum+1])-9:len(codelist[textnum+1])-1:1]
 								Tempo = codelist[textnum+2][len(codelist[textnum+2])-9:len(codelist[textnum+2])-1:1]
 								TimeSignature = codelist[textnum+3][len(codelist[textnum+3])-5:len(codelist[textnum+3])-1:1]
-								linestowrite = linestowrite + ['    <memory value="'+TimeSignature+Length+Tempo+'" offset="0x80'+SongMemoryOffsets[songNum][2:len(SongMemoryOffsets[songNum]):1].upper()+' />\n']
+								linestowrite = linestowrite + ['    <memory value="'+TimeSignature+Length+Tempo+'" offset="0x80'+SongMemoryOffsets[songNum][2:len(SongMemoryOffsets[songNum]):1].upper()+'" />\n']
 							elif("Style" in codelist[textnum]):
 								styleNum = StyleNames.index(codelist[textnum][1:len(codelist[textnum])-30:1])
 								instrumentSet1 = codelist[textnum+2][0:len(codelist[textnum+2])-1:1].replace(' ','')
 								instrumentSet2 = codelist[textnum+3][0:len(codelist[textnum+3])-1:1].replace(' ','')
 								instrumentSet3 = codelist[textnum+4][0:len(codelist[textnum+4])-1:1].replace(' ','')
-								linestowrite = linestowrite + ['    <memory value="'+instrumentSet1+instrumentSet2+instrumentSet3+'" offset="0x80'+StyleMemoryOffsets[styleNum][2:len(StyleMemoryOffsets[styleNum]):1]+' />\n']
+								linestowrite = linestowrite + ['    <memory value="'+instrumentSet1+instrumentSet2+instrumentSet3+'" offset="0x80'+StyleMemoryOffsets[styleNum][2:len(StyleMemoryOffsets[styleNum]):1]+'" />\n']
 				linestowrite = linestowrite + ['  </patch>\n',
 				'</wiidisc>\n']
 				xml = open(ModPath+'/Riivolution/'+ModName.replace(' ','')+'.xml','w')
