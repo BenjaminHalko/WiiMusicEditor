@@ -437,7 +437,7 @@ StyleMemoryOffsets = [
 '0659ACD4',
 '0659ACF8',
 '0659AD1C',
-'8059AD40']
+'0659AD40']
 
 InstrumentNames = [
 'Piano',
@@ -1424,21 +1424,23 @@ while True:
 						codelist = codes.readlines()
 						codes.close()
 						for textnum in range(len(codelist)):
-							if("Song" in codelist[textnum]) and ("[WiiMusicEditor]" in codelist[textnum]):
-								songNum = SongMemoryOrder.index(codelist[textnum][1:len(codelist[textnum])-29:1])
-								Length = codelist[textnum+1][len(codelist[textnum+1])-9:len(codelist[textnum+1]):1]
-								Tempo = codelist[textnum+2][len(codelist[textnum+2])-9:len(codelist[textnum+2]):1]
-								TimeSignature = codelist[textnum+3][len(codelist[textnum+3])-5:len(codelist[textnum+3]):1]
-								offset = int(MainDolOffsets[5],16)+int(MainDolOffsets[4],16)*songNum
-								maindol = open(GamePath+'/sys/main.dol','r+b')
-								maindol.seek(offset)
-								if(format(int.from_bytes(maindol.read(1), byteorder='little'),'x').upper() != 'FF'):
-									maindol.write(bytes.fromhex(TimeSignature))
-									maindol.seek(offset+4)
-									maindol.write(bytes.fromhex(Length))
-									maindol.seek(offset+8)
-									maindol.write(bytes.fromhex(Tempo))
-								maindol.close()
+							if("[WiiMusicEditor]" in codelist[textnum]):
+								if("Song" in codelist[textnum]):
+									songNum = SongMemoryOrder.index(codelist[textnum][1:len(codelist[textnum])-29:1])
+									Length = codelist[textnum+1][len(codelist[textnum+1])-9:len(codelist[textnum+1]):1]
+									Tempo = codelist[textnum+2][len(codelist[textnum+2])-9:len(codelist[textnum+2]):1]
+									TimeSignature = codelist[textnum+3][len(codelist[textnum+3])-5:len(codelist[textnum+3]):1]
+									offset = int(MainDolOffsets[5],16)+int(MainDolOffsets[4],16)*songNum
+									maindol = open(GamePath+'/sys/main.dol','r+b')
+									maindol.seek(offset)
+									if(format(int.from_bytes(maindol.read(1), byteorder='little'),'x').upper() != 'FF'):
+										maindol.write(bytes.fromhex(TimeSignature))
+										maindol.seek(offset+4)
+										maindol.write(bytes.fromhex(Length))
+										maindol.seek(offset+8)
+										maindol.write(bytes.fromhex(Tempo))
+									maindol.close()
+								
 						print('\nPatch Successful!')
 					else:
 						print('\nNo Gecko Codes Found')
@@ -1484,12 +1486,19 @@ while True:
 					codelist = codes.readlines()
 					codes.close()
 					for textnum in range(len(codelist)):
-						if("Song" in codelist[textnum]) and ("[WiiMusicEditor]" in codelist[textnum]):
-							songNum = SongMemoryOrder.index(codelist[textnum][1:len(codelist[textnum])-29:1])
-							Length = codelist[textnum+1][len(codelist[textnum+1])-9:len(codelist[textnum+1])-1:1]
-							Tempo = codelist[textnum+2][len(codelist[textnum+2])-9:len(codelist[textnum+2])-1:1]
-							TimeSignature = codelist[textnum+3][len(codelist[textnum+3])-5:len(codelist[textnum+3])-1:1]
-							linestowrite = linestowrite + ['    <memory value="'+TimeSignature+Length+Tempo+'" offset="0x80'+SongMemoryOffsets[songNum][2:len(SongMemoryOffsets[songNum]):1]+' />\n']
+						if("[WiiMusicEditor]" in codelist[textnum]):
+							if("Song" in codelist[textnum]):
+								songNum = SongMemoryOrder.index(codelist[textnum][1:len(codelist[textnum])-29:1])
+								Length = codelist[textnum+1][len(codelist[textnum+1])-9:len(codelist[textnum+1])-1:1]
+								Tempo = codelist[textnum+2][len(codelist[textnum+2])-9:len(codelist[textnum+2])-1:1]
+								TimeSignature = codelist[textnum+3][len(codelist[textnum+3])-5:len(codelist[textnum+3])-1:1]
+								linestowrite = linestowrite + ['    <memory value="'+TimeSignature+Length+Tempo+'" offset="0x80'+SongMemoryOffsets[songNum][2:len(SongMemoryOffsets[songNum]):1].upper()+' />\n']
+							elif("Style" in codelist[textnum]):
+								styleNum = StyleNames.index(codelist[textnum][1:len(codelist[textnum])-30:1])
+								instrumentSet1 = codelist[textnum+2][0:len(codelist[textnum+2])-1:1].replace(' ','')
+								instrumentSet2 = codelist[textnum+3][0:len(codelist[textnum+3])-1:1].replace(' ','')
+								instrumentSet3 = codelist[textnum+4][0:len(codelist[textnum+4])-1:1].replace(' ','')
+								linestowrite = linestowrite + ['    <memory value="'+instrumentSet1+instrumentSet2+instrumentSet3+'" offset="0x80'+StyleMemoryOffsets[styleNum][2:len(StyleMemoryOffsets[styleNum]):1]+' />\n']
 				linestowrite = linestowrite + ['  </patch>\n',
 				'</wiidisc>\n']
 				xml = open(ModPath+'/Riivolution/'+ModName.replace(' ','')+'.xml','w')
