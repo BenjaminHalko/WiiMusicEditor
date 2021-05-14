@@ -585,7 +585,7 @@ SongMemoryOrder = [
 'Animal Crossing',
 'F-Zero']
 
-MainDolOffsets = ['59C520','B0','B8','C0','BC']
+MainDolOffsets = ['59C520','B0','B8','C0','BC','59C540']
 MainDolWeirdOffsets = [5,6,7,32]
 
 
@@ -1418,12 +1418,30 @@ while True:
 				FindGameFolder()
 				FindDolphinSave()
 				if(input('\nAre you sure you want to patch Main.dol? [y/n] ') == 'y'):
-					print('\nCreating Gct...')
-					CreateGct()
-					print('\nPatching Main.dol...')
-					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section \"'+ProgramPath+'/R64E01.gct\"',capture_output=True)
-					os.remove(ProgramPath+'/R64E01.gct')
-					print('\nPatch Successful!')
+					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+						print('\nPatching Main.dol...')
+						codes = open(GamePath+'/GeckoCodes.ini')
+						codelist = codes.readlines()
+						codes.close()
+						for textnum in range(len(codelist)):
+							if("Song" in codelist[textnum]) and ("[WiiMusicEditor]" in codelist[textnum]):
+								songNum = SongMemoryOrder.index(codelist[textnum][1:len(codelist[textnum])-29:1])
+								Length = codelist[textnum+1][len(codelist[textnum+1])-9:len(codelist[textnum+1]):1]
+								Tempo = codelist[textnum+2][len(codelist[textnum+2])-9:len(codelist[textnum+2]):1]
+								TimeSignature = codelist[textnum+3][len(codelist[textnum+3])-5:len(codelist[textnum+3]):1]
+								offset = int(MainDolOffsets[5],16)+int(MainDolOffsets[4],16)*songNum
+								maindol = open(GamePath+'/sys/main.dol','r+b')
+								maindol.seek(offset)
+								if(format(int.from_bytes(maindol.read(1), byteorder='little'),'x').upper() != 'FF'):
+									maindol.write(bytes.fromhex(TimeSignature))
+									maindol.seek(offset+4)
+									maindol.write(bytes.fromhex(Length))
+									maindol.seek(offset+8)
+									maindol.write(bytes.fromhex(Tempo))
+								maindol.close()
+						print('\nPatch Successful!')
+					else:
+						print('\nNo Gecko Codes Found')
 			elif(Selection == 5): #////////////////////////////////////////Riivolution Patch
 				PrintSectionTitle('Riivolution Patch')
 				FindGameFolder()
