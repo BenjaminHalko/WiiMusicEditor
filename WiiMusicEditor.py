@@ -588,6 +588,7 @@ SongMemoryOrder = [
 MainDolOffsets = ['59C520','B0','B8','C0','BC','59C540']
 MainDolWeirdOffsets = [5,6,7,32]
 
+GctValues = ['00D0C0DE00D0C0DE','F000000000000000']
 
 #Functions
 def AddPatch(PatchName,PatchInfo):
@@ -947,18 +948,17 @@ def ChangeDefaultAnswer(ResponseOptions,iniKey):
 def CreateGct():
 	global GamePath
 	global ProgramPath
-	if(os.path.isfile('R64E01.gct')): os.remove('R64E01.gct')
 	patches = open(GamePath+'/GeckoCodes.ini')
 	textlines = patches.readlines()
 	patches.close()
-	codes = ''
+	codes = GctValues[0]
 	for text in textlines:
 		if(text[0].isalpha() or text[0].isnumeric()):
-			codes = codes + text
-
-	print('\n'+codes)
-	while(not os.path.isfile(ProgramPath+'/R64E01.gct')):
-		input('Take these codes and make a gct. Use this website: https://mkwii.com/gct/\nIn the Game Id window put \"R64E01\" and in the Code Title window put whatever you want.\nPut it in the root directory of the Wii Music Editor and name it R64E01.gct. (Press Enter to continue) ')
+			codes = codes + text.replace(' ','').strip()
+	codes = codes+GctValues[1]
+	patch = open(ProgramPath+'/R64E01.gct','wb')
+	patch.write(bytes.fromhex(codes))
+	patch.close()
 
 #Default Paths
 ProgramPath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
@@ -1419,28 +1419,11 @@ while True:
 				FindDolphinSave()
 				if(input('\nAre you sure you want to patch Main.dol? [y/n] ') == 'y'):
 					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+						print('\nCreating Gct...')
+						CreateGct()
 						print('\nPatching Main.dol...')
-						codes = open(GamePath+'/GeckoCodes.ini')
-						codelist = codes.readlines()
-						codes.close()
-						for textnum in range(len(codelist)):
-							if("[WiiMusicEditor]" in codelist[textnum]):
-								if("Song" in codelist[textnum]):
-									songNum = SongMemoryOrder.index(codelist[textnum][1:len(codelist[textnum])-29:1])
-									Length = codelist[textnum+1][len(codelist[textnum+1])-9:len(codelist[textnum+1]):1]
-									Tempo = codelist[textnum+2][len(codelist[textnum+2])-9:len(codelist[textnum+2]):1]
-									TimeSignature = codelist[textnum+3][len(codelist[textnum+3])-5:len(codelist[textnum+3]):1]
-									offset = int(MainDolOffsets[5],16)+int(MainDolOffsets[4],16)*songNum
-									maindol = open(GamePath+'/sys/main.dol','r+b')
-									maindol.seek(offset)
-									if(format(int.from_bytes(maindol.read(1), byteorder='little'),'x').upper() != 'FF'):
-										maindol.write(bytes.fromhex(TimeSignature))
-										maindol.seek(offset+4)
-										maindol.write(bytes.fromhex(Length))
-										maindol.seek(offset+8)
-										maindol.write(bytes.fromhex(Tempo))
-									maindol.close()
-								
+						subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section \"'+ProgramPath+'/R64E01.gct\"',capture_output=True)
+						os.remove(ProgramPath+'/R64E01.gct')
 						print('\nPatch Successful!')
 					else:
 						print('\nNo Gecko Codes Found')
@@ -1459,12 +1442,16 @@ while True:
 				ModPath = ModPath+ModName
 				os.mkdir(ModPath)
 				os.mkdir(ModPath+'/Riivolution')
+				os.mkdir(ModPath+'/Riivolution/codes')
 				os.mkdir(ModPath+'/'+ModName.replace(' ',''))
+				print('\nMaking Gct...')
+				CreateGct()
 				print('\nCopying Files...')
 				copyfile(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar',ModPath+'/'+ModName.replace(' ','')+'/rp_Music_sound.brsar')
 				copyfile(GamePath+'/files/US/Message/message.carc',ModPath+'/'+ModName.replace(' ','')+'/message.carc')
+				copyfile(ProgramPath+'/Helper/GctFiles/codehandler.bin',ModPath+'/Riivolution/codehandler.bin')
+				os.rename(ProgramPath+'/R64E01.gct',ModPath+'/Riivolution/codes/R64E01.gct')
 				print('\nCreating XML file...')
-				
 				linestowrite = [
 				'<wiidisc version="1" root="">\n',
 				'  <id game="R64" />\n',
@@ -1479,27 +1466,14 @@ while True:
 				'  </options>\n',
 				'  <patch id="TheMod">\n',
 				'    <file disc="/Sound/MusicStatic/rp_Music_sound.brsar" external="/'+ModName.replace(' ','')+'/rp_Music_sound.brsar" offset="" />\n',
-				'    <file disc="/US/Message/message.carc" external="/'+ModName.replace(' ','')+'/message.carc" offset="" />\n']
-				if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
-					print('\nPatching Main.dol...')
-					codes = open(GamePath+'/GeckoCodes.ini')
-					codelist = codes.readlines()
-					codes.close()
-					for textnum in range(len(codelist)):
-						if("[WiiMusicEditor]" in codelist[textnum]):
-							if("Song" in codelist[textnum]):
-								songNum = SongMemoryOrder.index(codelist[textnum][1:len(codelist[textnum])-29:1])
-								Length = codelist[textnum+1][len(codelist[textnum+1])-9:len(codelist[textnum+1])-1:1]
-								Tempo = codelist[textnum+2][len(codelist[textnum+2])-9:len(codelist[textnum+2])-1:1]
-								TimeSignature = codelist[textnum+3][len(codelist[textnum+3])-5:len(codelist[textnum+3])-1:1]
-								linestowrite = linestowrite + ['    <memory value="'+TimeSignature+Length+Tempo+'" offset="0x80'+SongMemoryOffsets[songNum][2:len(SongMemoryOffsets[songNum]):1].upper()+'" />\n']
-							elif("Style" in codelist[textnum]):
-								styleNum = StyleNames.index(codelist[textnum][1:len(codelist[textnum])-30:1])
-								instrumentSet1 = codelist[textnum+2][0:len(codelist[textnum+2])-1:1].replace(' ','')
-								instrumentSet2 = codelist[textnum+3][0:len(codelist[textnum+3])-1:1].replace(' ','')
-								instrumentSet3 = codelist[textnum+4][0:len(codelist[textnum+4])-1:1].replace(' ','')
-								linestowrite = linestowrite + ['    <memory value="'+instrumentSet1+instrumentSet2+instrumentSet3+'" offset="0x80'+StyleMemoryOffsets[styleNum][2:len(StyleMemoryOffsets[styleNum]):1]+'" />\n']
-				linestowrite = linestowrite + ['  </patch>\n',
+				'    <file disc="/US/Message/message.carc" external="/'+ModName.replace(' ','')+'/message.carc" offset="" />\n',
+				'    <memory valuefile="codehandler.bin" offset="0x80001800" />\n',
+				'    <memory value="8000" offset="0x00001CDE" />\n',
+				'    <memory value="28B8" offset="0x00001CE2" />\n',
+				'    <memory value="8000" offset="0x00001F5A" />\n',
+				'    <memory value="28B8" offset="0x00001F5E" />\n',
+				'    <memory valuefile="/codes/R64E01.gct" offset="0x800028B8" />\n',
+				'  </patch>\n',
 				'</wiidisc>\n']
 				xml = open(ModPath+'/Riivolution/'+ModName.replace(' ','')+'.xml','w')
 				xml.writelines(linestowrite)
