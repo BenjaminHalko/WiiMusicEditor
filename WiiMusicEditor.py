@@ -1292,8 +1292,9 @@ while True:
 			print("(#1) Change All Wii Music Text")
 			print("(#2) Remove Song")
 			print("(#3) Extract/Pack Wii Music ROM")
-			print("(#4) Patch Main.dol With Gecko Codes")
-			print("(#5) Create Riivolution Patch")
+			print("(#4) Create GCT")
+			print("(#5) Patch Main.dol With Gecko Codes")
+			print("(#6) Create Riivolution Patch")
 
 			Selection = MakeSelection(['Please Select an Option',0,5])
 
@@ -1329,7 +1330,7 @@ while True:
 							if('[WiiMusicEditor]' in text) and ('Style' not in text):
 								appliedCustomSongs.append(text[1:len(text)-29:1])
 				
-				for number in range(len(SongNames)-1):
+				for number in range(len(SongNames)-2):
 					if(Selection != len(SongNames)-1):
 						number = SongMemoryOrder.index(SongNames[Selection])
 					
@@ -1416,6 +1417,14 @@ while True:
 				print('')
 			elif(Selection == 4): #////////////////////////////////////////Patch Main.dol
 				FindGameFolder()
+				print('\nCreating Gct...')
+				CreateGct()
+				if(os.path.isfile(GamePath+'/R64E01.gct')): os.remove(GamePath+'/R64E01.gct')
+				os.rename(ProgramPath+'/R64E01.gct',GamePath+'/R64E01.gct')
+				print('\nCreation Complete!')
+				print('Saved to: '+GamePath+'/R64E01.gct')
+			elif(Selection == 5): #////////////////////////////////////////Patch Main.dol
+				FindGameFolder()
 				FindDolphinSave()
 				if(input('\nAre you sure you want to patch Main.dol? [y/n] ') == 'y'):
 					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
@@ -1427,7 +1436,7 @@ while True:
 						print('\nPatch Successful!')
 					else:
 						print('\nNo Gecko Codes Found')
-			elif(Selection == 5): #////////////////////////////////////////Riivolution Patch
+			elif(Selection == 6): #////////////////////////////////////////Riivolution Patch
 				PrintSectionTitle('Riivolution Patch')
 				FindGameFolder()
 				FindDolphinSave()
