@@ -1296,7 +1296,7 @@ while True:
 			print("(#5) Patch Main.dol With Gecko Codes")
 			print("(#6) Create Riivolution Patch")
 
-			Selection = MakeSelection(['Please Select an Option',0,5])
+			Selection = MakeSelection(['Please Select an Option',0,6])
 
 			if(Selection == 1): #////////////////////////////////////////Change Text
 				#Load Files
