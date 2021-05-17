@@ -437,7 +437,7 @@ StyleMemoryOffsets = [
 '0659ACD4',
 '0659ACF8',
 '0659AD1C',
-'8059AD40']
+'0659AD40']
 
 InstrumentNames = [
 'Piano',
@@ -585,9 +585,10 @@ SongMemoryOrder = [
 'Animal Crossing',
 'F-Zero']
 
-MainDolOffsets = ['59C520','B0','B8','C0','BC']
+MainDolOffsets = ['59C520','B0','B8','C0','BC','59C540']
 MainDolWeirdOffsets = [5,6,7,32]
 
+GctValues = ['00D0C0DE00D0C0DE','F000000000000000']
 
 #Functions
 def AddPatch(PatchName,PatchInfo):
@@ -947,18 +948,17 @@ def ChangeDefaultAnswer(ResponseOptions,iniKey):
 def CreateGct():
 	global GamePath
 	global ProgramPath
-	if(os.path.isfile('R64E01.gct')): os.remove('R64E01.gct')
 	patches = open(GamePath+'/GeckoCodes.ini')
 	textlines = patches.readlines()
 	patches.close()
-	codes = ''
+	codes = GctValues[0]
 	for text in textlines:
 		if(text[0].isalpha() or text[0].isnumeric()):
-			codes = codes + text
-
-	print('\n'+codes)
-	while(not os.path.isfile(ProgramPath+'/R64E01.gct')):
-		input('Take these codes and make a gct. Use this website: https://mkwii.com/gct/\nIn the Game Id window put \"R64E01\" and in the Code Title window put whatever you want.\nPut it in the root directory of the Wii Music Editor and name it R64E01.gct. (Press Enter to continue) ')
+			codes = codes + text.replace(' ','').strip()
+	codes = codes+GctValues[1]
+	patch = open(ProgramPath+'/R64E01.gct','wb')
+	patch.write(bytes.fromhex(codes))
+	patch.close()
 
 #Default Paths
 ProgramPath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
@@ -1292,10 +1292,11 @@ while True:
 			print("(#1) Change All Wii Music Text")
 			print("(#2) Remove Song")
 			print("(#3) Extract/Pack Wii Music ROM")
-			print("(#4) Patch Main.dol With Gecko Codes")
-			print("(#5) Create Riivolution Patch")
+			print("(#4) Create GCT")
+			print("(#5) Patch Main.dol With Gecko Codes")
+			print("(#6) Create Riivolution Patch")
 
-			Selection = MakeSelection(['Please Select an Option',0,5])
+			Selection = MakeSelection(['Please Select an Option',0,6])
 
 			if(Selection == 1): #////////////////////////////////////////Change Text
 				#Load Files
@@ -1329,7 +1330,7 @@ while True:
 							if('[WiiMusicEditor]' in text) and ('Style' not in text):
 								appliedCustomSongs.append(text[1:len(text)-29:1])
 				
-				for number in range(len(SongNames)-1):
+				for number in range(len(SongNames)-2):
 					if(Selection != len(SongNames)-1):
 						number = SongMemoryOrder.index(SongNames[Selection])
 					
@@ -1416,15 +1417,26 @@ while True:
 				print('')
 			elif(Selection == 4): #////////////////////////////////////////Patch Main.dol
 				FindGameFolder()
+				print('\nCreating Gct...')
+				CreateGct()
+				if(os.path.isfile(GamePath+'/R64E01.gct')): os.remove(GamePath+'/R64E01.gct')
+				os.rename(ProgramPath+'/R64E01.gct',GamePath+'/R64E01.gct')
+				print('\nCreation Complete!')
+				print('Saved to: '+GamePath+'/R64E01.gct')
+			elif(Selection == 5): #////////////////////////////////////////Patch Main.dol
+				FindGameFolder()
 				FindDolphinSave()
 				if(input('\nAre you sure you want to patch Main.dol? [y/n] ') == 'y'):
-					print('\nCreating Gct...')
-					CreateGct()
-					print('\nPatching Main.dol...')
-					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section \"'+ProgramPath+'/R64E01.gct\"',capture_output=True)
-					os.remove(ProgramPath+'/R64E01.gct')
-					print('\nPatch Successful!')
-			elif(Selection == 5): #////////////////////////////////////////Riivolution Patch
+					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+						print('\nCreating Gct...')
+						CreateGct()
+						print('\nPatching Main.dol...')
+						subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section \"'+ProgramPath+'/R64E01.gct\"',capture_output=True)
+						os.remove(ProgramPath+'/R64E01.gct')
+						print('\nPatch Successful!')
+					else:
+						print('\nNo Gecko Codes Found')
+			elif(Selection == 6): #////////////////////////////////////////Riivolution Patch
 				PrintSectionTitle('Riivolution Patch')
 				FindGameFolder()
 				FindDolphinSave()
