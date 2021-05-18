@@ -5,6 +5,6 @@ cd..
 cd..
 cd..
 
-robocopy "%CD%\WiiMusicEditorNew" "%CD%" /MIR /XF settings.ini /XD .git WiiMusicEditorNew /Helper/Backup > nul
+robocopy "%CD%\WiiMusicEditorNew" "%CD%" /MIR /XF settings.ini /XD .git WiiMusicEditorNew "%CD%\Helper\Backup" > nul
 
 WiiMusicEditor.bat
