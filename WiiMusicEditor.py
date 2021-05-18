@@ -10,6 +10,7 @@ from shutil import copyfile, rmtree, copytree
 from math import floor, ceil
 from typing import ByteString
 import webbrowser
+import hashlib
 
 #Special Imports
 while True:
@@ -675,7 +676,7 @@ def FindGameFolder():
 				FindWiiDiskFolder()
 				break
 			elif(os.path.isfile(GamePath)) and (pathlib.Path(GamePath).suffix in ExceptedFileExtensions):
-				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/extractdisk.bat\" \"'+os.path.dirname(GamePath)+'\" \"'+os.path.splitext(os.path.basename(GamePath))[0]+'\" '+os.path.splitext(os.path.basename(GamePath))[1])
+				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp --fst \"'+GamePath+'\" \"'+os.path.dirname(GamePath)+"/"+os.path.splitext(os.path.basename(GamePath))[0]+'\"')
 				GamePath = os.path.dirname(GamePath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(GamePath))[0]+'/DATA'
 				SaveSetting('Paths','GamePath',GamePath)
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
@@ -684,9 +685,6 @@ def FindGameFolder():
 				break
 			else:
 				print("\nERROR: Unable to Locate Valid Wii Music Directory")
-	if(not os.path.isfile(BrsarPath+'.backup')): copyfile(BrsarPath,BrsarPath+'.backup')
-	if(not os.path.isfile(MessagePath+'.backup')): copyfile(MessagePath,MessagePath+'.backup')
-	if(not os.path.isfile(GamePath+'/sys/main.dol.backup')): copyfile(GamePath+'/sys/main.dol',GamePath+'/sys/main.dol.backup')
 
 def FindWiiDiskFolder():
 	global GamePath
@@ -878,7 +876,6 @@ def DownloadUpdate():
 			if(not os.path.isdir(newPath)):
 				newPath = 'WiiMusicEditor-beta'
 			os.rename(newPath, 'WiiMusicEditorNew')
-			if(os.path.isfile(ProgramPath+'/WiiMusicEditorNew/.gitignore')): os.remove(ProgramPath+'/WiiMusicEditorNew/.gitignore')
 			subprocess.run(ProgramPath+'/WiiMusicEditorNew/Helper/Update/Update.bat')
 			quit()
 			return False
@@ -960,6 +957,76 @@ def CreateGct():
 	patch.write(bytes.fromhex(codes))
 	patch.close()
 
+def LoadNormalFiles():
+	global ProgramPath
+	global GamePath
+	ExceptedFileExtensions = ['.iso','.wbfs']
+	TempPath = GamePath
+	while True:
+		if(TempPath == ""):
+			TempPath = input("\nDrag an UNALTERED Wii Music Directory or a Wii Music Disk on to the Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+		if(os.path.isdir(TempPath+'/DATA/files')) or (os.path.isdir(TempPath+'/files')):
+			if(os.path.isdir(TempPath+'/DATA')):
+				TempPath = os.path.dirname(TempPath+'/DATA/files').replace('\\','/')
+			else:
+				TempPath = os.path.dirname(TempPath+'/files').replace('\\','/')
+			if(CheckFiles(TempPath)):
+				CopyUnalteredFiles(TempPath)
+				break
+			else:
+				if(TempPath != GamePath): print("Not an Unaltered Wii Music Directory")
+				
+		elif(os.path.isfile(TempPath)) and (pathlib.Path(TempPath).suffix in ExceptedFileExtensions):
+			if(os.path.isdir(ProgramPath+"/Disk")): rmtree(ProgramPath+"/Disk")
+			subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp --fst \"'+TempPath+'\" \"'+ProgramPath+'/Disk/\"')
+			TempPath = ProgramPath+'/Disk/DATA'
+			if(CheckFiles(TempPath)):
+				CopyUnalteredFiles(TempPath)
+				allowBreak = True
+			else:
+				if(TempPath != GamePath):
+					print("Not an Unaltered Wii Music Directory")
+				allowBreak = False
+			rmtree(ProgramPath+"/Disk")
+			if(allowBreak): break
+		else:
+			if(TempPath != GamePath): print("\nERROR: Unable to Locate Valid Wii Music Directory")
+		TempPath = ""
+
+def CheckFiles(directory):
+	global brsarChecksum
+	global messageChecksum
+	global mainDolChecksum
+	md5_hash = hashlib.md5()
+	a_file = open(directory+'/files/Sound/MusicStatic/rp_Music_sound.brsar', "rb")
+	content = a_file.read()
+	a_file.close()
+	md5_hash.update(content)
+	currentBrsarChecksum = md5_hash.hexdigest()
+	md5_hash = hashlib.md5()
+	a_file = open(directory+'/files/US/Message/message.carc', "rb")
+	content = a_file.read()
+	a_file.close()
+	md5_hash.update(content)
+	currentMessageChecksum = md5_hash.hexdigest()
+	md5_hash = hashlib.md5()
+	a_file = open(directory+'/sys/main.dol', "rb")
+	content = a_file.read()
+	a_file.close()
+	md5_hash.update(content)
+	currentMainDolChecksum = md5_hash.hexdigest()
+	return (currentBrsarChecksum == brsarChecksum) and (currentMessageChecksum == messageChecksum) and (currentMainDolChecksum == mainDolChecksum)
+
+def CopyUnalteredFiles(dir):
+	global ProgramPath
+	if(not os.path.isdir(ProgramPath+'/Helper/Backup')): os.mkdir(ProgramPath+'/Helper/Backup')
+	if(not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')):
+		copyfile(dir+'/files/Sound/MusicStatic/rp_Music_sound.brsar',ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')
+	if(not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')):
+		copyfile(dir+'/files/US/Message/message.carc',ProgramPath+'/Helper/Backup/message.carc')
+	if(not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol')):
+		copyfile(dir+'/sys/main.dol',ProgramPath+'/Helper/Backup/main.dol')
+
 #Default Paths
 ProgramPath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
 GamePath = LoadSetting('Paths','GamePath','None')
@@ -971,6 +1038,11 @@ SaveDataPath = DolphinSaveData+"/Wii/title/00010000/52363445/data"
 DolphinPath = LoadSetting('Paths','DolphinPath','None')
 WiiDiskFolder = ''
 FindWiiDiskFolder()
+
+#Checksums
+brsarChecksum = "e1f24f2363ed9accddc5c21d6a4b8149"
+messageChecksum = "dcb17927eaa761648d4a8639973cc13a"
+mainDolChecksum = "b72505b4877a4d55435a597fa2544a77"
 
 #Update
 beta = int(LoadSetting('Updates', 'Branch', '0'))
@@ -1030,8 +1102,12 @@ while True:
 		print('\nThanks for Downloading the Wii Music Editor!')
 		print('\nLet\'s Setup Some File Paths for You!')
 		FindGameFolder()
+		if(not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol')):
+			LoadNormalFiles()
 		if(input('\nWould You Like to Specify a Dolphin Directory? [y/n] ') == 'y'):
 			FindDolphin()
+	elif(not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol')):
+		LoadNormalFiles()
 
 	#Options
 	PrintSectionTitle('Options')
@@ -1381,7 +1457,7 @@ while True:
 							break
 						else:
 							print('ERROR: Not Supported File Type')
-					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/extractdisk.bat\" \"'+os.path.dirname(DiskPath)+'\" \"'+os.path.splitext(os.path.basename(DiskPath))[0]+'\" '+os.path.splitext(os.path.basename(DiskPath))[1])
+					subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp --fst \"'+DiskPath+'\" \"'+os.path.dirname(DiskPath)+"/"+os.path.splitext(os.path.basename(DiskPath))[0]+'\"')
 					if(input('\nWould You Like to Set This Path as the Current Game Path? [y/n] ') == 'y'):
 						GamePath = os.path.dirname(DiskPath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(DiskPath))[0]+'/DATA'
 						BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
@@ -1538,16 +1614,16 @@ while True:
 							codes = open(GamePath+'/GeckoCodes.ini','w')
 							codes.writelines(textlines)
 							codes.close()
-						if(os.path.isfile(BrsarPath+'.backup')):
+						if(os.path.isfile(ProgramPath+"/Helper/Backup/rp_Music_sound.brsar")):
 							os.remove(BrsarPath)
-							copyfile(BrsarPath+'.backup',BrsarPath)
+							copyfile(ProgramPath+"/Helper/Backup/rp_Music_sound.brsar",BrsarPath)
 							print('\nSongs Reverted')
 						else:
 							print('\nERROR: Backup not found')
 					elif(num == 2):
-						if(os.path.isfile(MessagePath+'.backup')):
+						if(os.path.isfile(ProgramPath+"/Helper/Backup/message.carc")):
 							os.remove(MessagePath)
-							copyfile(MessagePath+'.backup',MessagePath)
+							copyfile(ProgramPath+"/Helper/Backup/message.carc",MessagePath)
 							print('\nText Reverted')
 						else:
 							print('\nERROR: Backup not found')
@@ -1567,9 +1643,9 @@ while True:
 							codes.close()
 						print('\nStyles Reverted')
 					elif(num == 4):
-						if(os.path.isfile(GamePath+'/sys/main.dol.backup')):
+						if(os.path.isfile(ProgramPath+"/Helper/Backup/main.dol")):
 							os.remove(GamePath+'/sys/main.dol')
-							copyfile(GamePath+'/sys/main.dol.backup',GamePath+'/sys/main.dol')
+							copyfile(ProgramPath+"/Helper/Backup/main.dol",GamePath+'/sys/main.dol')
 							print('\nMain.dol Reverted')
 						else:
 							print('\nERROR: Backup not found')
