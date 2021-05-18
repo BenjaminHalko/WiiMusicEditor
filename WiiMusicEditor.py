@@ -1414,11 +1414,10 @@ while True:
 			print("(#2) Remove Song")
 			print("(#3) Import/Export Files")
 			print("(#4) Extract/Pack Wii Music ROM")
-			print("(#5) Create GCT")
-			print("(#6) Patch Main.dol With Gecko Codes")
-			print("(#7) Create Riivolution Patch")
+			print("(#5) Patch Main.dol With Gecko Codes")
+			print("(#6) Create Riivolution Patch")
 
-			Selection = MakeSelection(['Please Select an Option',0,7])
+			Selection = MakeSelection(['Please Select an Option',0,6])
 
 			if(Selection == 1): #////////////////////////////////////////Change Text
 				#Load Files
@@ -1492,8 +1491,8 @@ while True:
 					PrintSectionTitle('Import/Export Files')
 					print("(#0) Back To Main Menu")
 					print("(#1) Import Files")
-					print("(#2) Export Files to .zip (IN PROGRESS)")
-					print("(#3) Export Files to Folder (IN PROGRESS)")
+					print("(#2) Export Files to .zip")
+					print("(#3) Export Files to Folder")
 
 					Selection = MakeSelection(['Choose an Option',0,3])
 					if(Selection == 1):
@@ -1510,7 +1509,63 @@ while True:
 								break
 							else:
 								print('\nERROR: Bad Filetype')
-					else: break
+					
+					elif(Selection == 0): break
+					else:
+						name = os.path.dirname(GamePath)+" Extracted Files"
+						number = ""
+						num = 0
+						while(os.path.isdir(name+number) and Selection == 3) or (os.path.isfile(name+number+".zip") and Selection == 2):
+							num = num+1
+							number = " ("+str(num)+")"
+						name = name+number
+						if(Selection == 3) and (not os.path.isdir(name)): os.mkdir(name)
+						if(Selection == 2): zipObj = zipfile.ZipFile(name+'.zip', 'w')
+						md5_hash = hashlib.md5()
+						a_file = open(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar', "rb")
+						content = a_file.read()
+						a_file.close()
+						md5_hash.update(content)
+						if(brsarChecksum != md5_hash.hexdigest()):
+							if(Selection == 3):
+								copyfile(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar',name+'/rp_Music_sound.brsar')
+							else:
+								zipObj.write(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar','rp_Music_sound.brsar')
+						md5_hash = hashlib.md5()
+						a_file = open(GamePath+'/files/US/Message/message.carc', "rb")
+						content = a_file.read()
+						a_file.close()
+						md5_hash.update(content)
+						if(messageChecksum != md5_hash.hexdigest()):
+							if(Selection == 3):
+								copyfile(GamePath+'/files/US/Message/message.carc',name+'/message.carc')
+							else:
+								zipObj.write(GamePath+'/files/US/Message/message.carc','message.carc')
+						md5_hash = hashlib.md5()
+						a_file = open(GamePath+'/sys/main.dol', "rb")
+						content = a_file.read()
+						a_file.close()
+						md5_hash.update(content)
+						if(mainDolChecksum != md5_hash.hexdigest()):
+							if(Selection == 3):
+								copyfile(GamePath+'/sys/main.dol',name+'/main.dol')
+							else:
+								zipObj.write(GamePath+'/sys/main.dol','main.dol')
+						if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+							if(Selection == 3):
+								copyfile(GamePath+'/GeckoCodes.ini',name+'/GeckoCodes.ini')
+							else:
+								zipObj.write(GamePath+'/GeckoCodes.ini','GeckoCodes.ini')
+							CreateGct()
+							if(Selection == 3):
+								os.rename(ProgramPath+'/R64E01.gct',name+'/R64E01.gct')
+							else:
+								zipObj.write(ProgramPath+'/R64E01.gct','R64E01.gct')
+								os.remove(ProgramPath+'/R64E01.gct')
+						if(Selection == 2):
+							zipObj.close()
+							name = name+'.zip'
+						print('\nExport Complete!\nSaved to: '+name)
 
 			elif(Selection == 4): #////////////////////////////////////////Extract/Pack Wii Music ROM
 				while True:
@@ -1572,20 +1627,7 @@ while True:
 				os.rename(ProgramPath+'/R64E01.gct',GamePath+'/R64E01.gct')
 				print('\nCreation Complete!')
 				print('Saved to: '+GamePath+'/R64E01.gct')
-			elif(Selection == 6): #////////////////////////////////////////Create GCT
-				FindGameFolder()
-				FindDolphinSave()
-				if(input('\nAre you sure you want to patch Main.dol? [y/n] ') == 'y'):
-					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
-						print('\nCreating Gct...')
-						CreateGct()
-						print('\nPatching Main.dol...')
-						subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section \"'+ProgramPath+'/R64E01.gct\"',capture_output=True)
-						os.remove(ProgramPath+'/R64E01.gct')
-						print('\nPatch Successful!')
-					else:
-						print('\nNo Gecko Codes Found')
-			elif(Selection == 7): #////////////////////////////////////////Riivolution Patch
+			elif(Selection == 6): #////////////////////////////////////////Riivolution Patch
 				PrintSectionTitle('Riivolution Patch')
 				FindGameFolder()
 				FindDolphinSave()
