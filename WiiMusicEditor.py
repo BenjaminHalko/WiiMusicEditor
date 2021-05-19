@@ -1491,7 +1491,21 @@ while True:
 				print('(#'+str(len(SongNames)-1)+') All Songs')
 				SongToReplace = MakeSelection(['Choose a Song You Want to Replace',0,len(SongNames)-1])
 				Selection = MakeSelection(['What will the song get replaced with',0,len(SongNames)-2])
+				patch = open(GamePath+'/GeckoCodes.ini')
+				textlines = patch.readlines()
+				patch.close()
+				codes = [0,0,0]
+						
+				for num in range(len(textlines)):
+					if(SongNames[Selection] in textlines[num]):
+						if('[WiiMusicEditor]' in textlines[num]):
+							for number in range(3):
+								codes[number] = textlines[num+number+1][8:len(textlines[num+number+1]):1]
+							break
+
 				dol = open(GamePath+'/sys/main.dol','r+b')
+				patchCode = ""
+				name = ""
 				for num in range(len(SongNames)-1):
 					song = num
 					if(SongToReplace != len(SongNames)-1): song = SongToReplace
@@ -1500,6 +1514,10 @@ while True:
 						selectNum = SongMemoryOrder.index(SongNames[Selection])
 						dol.seek(int(MainDolOffsets[6],16)+int("BC",16)*songNum)
 						dol.write(bytes.fromhex(SongIds[selectNum][0]+'0000'+SongIds[selectNum][1]))
+						LengthCode = '0'+format(int(SongMemoryOffsets[songNum],16)+6,'x').lower()+codes[0]
+						TempoCode = '0'+format(int(SongMemoryOffsets[songNum],16)+10,'x').lower()+codes[1]
+						TimeCode = SongMemoryOffsets[songNum]+codes[2]
+						AddPatch(SongNames[song]+' Song Patch',LengthCode+TempoCode+TimeCode)
 					if(SongToReplace != len(SongNames)-1): break
 				dol.close()
 			elif(Selection == 3): #////////////////////////////////////////Remove Song
