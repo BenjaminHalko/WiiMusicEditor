@@ -587,7 +587,59 @@ SongMemoryOrder = [
 'Animal Crossing',
 'F-Zero']
 
-MainDolOffsets = ['59C520','B0','B8','C0','BC','59C540']
+SongIds = [
+['0155','0156'],
+['0157','0158'],
+['0159','015A'],
+['015B','015C'],
+['015D','015E'],
+['015F','0160'],
+['0161','0162'],
+['0163','0164'],
+['0165','0166'],
+['0167','0168'],
+['0169','016A'],
+['016B','016C'],
+['016D','016E'],
+['016F','0170'],
+['0171','0172'],
+['0173','0174'],
+['0175','0176'],
+['0177','0178'],
+['0179','017A'],
+['017B','017C'],
+['017D','017E'],
+['017F','0180'],
+['0181','0182'],
+['0183','0184'],
+['0185','0186'],
+['0187','0188'],
+['0189','018A'],
+['018B','018C'],
+['018D','018E'],
+['018F','0190'],
+['0191','0192'],
+['0193','0194'],
+['0195','0196'],
+['0197','0198'],
+['0199','019A'],
+['019B','019C'],
+['019D','019E'],
+['019F','01A0'],
+['01A1','01A2'],
+['01A3','01A4'],
+['01A5','01A6'],
+['01A7','01A8'],
+['01A9','01AA'],
+['01AB','01AC'],
+['01AD','01AE'],
+['01AF','01B0'],
+['01B1','01B2'],
+['01B3','01B4'],
+['01B5','01B6'],
+['01B7','01B8']]
+
+MainDolOffsets = ['59C520','B0','B8','C0','BC','59C540','59C56E']
 MainDolWeirdOffsets = [5,6,7,32]
 
 GctValues = ['00D0C0DE00D0C0DE','F000000000000000']
@@ -1136,7 +1188,7 @@ while True:
 	print("//       Music Editor       //")
 	print("//                          //")
 	print("//////////////////////////////\n")
-	
+
 	#Updates
 	if(AutoUpdate) and (not uptodate):
 		uptodate = True
@@ -1411,13 +1463,14 @@ while True:
 			PrintSectionTitle('Advanced Tools')
 			print("(#0) Back to Main Menu")
 			print("(#1) Change All Wii Music Text")
-			print("(#2) Remove Song")
-			print("(#3) Import/Export Files")
-			print("(#4) Extract/Pack Wii Music ROM")
-			print("(#5) Patch Main.dol With Gecko Codes")
-			print("(#6) Create Riivolution Patch")
+			print("(#2) Swap Songs")
+			print("(#3) Remove Song")
+			print("(#4) Import/Export Files")
+			print("(#5) Extract/Pack Wii Music ROM")
+			print("(#6) Patch Main.dol With Gecko Codes")
+			print("(#7) Create Riivolution Patch")
 
-			Selection = MakeSelection(['Please Select an Option',0,6])
+			Selection = MakeSelection(['Please Select an Option',0,7])
 
 			if(Selection == 1): #////////////////////////////////////////Change Text
 				#Load Files
@@ -1430,7 +1483,26 @@ while True:
 				subprocess.run('notepad \"'+MessageFolder().replace('\"','')+'/message.d/new_music_message.txt\"',capture_output=True)
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 				print("\nEditing Successful!\n")
-			elif(Selection == 2): #////////////////////////////////////////Remove Song
+			elif(Selection == 2): #////////////////////////////////////////Swap Songs
+				PrintSectionTitle('Swap Songs')
+				for num in range(len(SongNames)-1):
+					print('(#'+str(num)+') '+str(SongNames[num]))
+					time.sleep(0.005)
+				print('(#'+str(len(SongNames)-1)+') All Songs')
+				SongToReplace = MakeSelection(['Choose a Song You Want to Replace',0,len(SongNames)-1])
+				Selection = MakeSelection(['What will the song get replaced with',0,len(SongNames)-2])
+				dol = open(GamePath+'/sys/main.dol','r+b')
+				for num in range(len(SongNames)-1):
+					song = num
+					if(SongToReplace != len(SongNames)-1): song = SongToReplace
+					if(song != Selection):
+						songNum = SongMemoryOrder.index(SongNames[song])
+						selectNum = SongMemoryOrder.index(SongNames[Selection])
+						dol.seek(int(MainDolOffsets[6],16)+int("BC",16)*songNum)
+						dol.write(bytes.fromhex(SongIds[selectNum][0]+'0000'+SongIds[selectNum][1]))
+					if(SongToReplace != len(SongNames)-1): break
+				dol.close()
+			elif(Selection == 3): #////////////////////////////////////////Remove Song
 				FindGameFolder()
 				FindDolphinSave()
 				PrintSectionTitle('Remove Song')
@@ -1486,7 +1558,7 @@ while True:
 						if(Selection != len(SongNames)-1): break
 
 				print('\nEradication Complete!')
-			elif(Selection == 3): #////////////////////////////////////////Import/Export Files
+			elif(Selection == 4): #////////////////////////////////////////Import/Export Files
 				while True:
 					PrintSectionTitle('Import/Export Files')
 					print("(#0) Back To Main Menu")
@@ -1566,8 +1638,7 @@ while True:
 							zipObj.close()
 							name = name+'.zip'
 						print('\nExport Complete!\nSaved to: '+name)
-
-			elif(Selection == 4): #////////////////////////////////////////Extract/Pack Wii Music ROM
+			elif(Selection == 5): #////////////////////////////////////////Extract/Pack Wii Music ROM
 				while True:
 					PrintSectionTitle('Extract/Pack Wii Music ROM')
 					print("(#0) Back To Advanced Tools")
@@ -1619,7 +1690,7 @@ while True:
 							subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+DiskName+'.iso\" --iso')
 					else: break
 					print('')
-			elif(Selection == 5): #////////////////////////////////////////Patch Main.dol
+			elif(Selection == 6): #////////////////////////////////////////Patch Main.dol
 				FindGameFolder()
 				print('\nCreating Gct...')
 				CreateGct()
@@ -1627,7 +1698,7 @@ while True:
 				os.rename(ProgramPath+'/R64E01.gct',GamePath+'/R64E01.gct')
 				print('\nCreation Complete!')
 				print('Saved to: '+GamePath+'/R64E01.gct')
-			elif(Selection == 6): #////////////////////////////////////////Riivolution Patch
+			elif(Selection == 7): #////////////////////////////////////////Riivolution Patch
 				PrintSectionTitle('Riivolution Patch')
 				FindGameFolder()
 				FindDolphinSave()
