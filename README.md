@@ -1,5 +1,5 @@
 # WiiMusicEditor
-# Please note: macOS/OS X/Linux are unsupported. We are working on the port and we are sorry for any inconvience caused.
+# Please note: macOS/OS X/Linux are currently unsupported and will be delayed until further notice. We are sorry for any inconvience caused.
 ## Features
 
 - Automatically Applying .brseq to .brsar and Creating Length/Tempo/Time Signature Patch
