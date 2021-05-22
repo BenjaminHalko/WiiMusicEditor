@@ -1,5 +1,5 @@
 # WiiMusicEditor
-
+# Please note: macOS/OS X/Linux are unsupported. We are working on the port and we are sorry for any inconvience caused.
 ## Features
 
 - Automatically Applying .brseq to .brsar and Creating Length/Tempo/Time Signature Patch
@@ -31,6 +31,11 @@
 4. Run the WiiMusicEditor batch file 
 
 ### You are now set up and ready for Wii Music Modding!
+## Section 2 - Custom Songs
+
+## Section 3 - Changing Song Names
+## Section 4 - Editing Wii Music Styles
+## Section 5 - 
 
 ## Section 2 - Help
 ### - Creating custom songs for Wii Music
