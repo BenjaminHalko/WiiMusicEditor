@@ -1,5 +1,4 @@
 # WiiMusicEditor
-# Please note: macOS/OS X/Linux are currently unsupported and will be delayed until further notice. We are sorry for any inconvience caused.
 ## Features
 
 - Automatically Applying .brseq to .brsar and Creating Length/Tempo/Time Signature Patch
@@ -44,3 +43,5 @@ You can easily look up a MIDI for a song. Just search that song and add MIDI to 
 Once you've found a MIDI that you want to use, you'll need to check if it's Wii Music-ready. Unfortunately, there are some limitations. Here's what's needed to quality for a Wii Music-ready song:
 - The MIDI MUST have 4 tracks.
 - The MIDI CANNOT be above a certain file size (File sizes depend on the songs).
+
+###Please note: macOS/OS X/Linux are currently unsupported and will be delayed until further notice. We are sorry for any inconvience caused.
