@@ -842,7 +842,7 @@ def InitializeBrseq():
 def ChangeName(SongToChange,newText):
 	global ProgramPath
 	TextOffset = ['c8','190','12c']
-	subprocess.run(ProgramPath+'/Helper/Wiimms/decode.bat '+MessageFolder(),capture_output=True)
+	subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
 	for typeNum in range(3):
 		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
 		textlines = message.readlines()
@@ -1545,35 +1545,14 @@ while True:
 					if(Selection != len(SongNames)-1):
 						number = SongMemoryOrder.index(SongNames[Selection])
 					
-					if(Selection != len(SongNames)-1) or (SongMemoryOrder[number] not in appliedCustomSongs):
-						#Find Offset
-						offset = int(MainDolOffsets[0],16)
-						length = MainDolOffsets[1]
-
-						if(number != 0):
-							extraOffset = int(MainDolOffsets[2],16)*floor(number/2)+int(MainDolOffsets[3],16)*max(0,ceil(number/2)-1)
-							for num in MainDolWeirdOffsets:
-								if(num >= number): break
-								else:
-									if(floor(num/2) == (num/2)):
-										extraOffset = extraOffset - int(MainDolOffsets[2],16)
-									else:
-										extraOffset = extraOffset - int(MainDolOffsets[3],16)
-									extraOffset = extraOffset + int(MainDolOffsets[4],16)
-									
-							offset = offset+int(MainDolOffsets[1],16)+extraOffset
-							if(number in MainDolWeirdOffsets):
-								length = MainDolOffsets[4]
-							else:
-								length = MainDolOffsets[int(floor(number/2) == (number/2))+2]
-
+					if((Selection != len(SongNames)-1) or (SongMemoryOrder[number] not in appliedCustomSongs)):
 						#Brsar Writing
 						brsar = open(GamePath+'/sys/main.dol', "r+b")
-						brsar.seek(offset)
-						brsar.write(bytes.fromhex('ff'*int(length,16)))
+						brsar.seek(int(MainDolOffsets[6],16)+6+int("BC",16)*number)
+						brsar.write(bytes.fromhex('ffffffffffff'))
 						brsar.close()
 
-						if(Selection != len(SongNames)-1): break
+					if(Selection != len(SongNames)-1): break
 
 				print('\nEradication Complete!')
 			elif(Selection == 4): #////////////////////////////////////////Import/Export Files
