@@ -44,4 +44,4 @@ Once you've found a MIDI that you want to use, you'll need to check if it's Wii 
 - The MIDI MUST have 4 tracks.
 - The MIDI CANNOT be above a certain file size (File sizes depend on the songs).
 
-###Please note: macOS/OS X/Linux are currently unsupported and will be delayed until further notice. We are sorry for any inconvience caused.
+### Please note: macOS/OS X/Linux are currently unsupported and will be delayed until further notice. We are sorry for any inconvience caused.
