@@ -1506,6 +1506,7 @@ while True:
 				dol = open(GamePath+'/sys/main.dol','r+b')
 				patchCode = ""
 				name = ""
+				replaceSongPatch = input('Would you like to copy the song patch? [y/n] ')
 				for num in range(len(SongNames)-1):
 					song = num
 					if(SongToReplace != len(SongNames)-1): song = SongToReplace
@@ -1514,10 +1515,11 @@ while True:
 						selectNum = SongMemoryOrder.index(SongNames[Selection])
 						dol.seek(int(MainDolOffsets[6],16)+int("BC",16)*songNum)
 						dol.write(bytes.fromhex(SongIds[selectNum][0]+'0000'+SongIds[selectNum][1]))
-						LengthCode = '0'+format(int(SongMemoryOffsets[songNum],16)+6,'x').lower()+codes[0]
-						TempoCode = '0'+format(int(SongMemoryOffsets[songNum],16)+10,'x').lower()+codes[1]
-						TimeCode = SongMemoryOffsets[songNum]+codes[2]
-						AddPatch(SongNames[song]+' Song Patch',LengthCode+TempoCode+TimeCode)
+						if(replaceSongPatch == 'y'):
+							LengthCode = '0'+format(int(SongMemoryOffsets[songNum],16)+6,'x').lower()+codes[0]
+							TempoCode = '0'+format(int(SongMemoryOffsets[songNum],16)+10,'x').lower()+codes[1]
+							TimeCode = SongMemoryOffsets[songNum]+codes[2]
+							AddPatch(SongNames[song]+' Song Patch',LengthCode+TempoCode+TimeCode)
 					if(SongToReplace != len(SongNames)-1): break
 				dol.close()
 			elif(Selection == 3): #////////////////////////////////////////Remove Song
