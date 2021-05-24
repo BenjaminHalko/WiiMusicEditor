@@ -296,6 +296,11 @@ ScoreFileLengths = [
 '1880',
 ['3AA0','2960','2640','29C0','2BC0','29A0']]
 
+SongStartValues = [
+
+
+]
+
 SongMemoryOffsets = [
 '025a08a8',
 '025a0c54',
@@ -639,8 +644,7 @@ SongIds = [
 ['01B5','01B6'],
 ['01B7','01B8']]
 
-MainDolOffsets = ['59C520','B0','B8','C0','BC','59C540','59C56E']
-MainDolWeirdOffsets = [5,6,7,32]
+MainDolOffset = '59C56E'
 
 GctValues = ['00D0C0DE00D0C0DE','F000000000000000']
 
@@ -1516,21 +1520,14 @@ while True:
 				dol = open(GamePath+'/sys/main.dol','r+b')
 				patchCode = ""
 				name = ""
-<<<<<<< Updated upstream
 				replaceSongPatch = input('Would you like to copy the song patch? [y/n] ')
-=======
-<<<<<<< Updated upstream
-=======
-				replaceSongPatch = input('\nWould you like to copy the song patch? [y/n] ')
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 				for num in range(len(SongNames)-1):
 					song = num
 					if(SongToReplace != len(SongNames)-1): song = SongToReplace
 					if(song != Selection) and ((Selection != len(SongNames)-1) or (SongNames[song] not in appliedCustomSongs)):
 						songNum = SongMemoryOrder.index(SongNames[song])
 						selectNum = SongMemoryOrder.index(SongNames[Selection])
-						dol.seek(int(MainDolOffsets[6],16)+int("BC",16)*songNum)
+						dol.seek(int(MainDolOffset,16)+int("BC",16)*songNum)
 						dol.write(bytes.fromhex(SongIds[selectNum][0]+'0000'+SongIds[selectNum][1]))
 						if(replaceSongPatch == 'y'):
 							LengthCode = '0'+format(int(SongMemoryOffsets[songNum],16)+6,'x').lower()+codes[0]
@@ -1567,7 +1564,7 @@ while True:
 					if((Selection != len(SongNames)-1) or (SongMemoryOrder[number] not in appliedCustomSongs)):
 						#Brsar Writing
 						brsar = open(GamePath+'/sys/main.dol', "r+b")
-						brsar.seek(int(MainDolOffsets[6],16)+6+int("BC",16)*number)
+						brsar.seek(int(MainDolOffset,16)+6+int("BC",16)*number)
 						brsar.write(bytes.fromhex('ffffffffffff'))
 						brsar.close()
 
