@@ -717,7 +717,7 @@ def FindGameFolder():
 	if(not os.path.isdir(GamePath+'/files')):
 		ExceptedFileExtensions = ['.iso','.wbfs']
 		while True:
-			GamePath = input("\nDrag the Decompressed Wii Music Directory or a Wii Music Disk on to the Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			GamePath = input("\nDrag Wii Music Filesystem or ROM to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isdir(GamePath+'/DATA/files')) or (os.path.isdir(GamePath+'/files')):
 				if(os.path.isdir(GamePath+'/DATA')):
 					GamePath = os.path.dirname(GamePath+'/DATA/files').replace('\\','/')
@@ -784,7 +784,7 @@ def FindDolphinSave():
 	global SaveDataPath
 	if(not os.path.isdir(DolphinSaveData+'/Wii')):
 		while True:
-			DolphinSaveData = input("\nDrag the Dolphin Save Directory Over the Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			DolphinSaveData = input("\nDrag Dolphin Config Directory to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isdir(DolphinSaveData+'/Wii')):
 				DolphinSaveData = DolphinSaveData.replace('\\','/')
 				CodePath = DolphinSaveData+"/GameSettings/R64E01.ini"
@@ -1503,14 +1503,31 @@ while True:
 								codes[number] = textlines[num+number+1][8:len(textlines[num+number+1]):1]
 							break
 
+				if(Selection == len(SongNames)-1):
+					appliedCustomSongs = []
+					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+						codes = open(GamePath+'/GeckoCodes.ini')
+						textlines = codes.readlines()
+						codes.close()
+						for text in textlines:
+							if('[WiiMusicEditor]' in text) and ('Style' not in text):
+								appliedCustomSongs.append(text[1:len(text)-29:1])
+
 				dol = open(GamePath+'/sys/main.dol','r+b')
 				patchCode = ""
 				name = ""
+<<<<<<< Updated upstream
 				replaceSongPatch = input('Would you like to copy the song patch? [y/n] ')
+=======
+<<<<<<< Updated upstream
+=======
+				replaceSongPatch = input('\nWould you like to copy the song patch? [y/n] ')
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 				for num in range(len(SongNames)-1):
 					song = num
 					if(SongToReplace != len(SongNames)-1): song = SongToReplace
-					if(song != Selection):
+					if(song != Selection) and ((Selection != len(SongNames)-1) or (SongNames[song] not in appliedCustomSongs)):
 						songNum = SongMemoryOrder.index(SongNames[song])
 						selectNum = SongMemoryOrder.index(SongNames[Selection])
 						dol.seek(int(MainDolOffsets[6],16)+int("BC",16)*songNum)
