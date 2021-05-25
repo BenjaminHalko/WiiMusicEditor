@@ -18,3 +18,5 @@
 - Menu Song Replacement
 
 # Looking for the Manual? Check the wiki!
+
+https://github.com/BenjaminHalko/WiiMusicEditor/wiki/Main-Page
