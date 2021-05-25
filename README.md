@@ -1,22 +1,13 @@
-# WiiMusicEditor
-## Features
-
-- Automatically Applying .brseq to .brsar and Creating Length/Tempo/Time Signature Patch
-
-- Rename Songs Directly After Applying .brseq
-
-- Custom Style Creator
-
-- Wii Music Text Editor
-
-- Automatic Conversion of .midi or .rseq when creating Custom Songs
-
-- 100% Wii Music Save File
-
-- Run Wii Music From Inside The Program
-
-- Menu Song Replacement
+# WiiMusicEditor Features:
+- Powerful and Easy to use.
+- Automatic conversion of MIDIs or RSEQs to BRSEQs.
+- Automatic patching for (almost) Everything in the game!
+- Text Editing to change Dialog.
+- Multiple Song Managing Tools!
+- 100% Save File.
+- Dolphin Integration.
+- Python 3.8 support.
+- And more!
 
 # Looking for the Manual? Check the wiki!
-
-https://github.com/BenjaminHalko/WiiMusicEditor/wiki/Main-Page
+https://github.com/BenjaminHalko/WiiMusicEditor/wiki/
