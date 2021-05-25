@@ -1883,15 +1883,15 @@ while True:
 	elif(Selection == 9): #////////////////////////////////////////Help
 		PrintSectionTitle('Help')
 		print("(#0) Back to Main Menu")
-		print("(#1) Open the Manual")
-		print("(#2) Open Video Guide")
+		print("(#1) Open the Wiki")
+		print("(#2) Open Video Guide (No Video Guide Yet")
 		
-		Selection = MakeSelection(['What type of help do you want',0,2])
+		Selection = MakeSelection(['What type of help do you want',0,1])
 
 		if(Selection == 1):
-			print('\nOpening Manual...')
+			print('\nOpening Wiki...')
 			time.sleep(0.5)
-			webbrowser.open('https://github.com/BenjaminHalko/WiiMusicEditor#manual')
+			webbrowser.open('https://github.com/BenjaminHalko/WiiMusicEditor/wiki')
 		elif(Selection == 2):
 			print('\nOpening Video Guide...')
 			time.sleep(0.5)
