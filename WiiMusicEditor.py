@@ -20,629 +20,219 @@ while True:
 		import mido
 		from colorama import Fore, Style, init
 		from tqdm import tqdm
+		from tabulate import tabulate 
 		break
 	except ImportError:
 		subprocess.run('python -m pip install --upgrade pip')
-		subprocess.run('pip install mido requests colorama tqdm')
+		subprocess.run('pip install mido requests colorama tqdm tabulate')
 
 init(convert=True)
 
 time.sleep(0.05)
 
-#Song Names
-SongNames = [
-'A Little Night Music',
-'American Patrol',
-'Animal Crossing',
-'Animal Crossing K.K. Blues',
-'Bridal Chorus',
-'Carmen',
-'Chariots of Fire',
-'Daydream Believer',
-'Do-Re-Mi',
-'Every Breath You Take',
-'F-Zero',
-'Frere Jacques',
-'From Santurtzi to Bilbao',
-'From the New World',
-'Happy Birthday to You',
-'Ill Be There',
-'Ive Never Been to Me',
-'Jingle Bell Rock',
-'La Bamba',
-'La Cucaracha',
-'Little Hans',
-'Long Long Ago',
-'Material Girl',
-'Minuet in G Major',
-'My Grandfathers Clock',
-'O-Christmas Tree',
-'Ode To Joy',
-'Oh My Darling Clementine',
-'Over the Waves',
-'Please Mr. Postman',
-'Sakura Sakura',
-'Scarborough Fair',
-'September',
-'Sukiyaki',
-'Super Mario Bros',
-'Sur le Pont d Avignon',
-'Swan Lake',
-'The Blue Danube',
-'The Entertainer',
-'The Flea Waltz',
-'The Legend of Zelda',
-'The Loco Motion',
-'Troika',
-'Turkey in the Straw',
-'Twinkle Twinkle Little Star',
-'Wake Me Up Before You Go-Go',
-'Wii Music',
-'Wii Sports',
-'Woman',
-'Yankee Doodle',
-'Menu Song']
+class SongClass:
+	def __init__(self,SongType,Name,SongOffset,ScoreOffset,SongLength,ScoreLength,MemOffset,SongId,ScoreId,MemOrder):
+		self.SongType = SongType
+		self.Name = Name
+		self.SongOffset = SongOffset
+		self.ScoreOffset = ScoreOffset
+		self.SongLength = SongLength
+		self.ScoreLength = ScoreLength
+		self.MemOffset = MemOffset
+		self.SongId = SongId
+		self.ScoreId = ScoreId
+		self.MemOrder = MemOrder
 
-#Offsets
-SongOffsets = [
-'60A700',
-'6185A0',
-'680780',
-'63DD00',
-'5F9500',
-'5FEBA0',
-'656CE0',
-'652180',
-'612AC0',
-'654700',
-'682860',
-'635240',
-'640E80',
-'627F20',
-'610AE0',
-'665E60',
-'672200',
-'0',
-'62A700',
-'646960',
-'63B940',
-'62EB60',
-'6601A0',
-'60DF80',
-'625440',
-'639B00',
-'5F6620',
-'6227E0',
-'649D20',
-'65CE20',
-'64D040',
-'62C9A0',
-'65A200',
-'64F3A0',
-'674B20',
-'632F20',
-'5FC280',
-'6073A0',
-'614E40',
-'637040',
-'678CE0',
-'663180',
-'6441E0',
-'61C0A0',
-'6311A0',
-'66C1E0',
-'602CE0',
-'67D360',
-'66F780',
-'61F620',
-'19AF7A0']
+class StyleClass:
+	def __init__(self,StyleType,Name,MemOffset):
+		self.StyleType = StyleType
+		self.Name = Name
+		self.MemOffset = MemOffset
 
-ScoreOffsets = [
-'60C660',
-'61A540',
-'681AE0',
-'63F240',
-'5FAFE0',
-'600CE0',
-'658640',
-'653600',
-'613FC0',
-'655A80',
-'684040',
-'636320',
-'642720',
-'6295E0',
-'611C40',
-'6675C0',
-'673500',
-'0',
-'62B740',
-'648480',
-'63CD40',
-'62FFC0',
-'661900',
-'60F8A0',
-'626B00',
-'63AAC0',
-'5F7F60',
-'623F20',
-'64B640',
-'65EA80',
-'64E261',
-'62DB80',
-'65B900',
-'650E80',
-'676C00',
-'6340C0',
-'5FD780',
-'608B00',
-'616CC0',
-'6387C0',
-'67AD80',
-'664900',
-'645840',
-'61DB80',
-'632260',
-'66DEA0',
-'605520',
-'67EE40',
-'670FC0',
-'620F60',
-['19ABD00','19B1A00','19B4360','19B69A0','19B9360','19BBF20']]
+class InstrumentClass:
+	def __init__(self,Name,Number,InMenu):
+		self.Name = Name
+		self.Number = Number
+		self.InMenu = InMenu
 
-SongFileLengths = [
-'1F50',
-'1FA0',
-'1360',
-'1540',
-'1AE0',
-'2140',
-'19C0',
-'1480',
-'1500',
-'1380',
-'17E0',
-'10E0',
-'18A0',
-'16C0',
-'1160',
-'1760',
-'1300',
-'0',
-'1040',
-'1B20',
-'1400',
-'1460',
-'1760',
-'1920',
-'16C0',
-'FC0',
-'1940',
-'1740',
-'1920',
-'1C60',
-'1220',
-'11E0',
-'1700',
-'1AE0',
-'20E0',
-'11A0',
-'1500',
-'17C0',
-'1E80',
-'1780',
-'20A0',
-'1780',
-'1660',
-'1AE0',
-'10C0',
-'1CC0',
-'2840',
-'1AE0',
-'1840',
-'1940',
-'2260']
+class SongTypeValue:
+	Regular = 0
+	Menu = 1
 
-ScoreFileLengths = [
-'1920',
-'1B60',
-'D80',
-'1C40',
-'12A0',
-'2000',
-'1BC0',
-'1100',
-'E80',
-'1260',
-'19E0',
-'D20',
-'1AC0',
-'1120',
-'E80',
-'1600',
-'1620',
-'0',
-'1260',
-'18A0',
-'FC0',
-'11E0',
-'1880',
-'1240',
-'1420',
-'E80',
-'15A0',
-'1520',
-'1A00',
-'1720',
-'113F',
-'FE0',
-'1520',
-'1300',
-'20E0',
-'1180',
-'1420',
-'1C00',
-'18E0',
-'1340',
-'25E0',
-'1560',
-'1120',
-'1AA0',
-'C00',
-'18E0',
-'1E80',
-'1940',
-'1240',
-'1880',
-['3AA0','2960','2640','29C0','2BC0','29A0']]
+class StyleTypeValue:
+	Global = 0
+	SongSpecific = 1
+	Menu = 2
 
-SongStartValues = [
+NumberOfStyleTypes = 4
 
+Songs = [
+SongClass(SongTypeValue.Regular,'A Little Night Music','60A700','60C660','1F50','1920','025a08a8','0161','0162',6),
+SongClass(SongTypeValue.Regular,'American Patrol','6185A0','61A540','1FA0','1B60','025a0c54','016B','016C',11),
+SongClass(SongTypeValue.Regular,'Animal Crossing','680780','681AE0','1360','D80','025a2780','01B5','01B6',48),
+SongClass(SongTypeValue.Regular,'Animal Crossing K.K. Blues','63DD00','63F240','1540','1C40','025a1758','0189','018A',26),
+SongClass(SongTypeValue.Regular,'Bridal Chorus','5F9500','5FAFE0','1AE0','12A0','025a04fc','0157','0158',1),
+SongClass(SongTypeValue.Regular,'Carmen','5FEBA0','600CE0','2140','2000','025a0674','015B','015C',3),
+SongClass(SongTypeValue.Regular,'Chariots of Fire','656CE0','658640','19C0','1BC0','025a1df4','019B','019C',35),
+SongClass(SongTypeValue.Regular,'Daydream Believer','652180','653600','1480','1100','025a1c7c','0197','0198',33),
+SongClass(SongTypeValue.Regular,'Do-Re-Mi','612AC0','613FC0','1500','E80','025a0adc','0167','0168',9),
+SongClass(SongTypeValue.Regular,'Every Breath You Take','654700','655A80','1380','1260','025a1d38','0199','019A',34),
+SongClass(SongTypeValue.Regular,'F-Zero','682860','684040','17E0','19E0','025a283c','01B7','01B8',49),
+SongClass(SongTypeValue.Regular,'Frere Jacques','635240','636320','10E0','D20','025a1468','0181','0182',22),
+SongClass(SongTypeValue.Regular,'From Santurtzi to Bilbao','640E80','642720','18A0','1AC0','025a1814','018B','018C',27),
+SongClass(SongTypeValue.Regular,'From the New World','627F20','6295E0','16C0','1120','025a1000','0175','0176',16),
+SongClass(SongTypeValue.Regular,'Happy Birthday to You','610AE0','611C40','1160','E80','025a0a20','0165','0166',8),
+SongClass(SongTypeValue.Regular,'Ill Be There','665E60','6675C0','1760','1600','025a21a0','01A5','01A6',40),
+SongClass(SongTypeValue.Regular,'Ive Never Been to Me','672200','673500','1300','1620','025a2490','01AD','01AE',44),
+SongClass(SongTypeValue.Regular,'Jingle Bell Rock','0','0','0','0','025a2318','01A7','01A8',41),
+SongClass(SongTypeValue.Regular,'La Bamba','62A700','62B740','1040','1260','025a10bc','0177','0178',17),
+SongClass(SongTypeValue.Regular,'La Cucaracha','646960','648480','1B20','18A0','025a198c','018F','0190',29),
+SongClass(SongTypeValue.Regular,'Little Hans','63B940','63CD40','1400','FC0','025a169c','0187','0188',25),
+SongClass(SongTypeValue.Regular,'Long Long Ago','62EB60','62FFC0','1460','11E0','025a1234','017B','017C',19),
+SongClass(SongTypeValue.Regular,'Material Girl','6601A0','661900','1760','1880','025a2028','01A1','01A2',38),
+SongClass(SongTypeValue.Regular,'Minuet in G Major','60DF80','60F8A0','1920','1240','025a0964','0163','0164',7),
+SongClass(SongTypeValue.Regular,'My Grandfathers Clock','625440','626B00','16C0','1420','025a0f44','0173','0174',15),
+SongClass(SongTypeValue.Regular,'O-Christmas Tree','639B00','63AAC0','FC0','E80','025a15e0','0185','0186',24),
+SongClass(SongTypeValue.Regular,'Ode To Joy','5F6620','5F7F60','1940','15A0','025a0440','0155','0156',0),
+SongClass(SongTypeValue.Regular,'Oh My Darling Clementine','6227E0','623F20','1740','1520','025a0e88','0171','0172',14),
+SongClass(SongTypeValue.Regular,'Over the Waves','649D20','64B640','1920','1A00','025a1a48','0191','0192',30),
+SongClass(SongTypeValue.Regular,'Please Mr. Postman','65CE20','65EA80','1C60','1720','025a1f6c','019F','01A0',37),
+SongClass(SongTypeValue.Regular,'Sakura Sakura','64D040','64E261','1220','113F','025a1b04','0193','0194',31),
+SongClass(SongTypeValue.Regular,'Scarborough Fair','62C9A0','62DB80','11E0','FE0','025a1178','0179','017A',18),
+SongClass(SongTypeValue.Regular,'September','65A200','65B900','1700','1520','025a1eb0','019D','019E',36),
+SongClass(SongTypeValue.Regular,'Sukiyaki','64F3A0','650E80','1AE0','1300','025a1bc0','0195','0196',32),
+SongClass(SongTypeValue.Regular,'Super Mario Bros','674B20','676C00','20E0','20E0','025a254c','01AF','01B0',45),
+SongClass(SongTypeValue.Regular,'Sur le Pont d Avignon','632F20','6340C0','11A0','1180','025a13ac','017F','0180',21),
+SongClass(SongTypeValue.Regular,'Swan Lake','5FC280','5FD780','1500','1420','025a05b8','0159','015A',2),
+SongClass(SongTypeValue.Regular,'The Blue Danube','6073A0','608B00','17C0','1C00','025a07ec','015F','0160',5),
+SongClass(SongTypeValue.Regular,'The Entertainer','614E40','616CC0','1E80','18E0','025a0b98','0169','016A',10),
+SongClass(SongTypeValue.Regular,'The Flea Waltz','637040','6387C0','1780','1340','025a1524','0183','0184',23),
+SongClass(SongTypeValue.Regular,'The Legend of Zelda','678CE0','67AD80','20A0','25E0','025a2608','01B1','01B2',46),
+SongClass(SongTypeValue.Regular,'The Loco Motion','663180','664900','1780','1560','025a20e4','01A3','01A4',39),
+SongClass(SongTypeValue.Regular,'Troika','6441E0','645840','1660','1120','025a18d0','018D','018E',28),
+SongClass(SongTypeValue.Regular,'Turkey in the Straw','61C0A0','61DB80','1AE0','1AA0','025a0d10','016D','016E',12),
+SongClass(SongTypeValue.Regular,'Twinkle Twinkle Little Star','6311A0','632260','10C0','C00','025a12f0','017D','017E',20),
+SongClass(SongTypeValue.Regular,'Wake Me Up Before You Go-Go','66C1E0','66DEA0','1CC0','18E0','025a23d4','01A9','01AA',42),
+SongClass(SongTypeValue.Regular,'Wii Music','602CE0','605520','2840','1E80','025a0730','015D','015E',4),
+SongClass(SongTypeValue.Regular,'Wii Sports','67D360','67EE40','1AE0','1940','025a26c4','01B3','01B4',47),
+SongClass(SongTypeValue.Regular,'Woman','66F780','670FC0','1840','1240','025a23d4','01AB','01AC',43),
+SongClass(SongTypeValue.Regular,'Yankee Doodle','61F620','620F60','1940','1880','025a0dcc','016F','0170',13),
+SongClass(SongTypeValue.Menu,'Menu Song','19AF7A0',['19ABD00','19B1A00','19B4360','19B69A0','19B9360','19BBF20'],'2260',['3AA0','2960','2640','29C0','2BC0','29A0'],['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1,-1,-1)]
 
-]
+Styles = [
+StyleClass(StyleTypeValue.Global,'Jazz','0659A65C'),
+StyleClass(StyleTypeValue.Global,'Rock','0659A680'),
+StyleClass(StyleTypeValue.Global,'Latin','0659A6A4'),
+StyleClass(StyleTypeValue.Global,'March','0659A6C8'),
+StyleClass(StyleTypeValue.Global,'Electronic','0659A6EC'),
+StyleClass(StyleTypeValue.Global,'Pop','0659A710'),
+StyleClass(StyleTypeValue.Global,'Japanese','0659A724'),
+StyleClass(StyleTypeValue.Global,'Tango','0659A758'),
+StyleClass(StyleTypeValue.Global,'Classical','0659A77C'),
+StyleClass(StyleTypeValue.Global,'Hawaiian','0659A7A0'),
+StyleClass(StyleTypeValue.Global,'Reggae','0659A7C4'),
+StyleClass(StyleTypeValue.SongSpecific,'Twinkle Twinkle Little Star','0659A7E8'),
+StyleClass(StyleTypeValue.SongSpecific,'Yankee Doodle','0659A80C'),
+StyleClass(StyleTypeValue.SongSpecific,'Oh My Darling Clementine','0659A830'),
+StyleClass(StyleTypeValue.SongSpecific,'Scarborough Fair','0659A854'),
+StyleClass(StyleTypeValue.SongSpecific,'Carmen','0659A878'),
+StyleClass(StyleTypeValue.SongSpecific,'O Christmas Tree','0659A89C'),
+StyleClass(StyleTypeValue.SongSpecific,'Over The Waves','0659A8C0'),
+StyleClass(StyleTypeValue.SongSpecific,'Every Breath You Take','0659A8E4'),
+StyleClass(StyleTypeValue.SongSpecific,'Chariots of Fire','0659A908'),
+StyleClass(StyleTypeValue.SongSpecific,'September','0659A92C'),
+StyleClass(StyleTypeValue.SongSpecific,'Material Girl','0659A950'),
+StyleClass(StyleTypeValue.SongSpecific,'Ill Be There','0659A974'),
+StyleClass(StyleTypeValue.SongSpecific,'Woman','0659A998'),
+StyleClass(StyleTypeValue.SongSpecific,'Ive Never Been to Me','0659A9BC'),
+StyleClass(StyleTypeValue.SongSpecific,'The Legend of Zelda','0659A9E0'),
+StyleClass(StyleTypeValue.SongSpecific,'Wii Sports','0659AA04'),
+StyleClass(StyleTypeValue.SongSpecific,'Animal Crossing','0659AA28'),
+StyleClass(StyleTypeValue.SongSpecific,'Minuet in G Major','0659AA4C'),
+StyleClass(StyleTypeValue.SongSpecific,'The Entertainer','0659AA70'),
+StyleClass(StyleTypeValue.SongSpecific,'Happy Birthday to You','0659AA94'),
+StyleClass(StyleTypeValue.SongSpecific,'La Cucaracha','0659AAB8'),
+StyleClass(StyleTypeValue.SongSpecific,'From Santurtzi to Bilbao','0659AADC'),
+StyleClass(StyleTypeValue.SongSpecific,'A Little Night Music','0659AB00'),
+StyleClass(StyleTypeValue.SongSpecific,'The Blue Danube','0659AB24'),
+StyleClass(StyleTypeValue.SongSpecific,'Animal Crossing K.K. Blues','0659AB48'),
+StyleClass(StyleTypeValue.SongSpecific,'Wii Music','0659AB6C'),
+StyleClass(StyleTypeValue.SongSpecific,'Super Mario Bros','0659AC8C'),
+StyleClass(StyleTypeValue.Menu,'Menu Style Main','0659ACB0'),
+StyleClass(StyleTypeValue.Menu,'Menu Style Electronic','0659ACD4'),
+StyleClass(StyleTypeValue.Menu,'Menu Style Japanese','0659ACF8'),
+StyleClass(StyleTypeValue.Menu,'Menu Style March','0659AD1C'),
+StyleClass(StyleTypeValue.Menu,'Menu Style A Capella','0659AD40')]
 
-SongMemoryOffsets = [
-'025a08a8',
-'025a0c54',
-'025a2780',
-'025a1758',
-'025a04fc',
-'025a0674',
-'025a1df4',
-'025a1c7c',
-'025a0adc',
-'025a1d38',
-'025a283c',
-'025a1468',
-'025a1814',
-'025a1000', 
-'025a0a20',
-'025a21a0',
-'025a2490',
-'025a2318',
-'025a10bc',
-'025a198c',
-'025a169c',
-'025a1234',
-'025a2028',
-'025a0964',
-'025a0f44',
-'025a15e0',
-'025a0440',
-'025a0e88',
-'025a1a48',
-'025a1f6c',
-'025a1b04',
-'025a1178',
-'025a1eb0',
-'025a1bc0',
-'025a254c',
-'025a13ac',
-'025a05b8',
-'025a07ec',
-'025a0b98',
-'025a1524',
-'025a2608',
-'025a20e4',
-'025a18d0',
-'025a0d10',
-'025a12f0',
-'025a23d4',
-'025a0730',
-'025a26c4',
-'025a23d4',
-'025a0dcc',
-['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40']]
-
-StyleNames = [
-'Twinkle Twinkle Little Star',
-'Yankee Doodle',
-'Oh My Darling Clementine',
-'Scarborough Fair',
-'Carmen',
-'O Christmas Tree',
-'Over The Waves',
-'Every Breath You Take',
-'Chariots of Fire',
-'September',
-'Material Girl',
-'Ill Be There',
-'Woman',
-'Ive Never Been to Me',
-'The Legend of Zelda',
-'Wii Sports',
-'Animal Crossing',
-'Minuet in G Major',
-'The Entertainer',
-'Happy Birthday to You',
-'La Cucaracha',
-'From Santurtzi to Bilbao',
-'A Little Night Music',
-'The Blue Danube',
-'Animal Crossing K.K. Blues',
-'Wii Music',
-'Super Mario Bros',
-'Jazz',
-'Rock',
-'Latin',
-'March',
-'Electronic',
-'Pop',
-'Japanese',
-'Tango',
-'Classical',
-'Hawaiian',
-'Reggae',
-'Menu Style Main',
-'Menu Style Electronic',
-'Menu Style Japanese',
-'Menu Style March',
-'Menu Style A Capella',
-'Replace All Normal Styles',
-'Replace All Menu Styles']
-
-StyleMemoryOffsets = [
-'0659A7E8',
-'0659A80C',
-'0659A830',
-'0659A854',
-'0659A878',
-'0659A89C',
-'0659A8C0',
-'0659A8E4',
-'0659A908',
-'0659A92C',
-'0659A950',
-'0659A974',
-'0659A998',
-'0659A9BC',
-'0659A9E0',
-'0659AA04',
-'0659AA28',
-'0659AA4C',
-'0659AA70',
-'0659AA94',
-'0659AAB8',
-'0659AADC',
-'0659AB00',
-'0659AB24',
-'0659AB48',
-'0659AB6C',
-'0659AC8C',
-'0659A65C',
-'0659A680',
-'0659A6A4',
-'0659A6C8',
-'0659A6EC',
-'0659A710',
-'0659A724',
-'0659A758',
-'0659A77C',
-'0659A7A0',
-'0659A7C4',
-'0659ACB0',
-'0659ACD4',
-'0659ACF8',
-'0659AD1C',
-'0659AD40']
-
-InstrumentNames = [
-'Piano',
-'Marimba',
-'Vibraphone',
-'Steel Drum',
-'Dulcimer',
-'Handbell',
-'Harpsichord',
-'Timpani',
-'Galactic Piano',
-'Toy Piano',
-'Dog',
-'Cat',
-'Rapper',
-'Guitar',
-'Electric Guitar',
-'Electric Bass',
-'Double Bass',
-'Ukulele',
-'Banjo',
-'Sitar',
-'Shamisen',
-'Harp',
-'Galactic Guitar',
-'Galactic Bass',
-'Jews Harp',
-'Violin',
-'Cello',
-'Trumpet',
-'Saxophone',
-'Flute',
-'Clairenet',
-'Tuba',
-'Accordion',
-'Harmonica',
-'Bagpipe',
-'Recorder',
-'Galactic horn',
-'Nes',
-'Singer',
-'Another Singer',
-'Basic Drums',
-'Rock Drums',
-'Jazz Drums',
-'Latin Drums',
-'Ballad Drums',
-'Congas',
-'Maracas',
-'Tambourine',
-'Cuica',
-'Cowbell',
-'Clap',
-'Bells',
-'Castanets',
-'Guiro',
-'Timpales',
-'Djembe',
-'Taiko Drum',
-'Cheerleader',
-'Snare Drum',
-'Bass Drum',
-'Galactic Drums',
-'Galactic Congas',
-'DJ Turntables',
-'Kung Fu Person',
-'Reggae Drums',
-'Whistle',
-'Beatbox',
-'None']
-
-MenuInstruments = [
-'Saxophone',
-'Violin',
-'Shamisen',
-'Flute',
-'Clairenet',
-'Piano',
-'Vibraphone',
-'Tuba',
-'Electric bass',
-'Galactic Guitar',
-'Galactic Bass',
-'Singer',
-'Another Singer',
-'Basic Drums',
-'Rock Drums',
-'Latin Drums',
-'Snare Drum',
-'DJ Turntables',
-'Beatbox',
-'Taiko Drum',
-'Galactic Drums']
-
-
-SongMemoryOrder = [
-'Ode To Joy',
-'Bridal Chorus',
-'Swan Lake',
-'Carmen',
-'Wii Music',
-'The Blue Danube',
-'A Little Night Music',
-'Minuet in G Major',
-'Happy Birthday to You',
-'Do-Re-Mi',
-'The Entertainer',
-'American Patrol',
-'Turkey in the Straw',
-'Yankee Doodle',
-'Oh My Darling Clementine',
-'My Grandfathers Clock',
-'From the New World',
-'La Bamba',
-'Scarborough Fair',
-'Long Long Ago',
-'Twinkle Twinkle Little Star',
-'Sur le Pont d Avignon',
-'Frere Jacques',
-'The Flea Waltz',
-'O-Christmas Tree',
-'Little Hans',
-'Animal Crossing K.K. Blues',
-'From Santurtzi to Bilbao',
-'Troika',
-'La Cucaracha',
-'Over the Waves',
-'Sakura Sakura',
-'Sukiyaki',
-'Daydream Believer',
-'Every Breath You Take',
-'Chariots of Fire',
-'September',
-'Please Mr. Postman',
-'Material Girl',
-'The Loco Motion',
-'Ill Be There',
-'Jingle Bell Rock',
-'Wake Me Up Before You Go-Go',
-'Woman',
-'Ive Never Been to Me',
-'Super Mario Bros',
-'The Legend of Zelda',
-'Wii Sports',
-'Animal Crossing',
-'F-Zero']
-
-SongIds = [
-['0155','0156'],
-['0157','0158'],
-['0159','015A'],
-['015B','015C'],
-['015D','015E'],
-['015F','0160'],
-['0161','0162'],
-['0163','0164'],
-['0165','0166'],
-['0167','0168'],
-['0169','016A'],
-['016B','016C'],
-['016D','016E'],
-['016F','0170'],
-['0171','0172'],
-['0173','0174'],
-['0175','0176'],
-['0177','0178'],
-['0179','017A'],
-['017B','017C'],
-['017D','017E'],
-['017F','0180'],
-['0181','0182'],
-['0183','0184'],
-['0185','0186'],
-['0187','0188'],
-['0189','018A'],
-['018B','018C'],
-['018D','018E'],
-['018F','0190'],
-['0191','0192'],
-['0193','0194'],
-['0195','0196'],
-['0197','0198'],
-['0199','019A'],
-['019B','019C'],
-['019D','019E'],
-['019F','01A0'],
-['01A1','01A2'],
-['01A3','01A4'],
-['01A5','01A6'],
-['01A7','01A8'],
-['01A9','01AA'],
-['01AB','01AC'],
-['01AD','01AE'],
-['01AF','01B0'],
-['01B1','01B2'],
-['01B3','01B4'],
-['01B5','01B6'],
-['01B7','01B8']]
+Instruments = [
+InstrumentClass('Piano',0,True),
+InstrumentClass('Marimba',1,False),
+InstrumentClass('Vibraphone',2,True),
+InstrumentClass('Steel Drum',3,False),
+InstrumentClass('Dulcimer',4,False),
+InstrumentClass('Handbell',5,False),
+InstrumentClass('Harpsichord',6,False),
+InstrumentClass('Timpani',7,False),
+InstrumentClass('Galactic Piano',8,False),
+InstrumentClass('Toy Piano',9,False),
+InstrumentClass('Dog',10,False),
+InstrumentClass('Cat',11,False),
+InstrumentClass('Rapper',12,False),
+InstrumentClass('Guitar',13,False),
+InstrumentClass('Electric Guitar',14,False),
+InstrumentClass('Electric Bass',15,False),
+InstrumentClass('Double Bass',16,False),
+InstrumentClass('Ukulele',17,False),
+InstrumentClass('Banjo',18,False),
+InstrumentClass('Sitar',19,False),
+InstrumentClass('Shamisen',20,True),
+InstrumentClass('Harp',21,False),
+InstrumentClass('Galactic Guitar',22,True),
+InstrumentClass('Galactic Bass',23,True),
+InstrumentClass('Jaw Harp',24,False),
+InstrumentClass('Violin',25,True),
+InstrumentClass('Cello',26,False),
+InstrumentClass('Trumpet',27,False),
+InstrumentClass('Saxophone',28,True),
+InstrumentClass('Flute',29,True),
+InstrumentClass('Clairenet',30,True),
+InstrumentClass('Tuba',31,True),
+InstrumentClass('Accordion',32,False),
+InstrumentClass('Harmonica',33,False),
+InstrumentClass('Bagpipe',34,False),
+InstrumentClass('Recorder',35,False),
+InstrumentClass('Galactic horn',36,False),
+InstrumentClass('Nes',37,False),
+InstrumentClass('Singer',38,True),
+InstrumentClass('Another Singer',39,True),
+InstrumentClass('Basic Drums',40,True),
+InstrumentClass('Rock Drums',41,True),
+InstrumentClass('Jazz Drums',42,False),
+InstrumentClass('Latin Drums',43,True),
+InstrumentClass('Ballad Drums',44,False),
+InstrumentClass('Congas',45,False),
+InstrumentClass('Maracas',46,False),
+InstrumentClass('Tambourine',47,False),
+InstrumentClass('Cuica',48,False),
+InstrumentClass('Cowbell',49,False),
+InstrumentClass('Clap',50,False),
+InstrumentClass('Bells',51,False),
+InstrumentClass('Castanets',52,False),
+InstrumentClass('Guiro',53,False),
+InstrumentClass('Timpales',54,False),
+InstrumentClass('Djembe',55,False),
+InstrumentClass('Taiko Drum',56,True),
+InstrumentClass('Cheerleader',57,False),
+InstrumentClass('Snare Drum',58,True),
+InstrumentClass('Bass Drum',59,False),
+InstrumentClass('Galactic Drums',60,True),
+InstrumentClass('Galactic Congas',61,False),
+InstrumentClass('DJ Turntables',62,True),
+InstrumentClass('Kung Fu Person',63,False),
+InstrumentClass('Reggae Drums',64,False),
+InstrumentClass('Whistle',65,False),
+InstrumentClass('Beatbox',66,True),
+InstrumentClass('None',-1,False)]
 
 MainDolOffset = '59C56E'
 
@@ -851,7 +441,7 @@ def ChangeName(SongToChange,newText):
 		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
 		textlines = message.readlines()
 		message.close()
-		offset = format(int(TextOffset[typeNum],16)+SongMemoryOrder.index(SongNames[SongToChange]),'x').lower()
+		offset = format(int(TextOffset[typeNum],16)+Songs[SongToChange].MemOrder,'x').lower()
 		offset = ' ' * (4-len(offset))+offset+'00 @'
 		for num in range(len(textlines)):
 			if offset in str(textlines[num]):
@@ -941,33 +531,32 @@ def DownloadUpdate():
 		return True
 
 def SelectStyleInstrument(PartString,IsPercussion):
-	global StyleNames
+	global Styles
 	global Selection
-	global InstrumentNames
-	global MenuInstruments
 	global normalInstrumentNumber
 	global unsafeMode
+	global Instruments
 	global NormalStyleSelected
 	print('')
 	while True:
 		PartType = input("What\'s the Instrument Number you want for the "+PartString+": ")
 		if(PartType.isnumeric()):
-			PartType = int(PartType)
-			if(IsPercussion) and (not unsafeMode): PartType = PartType + normalInstrumentNumber
+			if(IsPercussion) and (not unsafeMode): PartType = int(PartType) + normalInstrumentNumber
+			PartType = Instruments[int(PartType)].Number
 			if(unsafeMode):
-				if(PartType == len(InstrumentNames)-1):
+				if(PartType == len(Instruments)-1):
 					PartType = 'ffffffff'
 					break
-				elif (PartType < len(InstrumentNames)):
+				elif (PartType < len(Instruments)):
 					PartType = format(PartType,'x').upper()
 					PartType = '0'*(8-len(PartType))+PartType
 					break
 				else:
 					print("\nERROR: Not a Valid Number\n")
-			elif((PartType == normalInstrumentNumber and not IsPercussion) or (PartType == len(InstrumentNames)-1 and IsPercussion)) and (NormalStyleSelected):
+			elif((PartType == normalInstrumentNumber and not IsPercussion) or (PartType == len(Instruments)-1 and IsPercussion)) and (NormalStyleSelected):
 				PartType = 'ffffffff'
 				break
-			elif((PartType < normalInstrumentNumber) != IsPercussion) and (PartType < len(InstrumentNames)) and ((NormalStyleSelected) or (InstrumentNames[PartType] in MenuInstruments)):
+			elif((PartType < normalInstrumentNumber) != IsPercussion) and (PartType < len(Instruments)) and ((NormalStyleSelected) or (Instruments[PartType].InMenu)):
 				PartType = format(PartType,'x').upper()
 				PartType = '0'*(8-len(PartType))+PartType
 				break
@@ -1193,7 +782,6 @@ while True:
 	print("//                          //")
 	print("//////////////////////////////\n")
 
-	#Updates
 	if(AutoUpdate) and (not uptodate):
 		uptodate = True
 		CheckForUpdates(False)
@@ -1246,24 +834,24 @@ while True:
 		LowestSong = -1
 		PrintSectionTitle('Song List')
 		SongMinLength = []
-		for num in range(len(SongNames)):
-			if(num != 50):
-				SongMinLength.append(min(int(SongFileLengths[num],16),int(ScoreFileLengths[num],16)))
+		for num in range(len(Songs)):
+			if(type(Songs[num].ScoreLength) == str):
+				SongMinLength.append(min(int(Songs[num].SongLength,16),int(Songs[num].ScoreLength,16)))
 			else:
-				SongMinLength.append(int(SongFileLengths[num],16))
-			if(int(BrseqLength,16) <= SongMinLength[num]) and (SongNames[num] not in appliedCustomSongs):
+				SongMinLength.append(int(Songs[num].SongLength,16))
+			if(int(BrseqLength,16) <= SongMinLength[num]) and (Songs[num].Name not in appliedCustomSongs):
 				if(LowestSong == -1): LowestSong = SongMinLength[num]
 				else: LowestSong = min(SongMinLength[num],LowestSong)
 
-		for num in range(len(SongNames)):
+		for num in range(len(Songs)):
 			if(int(BrseqLength,16) > SongMinLength[num]):
-				print(Fore.RED+'~unavalible~ '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+')'+Style.RESET_ALL)
-			elif(SongNames[num] in appliedCustomSongs):
-				print(Fore.YELLOW+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+') ~[Already Replaced]~'+Style.RESET_ALL)
+				print(Fore.RED+'~unavalible~ '+str(Songs[num].Name)+' ('+format(SongMinLength[num],'x').upper()+')'+Style.RESET_ALL)
+			elif(Songs[num].Name in appliedCustomSongs):
+				print(Fore.YELLOW+'(#'+str(num)+') '+str(Songs[num].Name)+' ('+format(SongMinLength[num],'x').upper()+') ~[Already Replaced]~'+Style.RESET_ALL)
 			elif (SongMinLength[num] == LowestSong):
-				print(Fore.GREEN+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+') ~[Smallest Song Avalible]~'+Style.RESET_ALL)
+				print(Fore.GREEN+'(#'+str(num)+') '+str(Songs[num].Name)+' ('+format(SongMinLength[num],'x').upper()+') ~[Smallest Song Avalible]~'+Style.RESET_ALL)
 			else:
-				print(Style.RESET_ALL+'(#'+str(num)+') '+str(SongNames[num])+' ('+format(SongMinLength[num],'x').upper()+')')
+				print(Style.RESET_ALL+'(#'+str(num)+') '+str(Songs[num].Name)+' ('+format(SongMinLength[num],'x').upper()+')')
 			time.sleep(0.005)
 
 		#Brseq Info
@@ -1276,10 +864,10 @@ while True:
 		PrintSectionTitle('Song Selection')
 		while True:
 			SongSelected = input("Enter the Song Number you want to Replace: ")
-			if(SongSelected.isnumeric()) and (int(SongSelected) < len(SongNames)):
+			if(SongSelected.isnumeric()) and (int(SongSelected) < len(Songs)):
 				SongSelected = int(SongSelected)
 				if(int(BrseqLength,16) <= SongMinLength[SongSelected]):
-					if(SongNames[SongSelected] not in appliedCustomSongs) or (DefaultReplacingReplacedSong == 'No') or (input('\nWARNING: You Have Already Replaced this Song Before! Are You Sure You Want to Replace this Song?\n(If you Want to Reset the Replaced Song Database, go to the Settings Menu.) [y/n] ') == 'y'):
+					if(Songs[SongSelected].Name not in appliedCustomSongs) or (DefaultReplacingReplacedSong == 'No') or (input('\nWARNING: You Have Already Replaced this Song Before! Are You Sure You Want to Replace this Song?\n(If you Want to Reset the Replaced Song Database, go to the Settings Menu.) [y/n] ') == 'y'):
 						break
 					else:
 						print('Aborted...\n')
@@ -1325,30 +913,30 @@ while True:
 				Length = format(int(Length) * int(TimeSignature),'x').upper()
 
 			#Final Writting
-			LengthCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+6,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
-			TempoCode = '0'+format(int(SongMemoryOffsets[SongSelected],16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
-			TimeCode = SongMemoryOffsets[SongSelected]+' 00000'+TimeSignature+'00\n'
+			LengthCode = '0'+format(int(Songs[SongSelected].MemOffset,16)+6,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
+			TempoCode = '0'+format(int(Songs[SongSelected].MemOffset,16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
+			TimeCode = Songs[SongSelected].MemOffset+' 00000'+TimeSignature+'00\n'
 
-		if(DefaultWantToReplaceSong == 'No') or (input('\nAre You Sure You Want to Override '+SongNames[SongSelected]+'?\nYou CANNOT restore the song if you don\'t have a backup! [y/n] ') == 'y'):
+		if(DefaultWantToReplaceSong == 'No') or (input('\nAre You Sure You Want to Override '+Songs[SongSelected].Name+'?\nYou CANNOT restore the song if you don\'t have a backup! [y/n] ') == 'y'):
 			#Brsar Writing
 			brsar = open(BrsarPath, "r+b")
-			brsar.seek(int(SongOffsets[SongSelected],16))
-			brsar.write(bytes(int(SongFileLengths[SongSelected],16)))
-			brsar.seek(int(SongOffsets[SongSelected],16))
+			brsar.seek(int(Songs[SongSelected].SongOffset,16))
+			brsar.write(bytes(int(Songs[SongSelected].SongLength,16)))
+			brsar.seek(int(Songs[SongSelected].SongOffset,16))
 			brsar.write(BrseqInfo)
-			if(type(ScoreOffsets[SongSelected]) != str):
-				for num in range(len(ScoreOffsets[SongSelected])):
-					brsar.seek(int(ScoreOffsets[SongSelected][num],16))
-					brsar.write(bytes(int(ScoreFileLengths[SongSelected][num],16)))
-					brsar.seek(int(ScoreOffsets[SongSelected][num],16))
+			if(type(Songs[SongSelected].ScoreOffset) != str):
+				for num in range(len(Songs[SongSelected].ScoreOffset)):
+					brsar.seek(int(Songs[SongSelected].ScoreOffset[num],16))
+					brsar.write(bytes(int(Songs[SongSelected].ScoreLength[num],16)))
+					brsar.seek(int(Songs[SongSelected].ScoreOffset[num],16))
 					brsar.write(BrseqInfo)
 			else:
-				brsar.seek(int(ScoreOffsets[SongSelected],16))
-				brsar.write(bytes(int(ScoreFileLengths[SongSelected],16)))
-				brsar.seek(int(ScoreOffsets[SongSelected],16))
+				brsar.seek(int(Songs[SongSelected].ScoreOffset,16))
+				brsar.write(bytes(int(Songs[SongSelected].ScoreLength,16)))
+				brsar.seek(int(Songs[SongSelected].ScoreOffset,16))
 				brsar.write(BrseqInfo)
 			brsar.close()
-			if(SongSelected != 50): AddPatch(SongNames[SongSelected]+' Song Patch',LengthCode+TempoCode+TimeCode)
+			if(SongSelected != 50): AddPatch(Songs[SongSelected].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
 			print("\nPatch Complete!")
 			time.sleep(0.5)
 			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
@@ -1363,35 +951,31 @@ while True:
 
 		#Song List
 		PrintSectionTitle("Song List")
-		for num in range(len(SongNames)):
-			print('(#'+str(num)+') '+str(SongNames[num]))
+		for num in range(len(Songs)):
+			print('(#'+str(num)+') '+str(Songs[num].Name))
 			time.sleep(0.005)
 
 		#Song Selection
 		PrintSectionTitle("Song Selection")
-		Selection = MakeSelection(['\nWhich Song Do You Want To Change The Name Of',0,len(SongNames)-1])
+		Selection = MakeSelection(['\nWhich Song Do You Want To Change The Name Of',0,len(Songs)-1])
 		
 		ChangeName(Selection,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 		print("\nEditing Successful!\n")
 	elif(Selection == 3): #////////////////////////////////////////Change Style
-		PrintSectionTitle("Style List")
 		FindDolphinSave()
-		SongStyles = 27
-		NormalStyleNumber = 11
 		MenuStyles = 5
-		for num in range(len(StyleNames)):
-			if(num == 0):
-				print('\n//////////Song Specific Styles\n')
-			elif(num == SongStyles):
-				print('\n//////////Global Styles\n')
-			elif(num == NormalStyleNumber+SongStyles):
-				print('\n//////////Menu Styles\n')
-			elif(num == NormalStyleNumber+SongStyles+MenuStyles):
-				print('\n//////////Replace All Styles\n')
-			print('(#'+str(num)+') '+str(StyleNames[num]))
-			time.sleep(0.005)
-		Selection = MakeSelection(['\nWhat\'s the Style Number you want to change',0,len(StyleNames)])
-		NormalStyleSelected = (Selection < len(StyleNames)-7) or (Selection == len(StyleNames)-2)
+		MaxStyles = [0]*NumberOfStyleTypes
+		StyleTable = [['Global Styles','Song Specific Styles','Menu Styles','Replace All Styles']]
+		for num in range(len(Styles)):
+			MaxStyles[Styles[num].StyleType] += 1
+			if(MaxStyles[Styles[num].StyleType] >= len(StyleTable)):
+				StyleTable.append(['']*NumberOfStyleTypes)
+			StyleTable[MaxStyles[Styles[num].StyleType]][Styles[num].StyleType] = '(#'+str(num)+') '+Styles[num].Name
+		StyleTable[1][NumberOfStyleTypes-1] = '(#'+str(len(Styles))+') Replace All Non-Menu Styles'
+		StyleTable[2][NumberOfStyleTypes-1] = '(#'+str(len(Styles)+1)+') Replace All Menu Styles'
+		print(tabulate(StyleTable, headers='firstrow'))
+		Selection = MakeSelection(['\nWhat\'s the Style Number you want to change',0,len(Styles)+2])
+		NormalStyleSelected = (Selection < len(Styles)-MenuStyles) or (Selection == len(Styles))
 		PrintSectionTitle("Instrument List")
 		normalInstrumentNumber = 40
 		
@@ -1399,65 +983,65 @@ while True:
 			for num in range(normalInstrumentNumber+1):
 				realNum = num
 				if(num == normalInstrumentNumber):
-					num = len(InstrumentNames)-1
-				if (InstrumentNames[num] not in MenuInstruments) and (not NormalStyleSelected):
-					print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
+					num = len(Instruments)-1
+				if (not Instruments[num].InMenu) and (not NormalStyleSelected):
+					print(Fore.RED+'(UNAVALIBLE) '+str(Instruments[num].Name)+Style.RESET_ALL)
 				else:
-					print('(#'+str(realNum)+') '+str(InstrumentNames[num]))
+					print('(#'+str(realNum)+') '+str(Instruments[num].Name))
 				time.sleep(0.005)
 		else:
-			for num in range(len(InstrumentNames)):
-				if ((InstrumentNames[num] in MenuInstruments) and (not NormalStyleSelected) and (num < normalInstrumentNumber)) or (((num < normalInstrumentNumber) or (num == len(InstrumentNames)-1)) and (NormalStyleSelected)):
-					print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[num]))
+			for num in range(len(Instruments)):
+				if ((Instruments[num].InMenu) and (not NormalStyleSelected) and (num < normalInstrumentNumber)) or (((num < normalInstrumentNumber) or (num == len(Instruments)-1)) and (NormalStyleSelected)):
+					print(Style.RESET_ALL+'(#'+str(num)+') '+str(Instruments[num].Name))
 				elif (unsafeMode):
-					if((InstrumentNames[num] in MenuInstruments) and (not NormalStyleSelected)) or (NormalStyleSelected):
-						print(Fore.YELLOW+'(#'+str(num)+') '+str(InstrumentNames[num])+Style.RESET_ALL)
+					if((Instruments[num].InMenu) and (not NormalStyleSelected)) or (NormalStyleSelected):
+						print(Fore.YELLOW+'(#'+str(num)+') '+str(Instruments[num].Name)+Style.RESET_ALL)
 					else:
-						print(Fore.RED+'(#'+str(num)+') '+str(InstrumentNames[num])+Style.RESET_ALL)
+						print(Fore.RED+'(#'+str(num)+') '+str(Instruments[num].Name)+Style.RESET_ALL)
 				time.sleep(0.005)
 		PrintSectionTitle("Instrument Selection")
 		Melody = SelectStyleInstrument('Melody',False)
 		Harmony = SelectStyleInstrument('Harmony',False)
 		Chord = SelectStyleInstrument('Chord',False)
 		Bass = SelectStyleInstrument('Bass',False)
-		PrintSectionTitle("Intrument List")
+		PrintSectionTitle("Instrument List")
 		if(not unsafeMode):
-			for num in range(40,len(InstrumentNames)):
-				if (InstrumentNames[num] not in MenuInstruments) and (not NormalStyleSelected):
-					print(Fore.RED+'(UNAVALIBLE) '+str(InstrumentNames[num])+Style.RESET_ALL)
+			for num in range(40,len(Instruments)):
+				if (not Instruments[num].InMenu) and (not NormalStyleSelected):
+					print(Fore.RED+'(UNAVALIBLE) '+Instruments[num].Name+Style.RESET_ALL)
 				else:
-					print('(#'+str(num-40)+') '+str(InstrumentNames[num]))
+					print('(#'+str(num-40)+') '+Instruments[num].Name)
 				time.sleep(0.005)
 		else:
-			for num in range(len(InstrumentNames)):
-				if ((InstrumentNames[num] in MenuInstruments) and (not NormalStyleSelected) and (num >= normalInstrumentNumber)) or (((num >= normalInstrumentNumber) or (num == len(InstrumentNames)-1)) and (NormalStyleSelected)):
-					print(Style.RESET_ALL+'(#'+str(num)+') '+str(InstrumentNames[num]))
+			for num in range(len(Instruments)):
+				if ((Instruments[num].InMenu) and (not NormalStyleSelected) and (num >= normalInstrumentNumber)) or (((num >= normalInstrumentNumber) or (num == len(Instruments)-1)) and (NormalStyleSelected)):
+					print(Style.RESET_ALL+'(#'+str(num)+') '+Instruments[num].Name)
 				elif (unsafeMode):
-					if((InstrumentNames[num] in MenuInstruments) and (not NormalStyleSelected)) or (NormalStyleSelected):
-						print(Fore.YELLOW+'(#'+str(num)+') '+str(InstrumentNames[num])+Style.RESET_ALL)
+					if((Instruments[num].InMenu) and (not NormalStyleSelected)) or (NormalStyleSelected):
+						print(Fore.YELLOW+'(#'+str(num)+') '+Instruments[num].Name+Style.RESET_ALL)
 					else:
-						print(Fore.RED+'(#'+str(num)+') '+str(InstrumentNames[num])+Style.RESET_ALL)
+						print(Fore.RED+'(#'+str(num)+') '+Instruments[num].Name+Style.RESET_ALL)
 				time.sleep(0.005)
 
 		Perc1 = SelectStyleInstrument('Percussion 1',True)
 		Perc2 = SelectStyleInstrument('Percussion 2',True)
 
-		if(Selection == len(StyleNames)-2):
+		if(Selection == len(Styles)):
 			PatchName = []
 			PatchInfo = []
-			for num in range(len(StyleNames)-7):
-				PatchName.append(StyleNames[num]+' Style Patch')
-				PatchInfo.append(StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+			for num in range(len(Styles)-MenuStyles):
+				PatchName.append(Styles[num].Name+' Style Patch')
+				PatchInfo.append(Styles[num].MemOffset+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 			AddPatch(PatchName,PatchInfo)
-		elif(Selection >= len(StyleNames)-7):
+		elif(Selection >= len(Styles)-MenuStyles):
 			PatchName = []
 			PatchInfo = []
-			for num in range(len(StyleNames)-7,len(StyleNames)-2):
-				PatchName.append(StyleNames[num]+' Style Patch')
-				PatchInfo.append(StyleMemoryOffsets[num]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+			for num in range(len(Styles)-MenuStyles,len(Styles)):
+				PatchName.append(Styles[num].Name+' Style Patch')
+				PatchInfo.append(Styles[num].MemOffset+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 			AddPatch(PatchName,PatchInfo)
 		else:
-			AddPatch(StyleNames[Selection]+' Style Patch',StyleMemoryOffsets[Selection]+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+			AddPatch(Styles[Selection].Name+' Style Patch',Styles[Selection].MemOffset+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 
 		print("\nPatch Complete!")
 		time.sleep(0.5)
@@ -1489,25 +1073,25 @@ while True:
 				print("\nEditing Successful!\n")
 			elif(Selection == 2): #////////////////////////////////////////Swap Songs
 				PrintSectionTitle('Swap Songs')
-				for num in range(len(SongNames)-1):
-					print('(#'+str(num)+') '+str(SongNames[num]))
+				for num in range(len(Songs)-1):
+					print('(#'+str(num)+') '+str(Songs[num].Name))
 					time.sleep(0.005)
-				print('(#'+str(len(SongNames)-1)+') All Songs')
-				SongToReplace = MakeSelection(['Choose a Song You Want to Replace',0,len(SongNames)-1])
-				Selection = MakeSelection(['What will the song get replaced with',0,len(SongNames)-2])
+				print('(#'+str(len(Songs)-1)+') All Songs')
+				SongToReplace = MakeSelection(['Choose a Song You Want to Replace',0,len(Songs)-1])
+				Selection = MakeSelection(['What will the song get replaced with',0,len(Songs)-2])
 				patch = open(GamePath+'/GeckoCodes.ini')
 				textlines = patch.readlines()
 				patch.close()
 				codes = [0,0,0]
 						
 				for num in range(len(textlines)):
-					if(SongNames[Selection] in textlines[num]):
+					if(Songs[Selection].Name in textlines[num]):
 						if('[WiiMusicEditor]' in textlines[num]):
 							for number in range(3):
 								codes[number] = textlines[num+number+1][8:len(textlines[num+number+1]):1]
 							break
 
-				if(Selection == len(SongNames)-1):
+				if(Selection == len(Songs)-1):
 					appliedCustomSongs = []
 					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
 						codes = open(GamePath+'/GeckoCodes.ini')
@@ -1521,33 +1105,31 @@ while True:
 				patchCode = ""
 				name = ""
 				replaceSongPatch = input('Would you like to copy the song patch? [y/n] ')
-				for num in range(len(SongNames)-1):
+				for num in range(len(Songs)-1):
 					song = num
-					if(SongToReplace != len(SongNames)-1): song = SongToReplace
-					if(song != Selection) and ((Selection != len(SongNames)-1) or (SongNames[song] not in appliedCustomSongs)):
-						songNum = SongMemoryOrder.index(SongNames[song])
-						selectNum = SongMemoryOrder.index(SongNames[Selection])
-						dol.seek(int(MainDolOffset,16)+int("BC",16)*songNum)
-						dol.write(bytes.fromhex(SongIds[selectNum][0]+'0000'+SongIds[selectNum][1]))
+					if(SongToReplace != len(Songs)-1): song = SongToReplace
+					if(song != Selection) and ((Selection != len(Songs)-1) or (Songs[song].Name not in appliedCustomSongs)):
+						dol.seek(int(MainDolOffset,16)+int("BC",16)*Songs[song].MemOrder)
+						dol.write(bytes.fromhex(Songs[Selection].SongId+'0000'+Songs[Selection].ScoreId))
 						if(replaceSongPatch == 'y'):
-							LengthCode = '0'+format(int(SongMemoryOffsets[songNum],16)+6,'x').lower()+codes[0]
-							TempoCode = '0'+format(int(SongMemoryOffsets[songNum],16)+10,'x').lower()+codes[1]
-							TimeCode = SongMemoryOffsets[songNum]+codes[2]
-							AddPatch(SongNames[song]+' Song Patch',LengthCode+TempoCode+TimeCode)
-					if(SongToReplace != len(SongNames)-1): break
+							LengthCode = '0'+format(int(Songs[song].MemOffset,16)+6,'x').lower()+codes[0]
+							TempoCode = '0'+format(int(Songs[Selection].MemOffset,16)+10,'x').lower()+codes[1]
+							TimeCode = Songs[song].MemOffset+codes[2]
+							AddPatch(Songs[song].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
+					if(SongToReplace != len(Songs)-1): break
 				dol.close()
 			elif(Selection == 3): #////////////////////////////////////////Remove Song
 				FindGameFolder()
 				FindDolphinSave()
 				PrintSectionTitle('Remove Song')
-				for num in range(len(SongNames)-1):
-					print('(#'+str(num)+') '+str(SongNames[num]))
+				for num in range(len(Songs)-1):
+					print('(#'+str(num)+') '+str(Songs[num].Name))
 					time.sleep(0.005)
-				print('(#'+str(len(SongNames)-1)+') Remove All Non-Custom Songs')
+				print('(#'+str(len(Songs)-1)+') Remove All Non-Custom Songs')
 				
-				Selection = MakeSelection(['Please Select a Song to Remove',0,len(SongNames)-1])
+				Selection = MakeSelection(['Please Select a Song to Remove',0,len(Songs)-1])
 
-				if(Selection == len(SongNames)-1):
+				if(Selection == len(Songs)-1):
 					appliedCustomSongs = []
 					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
 						codes = open(GamePath+'/GeckoCodes.ini')
@@ -1557,18 +1139,18 @@ while True:
 							if('[WiiMusicEditor]' in text) and ('Style' not in text):
 								appliedCustomSongs.append(text[1:len(text)-29:1])
 				
-				for number in range(len(SongNames)-2):
-					if(Selection != len(SongNames)-1):
-						number = SongMemoryOrder.index(SongNames[Selection])
+				for number in range(len(Songs)-2):
+					if(Selection != len(Songs)-1):
+						number = Selection
 					
-					if((Selection != len(SongNames)-1) or (SongMemoryOrder[number] not in appliedCustomSongs)):
+					if((Selection != len(Songs)-1) or (Songs[number].Name not in appliedCustomSongs)):
 						#Brsar Writing
 						brsar = open(GamePath+'/sys/main.dol', "r+b")
-						brsar.seek(int(MainDolOffset,16)+6+int("BC",16)*number)
+						brsar.seek(int(MainDolOffset,16)+6+int("BC",16)*Songs[number].MemOrder)
 						brsar.write(bytes.fromhex('ffffffffffff'))
 						brsar.close()
 
-					if(Selection != len(SongNames)-1): break
+					if(Selection != len(Songs)-1): break
 
 				print('\nEradication Complete!')
 			elif(Selection == 4): #////////////////////////////////////////Import/Export Files
