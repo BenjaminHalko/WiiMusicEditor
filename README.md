@@ -6,7 +6,7 @@
 - Multiple Song Managing Tools!
 - 100% Save File.
 - Dolphin Integration.
-- Python 3.8 support.
+- Python 3.9 and 3.8 support.
 - And more!
 
 # Looking for the Manual? Check the wiki!
