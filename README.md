@@ -1,7 +1,7 @@
 # WiiMusicEditor Features:
 - Powerful and Easy to use.
 - Automatic conversion of MIDIs or RSEQs to BRSEQs.
-- Automatic patching for (almost) Everything in the game!
+- Automatic patching for (almost) everything in the game!
 - Text Editing to change Dialog.
 - Multiple Song Managing Tools!
 - 100% Save File.
