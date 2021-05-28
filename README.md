@@ -1,5 +1,5 @@
 ![](https://user-images.githubusercontent.com/73490201/119917911-4e628100-bf1c-11eb-9c8c-2b8727e2d916.png)
-# WiiMusicEditor Features:
+# Features:
 - Powerful and Easy to use.
 - Automatic conversion of MIDIs or RSEQs to BRSEQs.
 - Automatic patching for (almost) everything in the game!
