@@ -979,18 +979,30 @@ while True:
 	elif(Selection == 3): #////////////////////////////////////////Change Style
 		FindDolphinSave()
 		MenuStyles = 5
-		MaxStyles = [0]*NumberOfStyleTypes
+		columnSplit = 4
+		MaxStyles = []
+		StyleTable = [[['Global Styles','Song Specific Styles','Quick Jam Styles','Menu Styles']],[['Replace All Styles']]]
+		for num in range(ceil(NumberOfStyleTypes/columnSplit)):
+			MaxStyles.append([0]*min(columnSplit,NumberOfStyleTypes-num*columnSplit))
 		print('')
-		StyleTable = [['Global Styles','Song Specific Styles','Quick Jam Styles','Menu Styles','Replace All Styles']]
 		for num in range(len(Styles)):
-			MaxStyles[Styles[num].StyleType] += 1
-			if(MaxStyles[Styles[num].StyleType] >= len(StyleTable)):
-				StyleTable.append(['']*NumberOfStyleTypes)
-			StyleTable[MaxStyles[Styles[num].StyleType]][Styles[num].StyleType] = '(#'+str(num)+') '+Styles[num].Name
-		StyleTable[1][NumberOfStyleTypes-1] = '(#'+str(len(Styles))+') Replace All Non-Menu Styles'
-		StyleTable[2][NumberOfStyleTypes-1] = '(#'+str(len(Styles)+1)+') Replace All Menu Styles'
-		print(tabulate(StyleTable, headers='firstrow'))
-		Selection = MakeSelection(['\nWhat\'s the Style Number you want to change',0,len(Styles)+2])
+			number = Styles[num].StyleType
+			array = 0
+			while(number >= columnSplit):
+				array += 1
+				number -= columnSplit
+			MaxStyles[array][number] += 1
+			if(MaxStyles[array][number] >= len(StyleTable[array])):
+				StyleTable[array].append(['']*min(columnSplit,NumberOfStyleTypes-array*columnSplit))
+			StyleTable[array][MaxStyles[array][number]][number] = '(#'+str(num)+') '+Styles[num].Name
+		while(len(StyleTable[floor(NumberOfStyleTypes/columnSplit)]) <= 2):
+			StyleTable[floor(NumberOfStyleTypes/columnSplit)].append(['']*(NumberOfStyleTypes-floor(NumberOfStyleTypes/columnSplit)*columnSplit))
+		StyleTable[floor(NumberOfStyleTypes/columnSplit)][1][NumberOfStyleTypes-floor(NumberOfStyleTypes/columnSplit)*columnSplit-1] = '(#'+str(len(Styles))+') Replace All Non-Menu Styles'
+		StyleTable[floor(NumberOfStyleTypes/columnSplit)][2][NumberOfStyleTypes-floor(NumberOfStyleTypes/columnSplit)*columnSplit-1] = '(#'+str(len(Styles)+1)+') Replace All Menu Styles'
+		for num in range(len(StyleTable)):
+			print(tabulate(StyleTable[num], headers='firstrow'))
+			print('')
+		Selection = MakeSelection(['What\'s the Style Number you want to change',0,len(Styles)+2])
 		NormalStyleSelected = (Selection < len(Styles)-MenuStyles) or (Selection == len(Styles))
 		PrintSectionTitle("Instrument List")
 		normalInstrumentNumber = 40
@@ -1303,12 +1315,17 @@ while True:
 					print('')
 			elif(Selection == 6): #////////////////////////////////////////Patch Main.dol
 				FindGameFolder()
-				print('\nCreating Gct...')
-				CreateGct()
-				if(os.path.isfile(GamePath+'/R64E01.gct')): os.remove(GamePath+'/R64E01.gct')
-				os.rename(ProgramPath+'/R64E01.gct',GamePath+'/R64E01.gct')
-				print('\nCreation Complete!')
-				print('Saved to: '+GamePath+'/R64E01.gct')
+				FindDolphinSave()
+				if(input('\nAre you sure you want to patch Main.dol? [y/n] ') == 'y'):
+					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+						print('\nCreating Gct...')
+						CreateGct()
+						print('\nPatching Main.dol...')
+						subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section \"'+ProgramPath+'/R64E01.gct\"',capture_output=True)
+						os.remove(ProgramPath+'/R64E01.gct')
+						print('\nPatch Successful!')
+					else:
+						print('\nNo Gecko Codes Found')
 			elif(Selection == 7): #////////////////////////////////////////Riivolution Patch
 				PrintSectionTitle('Riivolution Patch')
 				FindGameFolder()
