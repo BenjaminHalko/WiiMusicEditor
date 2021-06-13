@@ -117,8 +117,8 @@ SongClass(SongTypeValue.Regular,'Wake Me Up Before You Go-Go','66C1E0','66DEA0',
 SongClass(SongTypeValue.Regular,'Wii Music','602CE0','605520','2840','1E80','025a0730','015D','015E',4),
 SongClass(SongTypeValue.Regular,'Wii Sports','67D360','67EE40','1AE0','1940','025a26c4','01B3','01B4',47),
 SongClass(SongTypeValue.Regular,'Woman','66F780','670FC0','1840','1240','025a23d4','01AB','01AC',43),
-SongClass(SongTypeValue.Regular,'Yankee Doodle','61F620','620F60','1940','1880','025a0dcc','016F','0170',13),
-SongClass(SongTypeValue.Menu,'Menu Song','19AF7A0',['19ABD00','19B1A00','19B4360','19B69A0','19B9360','19BBF20'],'2260',['3AA0','2960','2640','29C0','2BC0','29A0'],['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1,-1,-1)]
+SongClass(SongTypeValue.Regular,'Yankee Doodle','61F620','620F60','1940','1880','025a0dcc','016F','0170',13)]
+#SongClass(SongTypeValue.Menu,'Menu Song','19AF7A0',['19ABD00','19B1A00','19B4360','19B69A0','19B9360','19BBF20'],'2260',['3AA0','2960','2640','29C0','2BC0','29A0'],['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1,-1,-1)]
 
 Styles = [
 StyleClass(StyleTypeValue.Global,'Jazz','0659A65C'),
@@ -402,51 +402,6 @@ def FindDolphinSave():
 				break
 			else:
 				print("\nERROR: Unable to Locate Valid Dolphin Save Directory")
-
-def InitializeBrseq():
-	global BrseqPath
-	global BrseqInfo
-	global BrseqLength
-	global ProgramPath
-	global Tempo
-	global Length
-	ExceptedSongExtensions = ['.midi','.mid','.brseq','.rseq']
-	if(len(sys.argv) < 2):
-		BrseqPath = ''
-	else:
-		BrseqPath = sys.argv[1]
-	if(not os.path.isfile(BrseqPath)) or (not pathlib.Path(BrseqPath).suffix in ExceptedSongExtensions):
-		while True:
-			BrseqPath = input("\nDrag File to Batch (MIDIs, BRSEQ, & RSEQ Files only): ").replace('&', '').replace('\'', '').replace('\"', '').strip()
-			if(os.path.isfile(BrseqPath)) and (pathlib.Path(BrseqPath).suffix in ExceptedSongExtensions):
-				break
-			else:
-				print("\nERROR: Not A Valid File!")
-
-	with tempfile.TemporaryDirectory() as directory:
-		prefix = pathlib.Path(BrseqPath).suffix
-		if(prefix == '.mid'): prefix = '.midi'
-		copyfile(BrseqPath,directory+'/z'+prefix)
-		if(os.path.isfile(directory+'/z.rseq')):
-			subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" assemble \"'+directory+'/z.rseq\"')
-		if(os.path.isfile(directory+'/z.brseq')):
-			subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" to_midi \"'+directory+'/z.brseq\"')
-		else:
-			subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" from_midi \"'+directory+'/z.midi\"')
-		mid = mido.MidiFile(directory+"/z.midi")
-		Tempo = 'Could Not Locate'
-		Length = 0
-		for msg in mid.tracks[0]:
-			if(msg.type == 'set_tempo'):
-				Tempo = floor(mido.tempo2bpm(msg.tempo))
-		Length = str(ceil(mid.length*Tempo/60))
-		Tempo = str(Tempo)
-		Brseq = open(directory+"/z.brseq","rb")
-		Brseq.seek(0)
-		BrseqInfo = Brseq.read()
-		Brseq.close()
-		BrseqLength = format(os.stat(directory+"/z.brseq").st_size,'x').upper()
-
 
 def ChangeName(SongToChange,newText):
 	global ProgramPath
@@ -732,6 +687,15 @@ def LoadNewFile(dir):
 			CopyFileSafe(geckoCodeFile,GamePath+'/GeckoCodes.ini')
 			print('\nImported .ini')
 
+def EditBrsarOffset(offset):
+	global sizeDifference
+	global brsar
+	brsar.seek(offset)
+	size = brsar.read(4)
+	brsar.seek(offset)
+	brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+	brsar.seek(int('5F6620',16)+int.from_bytes(size,"big")+sizeDifference)
+
 #Default Paths
 ProgramPath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
 GamePath = LoadSetting('Paths','GamePath','None')
@@ -763,6 +727,7 @@ DefaultWantToReplaceSong = LoadSetting('Default Answers', 'Want To Replace Song'
 DefaultReplacingReplacedSong = LoadSetting('Default Answers', 'Replacing Replaced Song', 'Yes')
 DefaultReplaceSongNames = LoadSetting('Default Answers', 'Replace Song Names', 'Ask')
 DefaultUseAutoLengthTempo = LoadSetting('Default Answers', 'Use Auto Length and Tempo', 'Ask')
+DefaultLoadSongScore = LoadSetting('Default Answers', 'Load Song And Score', 'No')
 
 #Unsafe Mode
 unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
@@ -833,7 +798,54 @@ while True:
 		#Load Files
 		FindGameFolder()
 		FindDolphinSave()
-		InitializeBrseq()
+
+		#Load Brseq
+		ExceptedSongExtensions = ['.midi','.mid','.brseq','.rseq']
+		BrseqInfo = []
+		BrseqLength = []
+		for num in range(2):
+			while True:
+				extraString = ''
+				if(DefaultLoadSongScore == 'Yes'):
+					extraString = ' [SONG]'
+					if(num == 1): extraString = ' [SCORE]'
+				BrseqPath = input("\nDrag File to Batch (MIDIs, BRSEQ, & RSEQ Files only)"+extraString+": ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+				if(os.path.isfile(BrseqPath)) and (pathlib.Path(BrseqPath).suffix in ExceptedSongExtensions):
+					break
+				else:
+					print("\nERROR: Not A Valid File!")
+
+			with tempfile.TemporaryDirectory() as directory:
+				prefix = pathlib.Path(BrseqPath).suffix
+				if(prefix == '.mid'): prefix = '.midi'
+				copyfile(BrseqPath,directory+'/z'+prefix)
+				if(os.path.isfile(directory+'/z.rseq')):
+					subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" assemble \"'+directory+'/z.rseq\"')
+				if(os.path.isfile(directory+'/z.brseq')):
+					if(num == 0): subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" to_midi \"'+directory+'/z.brseq\"')
+				else:
+					subprocess.run('\"'+ProgramPath+'/Helper/SequenceCmd/GotaSequenceCmd.exe\" from_midi \"'+directory+'/z.midi\"')
+				if(num == 0) :
+					Tempo = 'Could Not Locate'
+					Length = 'Could Not Locate'
+					if(os.path.isfile(directory+"/z.midi")):
+						mid = mido.MidiFile(directory+"/z.midi")
+						
+						for msg in mid.tracks[0]:
+							if(msg.type == 'set_tempo'):
+								Tempo = floor(mido.tempo2bpm(msg.tempo))
+						Length = str(ceil(mid.length*Tempo/60))
+						Tempo = str(Tempo)
+				Brseq = open(directory+"/z.brseq","rb")
+				Brseq.seek(0)
+				BrseqInfo.append(Brseq.read())
+				Brseq.close()
+				BrseqLength.append(format(os.stat(directory+"/z.brseq").st_size,'x').upper())
+			if(num == 0) and (DefaultLoadSongScore != 'Yes'):
+				BrseqInfo.append(BrseqInfo[0])
+				BrseqLength.append(BrseqLength[0])
+				print('cheese')
+				break
 
 		#Applied Custom Songs
 		appliedCustomSongs = []
@@ -848,32 +860,18 @@ while True:
 		#Song List
 		LowestSong = -1
 		PrintSectionTitle('Song List')
-		SongMinLength = []
-		for num in range(len(Songs)):
-			if(type(Songs[num].ScoreLength) == str):
-				SongMinLength.append(min(int(Songs[num].SongLength,16),int(Songs[num].ScoreLength,16)))
-			else:
-				SongMinLength.append(int(Songs[num].SongLength,16))
-			if(int(BrseqLength,16) <= SongMinLength[num]) and (Songs[num].Name not in appliedCustomSongs):
-				if(LowestSong == -1): LowestSong = SongMinLength[num]
-				else: LowestSong = min(SongMinLength[num],LowestSong)
 
 		for num in range(len(Songs)):
-			if(int(BrseqLength,16) > SongMinLength[num]):
-				print(Fore.RED+'~unavalible~ '+str(Songs[num].Name)+' ('+format(SongMinLength[num],'x').upper()+')'+Style.RESET_ALL)
-			elif(Songs[num].Name in appliedCustomSongs):
-				print(Fore.YELLOW+'(#'+str(num)+') '+str(Songs[num].Name)+' ('+format(SongMinLength[num],'x').upper()+') ~[Already Replaced]~'+Style.RESET_ALL)
-			elif (SongMinLength[num] == LowestSong):
-				print(Fore.GREEN+'(#'+str(num)+') '+str(Songs[num].Name)+' ('+format(SongMinLength[num],'x').upper()+') ~[Smallest Song Avalible]~'+Style.RESET_ALL)
+			if(Songs[num].Name in appliedCustomSongs):
+				print(Fore.YELLOW+'(#'+str(num)+') '+str(Songs[num].Name)+' ~[Already Replaced]~'+Style.RESET_ALL)
 			else:
-				print(Style.RESET_ALL+'(#'+str(num)+') '+str(Songs[num].Name)+' ('+format(SongMinLength[num],'x').upper()+')')
+				print('(#'+str(num)+') '+str(Songs[num].Name))
 			time.sleep(0.005)
 
 		#Brseq Info
 		PrintSectionTitle("File Info")
 		print("Number of Beats: "+Length)
 		print("Tempo: "+Tempo)
-		print("File Size: "+BrseqLength)
 
 		#Song Selection
 		PrintSectionTitle('Song Selection')
@@ -881,13 +879,10 @@ while True:
 			SongSelected = input("Enter the Song Number you want to Replace: ")
 			if(SongSelected.isnumeric()) and (int(SongSelected) < len(Songs)):
 				SongSelected = int(SongSelected)
-				if(int(BrseqLength,16) <= SongMinLength[SongSelected]):
-					if(Songs[SongSelected].Name not in appliedCustomSongs) or (DefaultReplacingReplacedSong == 'No') or (input('\nWARNING: You Have Already Replaced this Song Before! Are You Sure You Want to Replace this Song?\n(If you Want to Reset the Replaced Song Database, go to the Settings Menu.) [y/n] ') == 'y'):
-						break
-					else:
-						print('Aborted...\n')
+				if(Songs[SongSelected].Name not in appliedCustomSongs) or (DefaultReplacingReplacedSong == 'No') or (input('\nWARNING: You Have Already Replaced this Song Before! Are You Sure You Want to Replace this Song [y/n] ') == 'y'):
+					break
 				else:
-					print("ERROR: Brseq Filesize is over the maximum filesize for this song!\n")
+					print('Aborted...\n')
 			else:
 				print("\nERROR: Not a Valid Number\n")
 
@@ -895,9 +890,9 @@ while True:
 		if(SongSelected != 50):
 			PrintSectionTitle("Length, Tempo, Time Signature Patch")
 			AutoFill = 'n'
-			if((Tempo != 'Could Not Locate') or (Length != '0')) and (DefaultUseAutoLengthTempo != 'No'):
+			if((Tempo != 'Could Not Locate') or ((Length != '0') and (Length != 'Could Not Locate'))) and (DefaultUseAutoLengthTempo != 'No'):
 				MetaDataFound = ''
-				if(Length != '0'): MetaDataFound = 'Length'
+				if(Length != 'Could Not Locate') and (Length != '0'): MetaDataFound = 'Length'
 				if(Tempo != 'Could Not Locate'):
 					if(MetaDataFound == ''): MetaDataFound = 'Tempo'
 					else: MetaDataFound = MetaDataFound+', Tempo'
@@ -926,30 +921,49 @@ while True:
 
 			if(AutoFill != 'y') or (Length == 0):
 				Length = format(int(Length) * int(TimeSignature),'x').upper()
-
+			
 			#Final Writting
 			LengthCode = '0'+format(int(Songs[SongSelected].MemOffset,16)+6,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
 			TempoCode = '0'+format(int(Songs[SongSelected].MemOffset,16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
 			TimeCode = Songs[SongSelected].MemOffset+' 00000'+TimeSignature+'00\n'
 
-		if(DefaultWantToReplaceSong == 'No') or (input('\nAre You Sure You Want to Override '+Songs[SongSelected].Name+'?\nYou CANNOT restore the song if you don\'t have a backup! [y/n] ') == 'y'):
+		if(DefaultWantToReplaceSong != 'No') or (input('\nAre You Sure You Want to Override '+Songs[SongSelected].Name+'?\nYou CANNOT restore the song if you don\'t have a backup! [y/n] ') == 'y'):
 			#Brsar Writing
+			brsar = open(BrsarPath, "rb")
+			brsar.seek(int('33A84',16)+24*Songs[SongSelected].MemOrder*2)
+			offset1 = brsar.read(4)
+			offset2 = brsar.read(4)
+			brsar.seek(int('33A84',16)+24*(Songs[SongSelected].MemOrder*2+1))
+			offset3 = brsar.read(4)
+			offset4 = brsar.read(4)
+			brsar.seek(0)
+			data1 = brsar.read(int('5F6620',16)+int.from_bytes(offset1,'big'))
+			brsar.seek(int('5F6620',16)+int.from_bytes(offset1,'big')+int.from_bytes(offset2,'big'))
+			data2 = brsar.read(int.from_bytes(offset3,'big')-int.from_bytes(offset1,'big')-int.from_bytes(offset2,'big'))
+			brsar.seek(int('5F6620',16)+int.from_bytes(offset3,'big')+int.from_bytes(offset4,'big'))
+			data3 = brsar.read()
+			brsar.close()
+			brsar = open(BrsarPath, "wb")
+			brsar.write(data1+BrseqInfo[0]+data2+BrseqInfo[1]+data3)
+			brsar.close()
 			brsar = open(BrsarPath, "r+b")
-			brsar.seek(int(Songs[SongSelected].SongOffset,16))
-			brsar.write(bytes(int(Songs[SongSelected].SongLength,16)))
-			brsar.seek(int(Songs[SongSelected].SongOffset,16))
-			brsar.write(BrseqInfo)
-			if(type(Songs[SongSelected].ScoreOffset) != str):
-				for num in range(len(Songs[SongSelected].ScoreOffset)):
-					brsar.seek(int(Songs[SongSelected].ScoreOffset[num],16))
-					brsar.write(bytes(int(Songs[SongSelected].ScoreLength[num],16)))
-					brsar.seek(int(Songs[SongSelected].ScoreOffset[num],16))
-					brsar.write(BrseqInfo)
-			else:
-				brsar.seek(int(Songs[SongSelected].ScoreOffset,16))
-				brsar.write(bytes(int(Songs[SongSelected].ScoreLength,16)))
-				brsar.seek(int(Songs[SongSelected].ScoreOffset,16))
-				brsar.write(BrseqInfo)
+			brsar.seek(int('33A88',16)+24*Songs[SongSelected].MemOrder*2)
+			sizeDifference = int(BrseqLength[0],16)-int.from_bytes(brsar.read(4),"big")
+			brsar.seek(int('33A88',16)+24*Songs[SongSelected].MemOrder*2)
+			brsar.write(int(BrseqLength[0],16).to_bytes(4, 'big'))
+			EditBrsarOffset(int('33A84',16)+24*(Songs[SongSelected].MemOrder*2+1))
+			brsar.seek(int('33A88',16)+24*(Songs[SongSelected].MemOrder*2+1))
+			sizeDifference += int(BrseqLength[1],16)-int.from_bytes(brsar.read(4),"big")
+			brsar.seek(int('33A88',16)+24*(Songs[SongSelected].MemOrder*2+1))
+			brsar.write(int(BrseqLength[1],16).to_bytes(4, 'big'))
+			#Resize All Song Offsets
+			for num in range((Songs[SongSelected].MemOrder+1)*2,100):
+				EditBrsarOffset(int('33A84',16)+24*num)
+			for offset in ['8','33748','343F0','359FC','35A68','35AD4','35B40','35BCC','35C38','35CA4','35D30','35DBC','35E28','35EB4','35F20','35F8C','36018','36064','360D0','3705C','370E8','371F4',
+			'37340','376CC','37738','37784','379D0','37ABC','37B48','37BB4','37C20','37C8C','37D18','37D64','37E70','37EBC','37F48','3374C','343F8','35A04','35A70','35ADC','35B48','35BD4','35C40','35CAC',
+			'35D38','35DC4','35E30','35EBC','35F28','35F94','36020','3606C','360D8','37064','370F0','371FC','37348','376D4','37740','3778C','379D8','37AC4','37B50','37BBC','37C28','37C94','37D20',
+			'37D6C','37E78','37EC4','37F50']:
+				EditBrsarOffset(int(offset,16))
 			brsar.close()
 			if(SongSelected != 50): AddPatch(Songs[SongSelected].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
 			print("\nPatch Complete!")
@@ -1518,7 +1532,7 @@ while True:
 			PrintSectionTitle("Settings")
 			print("(#0) Back To Main Menu")
 			print("(#1) Change File Paths")
-			print("(#2) Toggle Warnings")
+			print("(#2) Other Settings")
 			print("(#3) Updates")
 			if(unsafeMode):
 				print("(#4) Switch to Safe Mode")
@@ -1550,21 +1564,24 @@ while True:
 					else: break
 			elif(Selection == 2):
 				while True:
-					PrintSectionTitle('Default Answers')
+					PrintSectionTitle('Specific Settings')
 					print("(#0) Back To Settings")
-					print("(#1) Replace Sound Warnings: "+DefaultWantToReplaceSong)
-					print("(#2) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
-					print("(#3) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
-					print("(#4) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
+					print("(#1) Replace Song and Score Files Seperatly: "+DefaultLoadSongScore)
+					print("(#2) Replace Song Warnings: "+DefaultWantToReplaceSong)
+					print("(#3) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
+					print("(#4) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
+					print("(#5) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
 
-					Selection = MakeSelection(['Choose an Option',0,4])
+					Selection = MakeSelection(['Choose an Option',0,5])
 					if(Selection == 1):
-						DefaultWantToReplaceSong = ChangeDefaultAnswer(['Yes','No'],['Want To Replace Song',DefaultWantToReplaceSong])
+						DefaultLoadSongScore = ChangeDefaultAnswer(['Yes','No'],['Load Song And Score',DefaultLoadSongScore])
 					elif(Selection == 2):
-						DefaultReplacingReplacedSong = ChangeDefaultAnswer(['Yes','No'],['Replacing Replaced Song',DefaultReplacingReplacedSong])
+						DefaultWantToReplaceSong = ChangeDefaultAnswer(['Yes','No'],['Want To Replace Song',DefaultWantToReplaceSong])
 					elif(Selection == 3):
-						DefaultUseAutoLengthTempo = ChangeDefaultAnswer(['Ask','Yes','No'],['Use Auto Length and Tempo'])
+						DefaultReplacingReplacedSong = ChangeDefaultAnswer(['Yes','No'],['Replacing Replaced Song',DefaultReplacingReplacedSong])
 					elif(Selection == 4):
+						DefaultUseAutoLengthTempo = ChangeDefaultAnswer(['Ask','Yes','No'],['Use Auto Length and Tempo'])
+					elif(Selection == 5):
 						DefaultReplaceSongNames = ChangeDefaultAnswer(['Ask','Yes','No'],['Replace Song Names'])
 					else: break
 			elif(Selection == 3):
