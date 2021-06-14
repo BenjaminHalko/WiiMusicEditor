@@ -261,7 +261,10 @@ def AddPatch(PatchName,PatchInfo):
 	global CodePath
 	global DefaultStyleMethod
 	global ProgramPath
-	codePathInGamePath = GamePath+'/GeckoCodes.ini'
+	if(BrsarPath == DefaultImportSeperateBrsar):
+		codePathInGamePath = os.path.dirname(BrsarPath)+'/GeckoCodes.ini'
+	else:
+		codePathInGamePath = GamePath+'/GeckoCodes.ini'
 	if(type(PatchName) == str):
 		PatchName = [PatchName]
 		PatchInfo = [PatchInfo]
@@ -739,6 +742,7 @@ DefaultReplacingReplacedSong = LoadSetting('Default Answers', 'Replacing Replace
 DefaultReplaceSongNames = LoadSetting('Default Answers', 'Replace Song Names', 'Ask')
 DefaultUseAutoLengthTempo = LoadSetting('Default Answers', 'Use Auto Length and Tempo', 'Ask')
 DefaultLoadSongScore = LoadSetting('Default Answers', 'Load Song And Score', 'No')
+DefaultImportSeperateBrsar = LoadSetting('Default Answers', 'Seperate Brsar', 'None Selected')
 
 #Unsafe Mode
 unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
@@ -810,9 +814,13 @@ while True:
 		FindGameFolder()
 		FindDolphinSave()
 
+		if(os.path.isfile(DefaultImportSeperateBrsar)):
+			normalBrsar = BrsarPath
+			BrsarPath = DefaultImportSeperateBrsar
+
 		#Applied Custom Songs
 		appliedCustomSongs = []
-		if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+		if(os.path.isfile(GamePath+'/GeckoCodes.ini')) and ():
 			codes = open(GamePath+'/GeckoCodes.ini')
 			textlines = codes.readlines()
 			codes.close()
@@ -1048,12 +1056,14 @@ while True:
 			AddPatch('Rapper Crash Fix','043B0BBB 881C0090\n043B0BBF 7C090000\n043B0BC3 4081FFBC\n043B0BC7 881C00D6\n')
 			print("\nPatch Complete!")
 			time.sleep(0.5)
-			if(DefaultReplaceSongNames != 'No') and (Songs[SongSelected].SongType != SongTypeValue.Menu) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
+			if(DefaultReplaceSongNames != 'No') and (not os.path.isfile(DefaultImportSeperateBrsar)) and (Songs[SongSelected].SongType != SongTypeValue.Menu) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
 				ChangeName(SongSelected,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 				print("\nEditing Successful!\n")
 			else: print('')
 		else:
 			print("Aborted...")
+		if(os.path.isfile(DefaultImportSeperateBrsar)):
+			BrsarPath = normalBrsar
 	elif(Selection == 2): #////////////////////////////////////////Change Song Names
 		#Load Files
 		FindGameFolder()
@@ -1607,21 +1617,31 @@ while True:
 					PrintSectionTitle('Specific Settings')
 					print("(#0) Back To Settings")
 					print("(#1) Replace Song and Score Files Seperatly: "+DefaultLoadSongScore)
-					print("(#2) Replace Song Warnings: "+DefaultWantToReplaceSong)
-					print("(#3) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
-					print("(#4) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
-					print("(#5) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
+					print("(#2) Load Single Brsar When Changing Songs: "+DefaultImportSeperateBrsar)
+					print("(#3) Replace Song Warnings: "+DefaultWantToReplaceSong)
+					print("(#4) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
+					print("(#5) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
+					print("(#6) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
 
-					Selection = MakeSelection(['Choose an Option',0,5])
+					Selection = MakeSelection(['Choose an Option',0,6])
 					if(Selection == 1):
 						DefaultLoadSongScore = ChangeDefaultAnswer(['Yes','No'],['Load Song And Score',DefaultLoadSongScore])
 					elif(Selection == 2):
-						DefaultWantToReplaceSong = ChangeDefaultAnswer(['Yes','No'],['Want To Replace Song',DefaultWantToReplaceSong])
+						while True:
+							DefaultImportSeperateBrsar = input("\nDrag Brsar to Use (Or Type Nothing to Load from Disk Folder): ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+							if((os.path.isfile(DefaultImportSeperateBrsar)) and (pathlib.Path(DefaultImportSeperateBrsar).suffix == '.brsar')) or (DefaultImportSeperateBrsar == ''):
+								if(DefaultImportSeperateBrsar == ''): DefaultImportSeperateBrsar = 'None Selected'
+								break
+							else:
+								print("\nERROR: Not A Valid File!")
+						SaveSetting('Default Answers','Seperate Brsar',DefaultImportSeperateBrsar)
 					elif(Selection == 3):
-						DefaultReplacingReplacedSong = ChangeDefaultAnswer(['Yes','No'],['Replacing Replaced Song',DefaultReplacingReplacedSong])
+						DefaultWantToReplaceSong = ChangeDefaultAnswer(['Yes','No'],['Want To Replace Song',DefaultWantToReplaceSong])
 					elif(Selection == 4):
-						DefaultUseAutoLengthTempo = ChangeDefaultAnswer(['Ask','Yes','No'],['Use Auto Length and Tempo'])
+						DefaultReplacingReplacedSong = ChangeDefaultAnswer(['Yes','No'],['Replacing Replaced Song',DefaultReplacingReplacedSong])
 					elif(Selection == 5):
+						DefaultUseAutoLengthTempo = ChangeDefaultAnswer(['Ask','Yes','No'],['Use Auto Length and Tempo'])
+					elif(Selection == 6):
 						DefaultReplaceSongNames = ChangeDefaultAnswer(['Ask','Yes','No'],['Replace Song Names'])
 					else: break
 			elif(Selection == 3):
