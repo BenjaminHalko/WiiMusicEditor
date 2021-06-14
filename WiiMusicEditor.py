@@ -511,13 +511,14 @@ def SelectStyleInstrument(PartString,IsPercussion):
 	while True:
 		PartType = input("What\'s the Instrument Number you want for the "+PartString+": ")
 		if(PartType.isnumeric()):
-			if(IsPercussion) and (not unsafeMode): PartType = int(PartType) + normalInstrumentNumber
-			PartType = Instruments[int(PartType)].Number
+			PartType = int(PartType)
+			if(IsPercussion) and (not unsafeMode): PartType = PartType + normalInstrumentNumber
 			if(unsafeMode):
 				if(PartType == len(Instruments)-1):
 					PartType = 'ffffffff'
 					break
 				elif (PartType < len(Instruments)):
+					PartType = Instruments[PartType].Number
 					PartType = format(PartType,'x').upper()
 					PartType = '0'*(8-len(PartType))+PartType
 					break
@@ -527,6 +528,7 @@ def SelectStyleInstrument(PartString,IsPercussion):
 				PartType = 'ffffffff'
 				break
 			elif((PartType < normalInstrumentNumber) != IsPercussion) and (PartType < len(Instruments)) and ((NormalStyleSelected) or (Instruments[PartType].InMenu)):
+				PartType = Instruments[PartType].Number
 				PartType = format(PartType,'x').upper()
 				PartType = '0'*(8-len(PartType))+PartType
 				break
