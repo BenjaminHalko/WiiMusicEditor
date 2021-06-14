@@ -54,7 +54,7 @@ class InstrumentClass:
 class SongTypeValue:
 	Regular = 0
 	Menu = 1
-	JamMastery = 2
+	Maestro = 2
 
 class StyleTypeValue:
 	Global = 0
@@ -115,6 +115,11 @@ SongClass(SongTypeValue.Regular,'Wii Music','025a0730','015D','015E',4),
 SongClass(SongTypeValue.Regular,'Wii Sports','025a26c4','01B3','01B4',47),
 SongClass(SongTypeValue.Regular,'Woman','025a23d4','01AB','01AC',43),
 SongClass(SongTypeValue.Regular,'Yankee Doodle','025a0dcc','016F','0170',13),
+SongClass(SongTypeValue.Maestro,'Twinkle Twinkle Little Star [Mii Maestro]','-1','-1','-1',2),
+SongClass(SongTypeValue.Maestro,'Carmen [Mii Maestro]','-1','-1','-1',0),
+SongClass(SongTypeValue.Maestro,'The Four Seaons - Spring [Mii Maestro]','-1','-1','-1',4),
+SongClass(SongTypeValue.Maestro,'Ode To Joy [Mii Maestro]','-1','-1','-1',3),
+SongClass(SongTypeValue.Maestro,'The Legend of Zelda [Mii Maestro]','-1','-1','-1',1),
 SongClass(SongTypeValue.Menu,'Menu Song (It is still a work in progress though)',['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1,-1,-1)]
 #'19AF7A0',['19ABD00','19B1A00','19B4360','19B69A0','19B9360','19BBF20'],'2260',['3AA0','2960','2640','29C0','2BC0','29A0']
 Styles = [
@@ -402,13 +407,20 @@ def FindDolphinSave():
 
 def ChangeName(SongToChange,newText):
 	global ProgramPath
-	TextOffset = ['c8','190','12c']
+	if(Songs[SongToChange].SongType == SongTypeValue.Regular):
+		TextOffset = ['c8','190','12c']
+	elif(Songs[SongToChange].SongType == SongTypeValue.Maestro):
+		TextOffset = ['fa','1c2','15e']
 	subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
 	for typeNum in range(3):
 		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
 		textlines = message.readlines()
 		message.close()
-		offset = format(int(TextOffset[typeNum],16)+Songs[SongToChange].MemOrder,'x').lower()
+		numberToChange = Songs[SongToChange].MemOrder
+		if(Songs[SongToChange].SongType == SongTypeValue.Maestro):
+			array = [0,4,2,3,1]
+			numberToChange = array[numberToChange]
+		offset = format(int(TextOffset[typeNum],16)+numberToChange,'x').lower()
 		offset = ' ' * (4-len(offset))+offset+'00 @'
 		for num in range(len(textlines)):
 			if offset in str(textlines[num]):
@@ -798,6 +810,40 @@ while True:
 		FindGameFolder()
 		FindDolphinSave()
 
+		#Applied Custom Songs
+		appliedCustomSongs = []
+		if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+			codes = open(GamePath+'/GeckoCodes.ini')
+			textlines = codes.readlines()
+			codes.close()
+			for text in textlines:
+				if('[WiiMusicEditor]' in text) and ('Style' not in text):
+					appliedCustomSongs.append(text[1:len(text)-29:1])
+
+		#Song List
+		LowestSong = -1
+		PrintSectionTitle('Song List')
+
+		for num in range(len(Songs)):
+			if(Songs[num].Name in appliedCustomSongs):
+				print(Fore.YELLOW+'(#'+str(num)+') '+str(Songs[num].Name)+' ~[Already Replaced]~'+Style.RESET_ALL)
+			else:
+				print('(#'+str(num)+') '+str(Songs[num].Name))
+			time.sleep(0.005)
+
+		#Song Selection
+		PrintSectionTitle('Song Selection')
+		while True:
+			SongSelected = input("Enter the Song Number you want to Replace: ")
+			if(SongSelected.isnumeric()) and (int(SongSelected) < len(Songs)):
+				SongSelected = int(SongSelected)
+				if(Songs[SongSelected].Name not in appliedCustomSongs) or (DefaultReplacingReplacedSong == 'No') or (input('\nWARNING: You Have Already Replaced this Song Before! Are You Sure You Want to Replace this Song [y/n] ') == 'y'):
+					break
+				else:
+					print('Aborted...\n')
+			else:
+				print("\nERROR: Not a Valid Number\n")
+
 		#Load Brseq
 		ExceptedSongExtensions = ['.midi','.mid','.brseq','.rseq']
 		BrseqInfo = []
@@ -840,53 +886,20 @@ while True:
 				BrseqInfo.append(Brseq.read())
 				Brseq.close()
 				BrseqLength.append(format(os.stat(directory+"/z.brseq").st_size,'x').upper())
-			if(num == 0) and (DefaultLoadSongScore != 'Yes'):
+			if((num == 0) and (DefaultLoadSongScore != 'Yes')) or (Songs[SongSelected].SongType == SongTypeValue.Maestro):
 				BrseqInfo.append(BrseqInfo[0])
 				BrseqLength.append(BrseqLength[0])
-				print('cheese')
 				break
 
-		#Applied Custom Songs
-		appliedCustomSongs = []
-		if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
-			codes = open(GamePath+'/GeckoCodes.ini')
-			textlines = codes.readlines()
-			codes.close()
-			for text in textlines:
-				if('[WiiMusicEditor]' in text) and ('Style' not in text):
-					appliedCustomSongs.append(text[1:len(text)-29:1])
-
-		#Song List
-		LowestSong = -1
-		PrintSectionTitle('Song List')
-
-		for num in range(len(Songs)):
-			if(Songs[num].Name in appliedCustomSongs):
-				print(Fore.YELLOW+'(#'+str(num)+') '+str(Songs[num].Name)+' ~[Already Replaced]~'+Style.RESET_ALL)
-			else:
-				print('(#'+str(num)+') '+str(Songs[num].Name))
-			time.sleep(0.005)
-
-		#Brseq Info
-		PrintSectionTitle("File Info")
-		print("Number of Beats: "+Length)
-		print("Tempo: "+Tempo)
-
-		#Song Selection
-		PrintSectionTitle('Song Selection')
-		while True:
-			SongSelected = input("Enter the Song Number you want to Replace: ")
-			if(SongSelected.isnumeric()) and (int(SongSelected) < len(Songs)):
-				SongSelected = int(SongSelected)
-				if(Songs[SongSelected].Name not in appliedCustomSongs) or (DefaultReplacingReplacedSong == 'No') or (input('\nWARNING: You Have Already Replaced this Song Before! Are You Sure You Want to Replace this Song [y/n] ') == 'y'):
-					break
-				else:
-					print('Aborted...\n')
-			else:
-				print("\nERROR: Not a Valid Number\n")
+		
 
 		#Length, Tempo, Time Signature Patch
-		if(SongSelected != 50):
+		if(Songs[SongSelected].SongType == SongTypeValue.Regular):
+			#Brseq Info
+			PrintSectionTitle("File Info")
+			print("Number of Beats: "+Length)
+			print("Tempo: "+Tempo)
+
 			PrintSectionTitle("Length, Tempo, Time Signature Patch")
 			AutoFill = 'n'
 			if((Tempo != 'Could Not Locate') or ((Length != '0') and (Length != 'Could Not Locate'))) and (DefaultUseAutoLengthTempo != 'No'):
@@ -1003,10 +1016,39 @@ while True:
 				for offset in ['8','37D68','37D6C','37E70','37E78','37EBC','37EC4','37F48','37F50']:
 					EditBrsarOffset(int(offset,16))
 				brsar.close()
+			elif(Songs[SongSelected].SongType == SongTypeValue.Maestro):
+				brsar.seek(int('37140',16)+24*(Songs[SongSelected].MemOrder+2))
+				offset1 = brsar.read(4)
+				offset2 = brsar.read(4)
+				brsar.seek(int('370E8',16))
+				currentSpot = int.from_bytes(brsar.read(4),'big')
+				brsar.seek(0)
+				data1 = brsar.read(currentSpot+int.from_bytes(offset1,'big'))
+				brsar.seek(currentSpot+int.from_bytes(offset1,'big')+int.from_bytes(offset2,'big'))
+				data2 = brsar.read()
+				brsar.close()
+				brsar = open(BrsarPath, "wb")
+				brsar.write(data1+BrseqInfo[0]+data2)
+				brsar.close()
+				brsar = open(BrsarPath, "r+b")
+				brsar.seek(int('37144',16)+24*(Songs[SongSelected].MemOrder+2))
+				sizeDifference = int(BrseqLength[0],16)-int.from_bytes(brsar.read(4),"big")
+				brsar.seek(int('37144',16)+24*(Songs[SongSelected].MemOrder+2))
+				brsar.write(int(BrseqLength[0],16).to_bytes(4, 'big'))
+				#Resize All Song Offsets
+				for num in range(Songs[SongSelected].MemOrder+3,7):
+					EditBrsarOffset(int('37140',16)+24*num)
+
+				for offset in ['8','370EC','370F0','371F4','371FC',
+				'37340','37348','376CC','376D4','37738','37740','3374C',
+				'37784','3778C','379D0','379D8','37ABC','37AC4','37B48','37B50','37BB4','37BBC','37C20','37C28','37C8C','37C94','37D18','37D20',
+				'37D64','37D6C','37E70','37E78','37EBC','37EC4','37F48','37F50']:
+					EditBrsarOffset(int(offset,16))
+				brsar.close()
 			AddPatch('Rapper Crash Fix','043B0BBB 881C0090\n043B0BBF 7C090000\n043B0BC3 4081FFBC\n043B0BC7 881C00D6\n')
 			print("\nPatch Complete!")
 			time.sleep(0.5)
-			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
+			if(DefaultReplaceSongNames != 'No') and (Songs[SongSelected].SongType != SongTypeValue.Menu) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
 				ChangeName(SongSelected,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 				print("\nEditing Successful!\n")
 			else: print('')
@@ -1018,13 +1060,16 @@ while True:
 
 		#Song List
 		PrintSectionTitle("Song List")
+		maxNumber = 0
 		for num in range(len(Songs)):
-			print('(#'+str(num)+') '+str(Songs[num].Name))
-			time.sleep(0.005)
+			if(Songs[num].SongType != SongTypeValue.Menu):
+				print('(#'+str(num)+') '+str(Songs[num].Name))
+				time.sleep(0.005)
+				maxNumber += 1
 
 		#Song Selection
 		PrintSectionTitle("Song Selection")
-		Selection = MakeSelection(['\nWhich Song Do You Want To Change The Name Of',0,len(Songs)-1])
+		Selection = MakeSelection(['Which Song Do You Want To Change The Name Of',0,maxNumber-1])
 		
 		ChangeName(Selection,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 		print("\nEditing Successful!\n")
@@ -1154,14 +1199,17 @@ while True:
 				FindGameFolder()
 				FindDolphinSave()
 				PrintSectionTitle('Remove Song')
+				maxNumber = 0
 				for num in range(len(Songs)-1):
-					print('(#'+str(num)+') '+str(Songs[num].Name))
-					time.sleep(0.005)
-				print('(#'+str(len(Songs)-1)+') Remove All Non-Custom Songs')
+					if(Songs[num].SongType == SongTypeValue.Regular):
+						print('(#'+str(num)+') '+str(Songs[num].Name))
+						time.sleep(0.005)
+						maxNumber += 1
+				print('(#'+str(maxNumber)+') Remove All Non-Custom Songs')
 				
-				Selection = MakeSelection(['Please Select a Song to Remove',0,len(Songs)-1])
+				Selection = MakeSelection(['Please Select a Song to Remove',0,maxNumber])
 
-				if(Selection == len(Songs)-1):
+				if(Selection == maxNumber):
 					appliedCustomSongs = []
 					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
 						codes = open(GamePath+'/GeckoCodes.ini')
@@ -1171,13 +1219,15 @@ while True:
 							if('[WiiMusicEditor]' in text) and ('Style' not in text):
 								appliedCustomSongs.append(text[1:len(text)-29:1])
 				
-				for number in range(len(Songs)-2):
-					if(Selection != len(Songs)-1):
+				for number in range(maxNumber-1):
+					if(Selection != maxNumber):
 						number = Selection
 					
-					if((Selection != len(Songs)-1) or (Songs[number].Name not in appliedCustomSongs)):
+					if((Selection != maxNumber) or (Songs[number].Name not in appliedCustomSongs)):
 						#Brsar Writing
 						brsar = open(GamePath+'/sys/main.dol', "r+b")
+						if(Songs[number].SongType == SongTypeValue.Regular):
+							MainDolOffset = '59C56E'
 						brsar.seek(int(MainDolOffset,16)+6+int("BC",16)*Songs[number].MemOrder)
 						brsar.write(bytes.fromhex('ffffffffffff'))
 						brsar.close()
