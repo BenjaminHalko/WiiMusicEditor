@@ -1,6 +1,7 @@
 ![](https://user-images.githubusercontent.com/73490201/119917911-4e628100-bf1c-11eb-9c8c-2b8727e2d916.png)
 # Features:
 - Powerful and Easy to use.
+- Able to replace songs bigger than the original.
 - Automatic conversion of MIDIs or RSEQs to BRSEQs.
 - Automatic patching for (almost) everything in the game!
 - Text Editing to change Dialog.
