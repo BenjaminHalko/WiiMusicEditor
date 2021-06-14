@@ -989,6 +989,101 @@ while True:
 				'37D64','37D6C','37E70','37E78','37EBC','37EC4','37F48','37F50']:
 					EditBrsarOffset(int(offset,16))
 				brsar.close()
+
+				if(Songs[SongSelected].Name == 'Do-Re-Mi'):
+					brsar = open(BrsarPath, "rb")
+					brsar.seek(int('34B38',16))
+					offset1 = brsar.read(4)
+					offset2 = brsar.read(4)
+					brsar.seek(int('343F0',16))
+					currentSpot = int.from_bytes(brsar.read(4),'big')
+					brsar.seek(0)
+					data1 = brsar.read(currentSpot+int.from_bytes(offset1,'big'))
+					brsar.seek(currentSpot+int.from_bytes(offset1,'big')+int.from_bytes(offset2,'big'))
+					data2 = brsar.read()
+					brsar.close()
+					brsar = open(BrsarPath, "wb")
+					brsar.write(data1+BrseqInfo[0]+data2)
+					brsar.close()
+					brsar = open(BrsarPath, "r+b")
+					brsar.seek(int('34B3C',16))
+					sizeDifference = int(BrseqLength[0],16)-int.from_bytes(brsar.read(4),"big")
+					brsar.seek(int('34B3C',16))
+					brsar.write(int(BrseqLength[0],16).to_bytes(4, 'big'))
+					#Resize All Song Offsets
+					for num in range(1,113):
+						EditBrsarOffset(int('34B38',16)+24*num)
+					brsar.seek(int('35420',16))
+					offset1 = brsar.read(4)
+					offset2 = brsar.read(4)
+					brsar.seek(0)
+					data1 = brsar.read(currentSpot+int.from_bytes(offset1,'big'))
+					brsar.seek(currentSpot+int.from_bytes(offset1,'big')+int.from_bytes(offset2,'big'))
+					data2 = brsar.read()
+					brsar.close()
+					brsar = open(BrsarPath, "wb")
+					brsar.write(data1+BrseqInfo[0]+data2)
+					brsar.close()
+					brsar = open(BrsarPath, "r+b")
+					brsar.seek(int('35424',16))
+					sizeDifference += int(BrseqLength[0],16)-int.from_bytes(brsar.read(4),"big")
+					brsar.seek(int('35424',16))
+					brsar.write(int(BrseqLength[0],16).to_bytes(4, 'big'))
+					for num in range(113,157):
+						EditBrsarOffset(int('34B38',16)+24*num)
+					for offset in ['8','343F4','343F8','359FC','35A04','35A68','35A70','35AD4','35ADC','35B40','35B48','35BCC','35BD4',
+					'35C38','35C40','35CA4','35CAC','35D30','35D38','35DBC','35DC4','35E28','35E30','35EB4','35EBC','35F20','35F28','35F8C','35F94',
+					'36018','36020','36064','3606C','360D0','360D8','3705C','37064','370E8','370F0','371F4','371FC',
+					'37340','37348','376CC','376D4','37738','37740','3374C',
+					'37784','3778C','379D0','379D8','37ABC','37AC4','37B48','37B50','37BB4','37BBC','37C20','37C28','37C8C','37C94','37D18','37D20',
+					'37D64','37D6C','37E70','37E78','37EBC','37EC4','37F48','37F50']:
+						EditBrsarOffset(int(offset,16))
+					brsar.seek(int('36678',16))
+					offset1 = brsar.read(4)
+					offset2 = brsar.read(4)
+					brsar.seek(int('360D0',16))
+					currentSpot = int.from_bytes(brsar.read(4),'big')
+					brsar.seek(0)
+					data1 = brsar.read(currentSpot+int.from_bytes(offset1,'big'))
+					brsar.seek(currentSpot+int.from_bytes(offset1,'big')+int.from_bytes(offset2,'big'))
+					data2 = brsar.read()
+					brsar.close()
+					brsar = open(BrsarPath, "wb")
+					brsar.write(data1+BrseqInfo[0]+data2)
+					brsar.close()
+					brsar = open(BrsarPath, "r+b")
+					brsar.seek(int('3667C',16))
+					sizeDifference = int(BrseqLength[0],16)-int.from_bytes(brsar.read(4),"big")
+					brsar.seek(int('3667C',16))
+					brsar.write(int(BrseqLength[0],16).to_bytes(4, 'big'))
+					#Resize All Song Offsets
+					for num in range(1,95):
+						EditBrsarOffset(int('36678',16)+24*num)
+					brsar.seek(int('36F60',16))
+					offset1 = brsar.read(4)
+					offset2 = brsar.read(4)
+					brsar.seek(0)
+					data1 = brsar.read(currentSpot+int.from_bytes(offset1,'big'))
+					brsar.seek(currentSpot+int.from_bytes(offset1,'big')+int.from_bytes(offset2,'big'))
+					data2 = brsar.read()
+					brsar.close()
+					brsar = open(BrsarPath, "wb")
+					brsar.write(data1+BrseqInfo[0]+data2)
+					brsar.close()
+					brsar = open(BrsarPath, "r+b")
+					brsar.seek(int('36F64',16))
+					sizeDifference += int(BrseqLength[0],16)-int.from_bytes(brsar.read(4),"big")
+					brsar.seek(int('36F64',16))
+					brsar.write(int(BrseqLength[0],16).to_bytes(4, 'big'))
+					for num in range(95,105):
+						EditBrsarOffset(int('36678',16)+24*num)
+					for offset in ['8','360D4','360D8','3705C','37064','370E8','370F0','371F4','371FC',
+					'37340','37348','376CC','376D4','37738','37740','3374C',
+					'37784','3778C','379D0','379D8','37ABC','37AC4','37B48','37B50','37BB4','37BBC','37C20','37C28','37C8C','37C94','37D18','37D20',
+					'37D64','37D6C','37E70','37E78','37EBC','37EC4','37F48','37F50']:
+						EditBrsarOffset(int(offset,16))
+					brsar.close()
+					
 				AddPatch(Songs[SongSelected].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
 			elif(Songs[SongSelected].SongType == SongTypeValue.Menu):
 				offset = [0]*14
