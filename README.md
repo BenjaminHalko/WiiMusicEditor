@@ -11,5 +11,8 @@
 - Python 3.9 and 3.8 support.
 - And more!
 
+# Setup Video
+https://youtu.be/EBz9VtBXqEo
+
 # Looking for the Manual? Check the wiki!
 https://github.com/BenjaminHalko/WiiMusicEditor/wiki/
