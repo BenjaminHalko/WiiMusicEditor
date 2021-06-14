@@ -54,6 +54,7 @@ class InstrumentClass:
 class SongTypeValue:
 	Regular = 0
 	Menu = 1
+	JamMastery = 2
 
 class StyleTypeValue:
 	Global = 0
@@ -114,7 +115,7 @@ SongClass(SongTypeValue.Regular,'Wii Music','025a0730','015D','015E',4),
 SongClass(SongTypeValue.Regular,'Wii Sports','025a26c4','01B3','01B4',47),
 SongClass(SongTypeValue.Regular,'Woman','025a23d4','01AB','01AC',43),
 SongClass(SongTypeValue.Regular,'Yankee Doodle','025a0dcc','016F','0170',13),
-SongClass(SongTypeValue.Menu,'Menu Song',['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1,-1,-1)]
+SongClass(SongTypeValue.Menu,'Menu Song (It is still a work in progress though)',['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1,-1,-1)]
 #'19AF7A0',['19ABD00','19B1A00','19B4360','19B69A0','19B9360','19BBF20'],'2260',['3AA0','2960','2640','29C0','2BC0','29A0']
 Styles = [
 StyleClass(StyleTypeValue.Global,'Jazz','0659A65C'),
@@ -1000,6 +1001,7 @@ while True:
 				for offset in ['8','37D68','37D6C','37E70','37E78','37EBC','37EC4','37F48','37F50']:
 					EditBrsarOffset(int(offset,16))
 				brsar.close()
+			AddPatch('Rapper Crash Fix','043B0BBB 881C0090\n043B0BBF 7C090000\n043B0BC3 4081FFBC\n043B0BC7 881C00D6')
 			print("\nPatch Complete!")
 			time.sleep(0.5)
 			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
@@ -1499,9 +1501,9 @@ while True:
 		PrintSectionTitle('Help')
 		print("(#0) Back to Main Menu")
 		print("(#1) Open the Wiki")
-		print("(#2) Open Video Guide (No Video Guide Yet")
+		print("(#2) Open Video Guide")
 		
-		Selection = MakeSelection(['What type of help do you want',0,1])
+		Selection = MakeSelection(['What type of help do you want',0,2])
 
 		if(Selection == 1):
 			print('\nOpening Wiki...')
@@ -1510,7 +1512,7 @@ while True:
 		elif(Selection == 2):
 			print('\nOpening Video Guide...')
 			time.sleep(0.5)
-			webbrowser.open('thereisnovideoguideyetbecauseihaventrecordedthevideoyet.com')
+			webbrowser.open('https://youtu.be/EBz9VtBXqEo')
 		print('')
 		time.sleep(0.5)
 	elif(Selection == 10): #////////////////////////////////////////Settings
