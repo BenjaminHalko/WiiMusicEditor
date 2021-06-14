@@ -1001,7 +1001,7 @@ while True:
 				for offset in ['8','37D68','37D6C','37E70','37E78','37EBC','37EC4','37F48','37F50']:
 					EditBrsarOffset(int(offset,16))
 				brsar.close()
-			AddPatch('Rapper Crash Fix','043B0BBB 881C0090\n043B0BBF 7C090000\n043B0BC3 4081FFBC\n043B0BC7 881C00D6')
+			AddPatch('Rapper Crash Fix','043B0BBB 881C0090\n043B0BBF 7C090000\n043B0BC3 4081FFBC\n043B0BC7 881C00D6\n')
 			print("\nPatch Complete!")
 			time.sleep(0.5)
 			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
