@@ -261,7 +261,7 @@ def AddPatch(PatchName,PatchInfo):
 	global CodePath
 	global DefaultStyleMethod
 	global ProgramPath
-	if(BrsarPath == DefaultImportSeperateBrsar):
+	if(liteMode):
 		codePathInGamePath = os.path.dirname(BrsarPath)+'/GeckoCodes.ini'
 	else:
 		codePathInGamePath = GamePath+'/GeckoCodes.ini'
@@ -328,10 +328,15 @@ def FindGameFolder():
 	global BrsarPath
 	global MessagePath
 	global WiiDiskFolder
+	global liteMode
+	startMode = (GamePath == 'None')
 	if(not os.path.isdir(GamePath+'/files')):
 		ExceptedFileExtensions = ['.iso','.wbfs']
 		while True:
-			GamePath = input("\nDrag Wii Music Filesystem or ROM to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			if(startMode):
+				GamePath = input("\nDrag Wii Music Filesystem or ROM to Window\n(Or a Brsar File to enter Lite Mode): ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			else:
+				GamePath = input("\nDrag Wii Music Filesystem or ROM to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isdir(GamePath+'/DATA/files')) or (os.path.isdir(GamePath+'/files')):
 				if(os.path.isdir(GamePath+'/DATA')):
 					GamePath = os.path.dirname(GamePath+'/DATA/files').replace('\\','/')
@@ -349,6 +354,11 @@ def FindGameFolder():
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 				MessagePath = GamePath+'/files/US/Message/message.carc'
 				FindWiiDiskFolder()
+				break
+			elif(os.path.isfile(GamePath)) and (pathlib.Path(GamePath).suffix == '.brsar') and (startMode):
+				BrsarPath = GamePath
+				GamePath = 'None'
+				liteMode = True
 				break
 			else:
 				print("\nERROR: Unable to Locate Valid Wii Music Directory")
@@ -736,6 +746,9 @@ updateUrl = ['https://raw.githubusercontent.com/BenjaminHalko/WiiMusicEditor/mai
 updateDownload = ['https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/main.zip',
 'https://github.com/BenjaminHalko/WiiMusicEditor/archive/refs/heads/beta.zip']
 
+#Lite Mode
+liteMode = False
+
 #Default Answers
 DefaultWantToReplaceSong = LoadSetting('Default Answers', 'Want To Replace Song', 'Yes')
 DefaultReplacingReplacedSong = LoadSetting('Default Answers', 'Replacing Replaced Song', 'Yes')
@@ -782,54 +795,69 @@ while True:
 		CheckForUpdates(False)
 
 	#First Run
-	if(GamePath == 'None'):
-		print('\nThanks for Downloading the Wii Music Editor!')
-		print('\nLet\'s Setup Some File Paths for You!')
-		FindGameFolder()
-		if(not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol')):
+	if(not liteMode):
+		if(GamePath == 'None'):
+			print('\nThanks for Downloading the Wii Music Editor!')
+			print('\nLet\'s Setup Some File Paths for You!')
+			FindGameFolder()
+			if(not liteMode) and ((not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol'))):
+				LoadNormalFiles()
+			if(not liteMode) and (input('\nWould You Like to Specify a Dolphin Directory? [y/n] ') == 'y'):
+				FindDolphin()
+		elif((not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol'))):
 			LoadNormalFiles()
-		if(input('\nWould You Like to Specify a Dolphin Directory? [y/n] ') == 'y'):
-			FindDolphin()
-	elif(not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol')):
-		LoadNormalFiles()
 
-	#Options
-	PrintSectionTitle('Options')
-	print("(#1) Add Custom Song To Wii Music")
-	print("(#2) Change Song Names")
-	print("(#3) Edit Styles")
-	print("(#4) Advanced Tools")
-	print("(#5) Load Wii Music")
-	print("(#6) Revert Changes")
-	print("(#7) Overwrite Save File With 100% Save")
-	print("(#8) Download Pre-Made Custom Songs")
-	print("(#9) Help")
-	print("(#10) Settings")
-	print("(#11) Credits")
+	if(not liteMode):
+		#Options
+		PrintSectionTitle('Options')
+		print("(#1) Add Custom Song To Wii Music")
+		print("(#2) Change Song Names")
+		print("(#3) Edit Styles")
+		print("(#4) Advanced Tools")
+		print("(#5) Load Wii Music")
+		print("(#6) Revert Changes")
+		print("(#7) Overwrite Save File With 100% Save")
+		print("(#8) Download Pre-Made Custom Songs")
+		print("(#9) Help")
+		print("(#10) Settings")
+		print("(#11) Credits")
+	else:
+		#Options
+		PrintSectionTitle('Options')
+		print("(#1) Add Custom Song To Wii Music")
+		print(Fore.RED+"(Unavailable in Lite Mode) Change Song Names"+Style.RESET_ALL)
+		print(Fore.RED+"(Unavailable in Lite Mode) Edit Styles"+Style.RESET_ALL)
+		print(Fore.RED+"(Unavailable in Lite Mode) Advanced Tools"+Style.RESET_ALL)
+		print(Fore.RED+"(Unavailable in Lite Mode) Load Wii Music"+Style.RESET_ALL)
+		print(Fore.RED+"(Unavailable in Lite Mode) Revert Changes"+Style.RESET_ALL)
+		print(Fore.RED+"(Unavailable in Lite Mode) Overwrite Save File With 100% Save"+Style.RESET_ALL)
+		print("(#8) Download Pre-Made Custom Songs")
+		print("(#9) Help")
+		print("(#10) Settings")
+		print("(#11) Credits")
 
 	Selection = MakeSelection(['Please Select an Option',1,11])
+	
 
 	if(Selection == 1): #////////////////////////////////////////Add Custom Song
-		#Load Files
-		FindGameFolder()
-		FindDolphinSave()
+		if(not liteMode):
+			#Load Files
+			FindGameFolder()
+			FindDolphinSave()
 
-		if(os.path.isfile(DefaultImportSeperateBrsar)):
-			normalBrsar = BrsarPath
-			BrsarPath = DefaultImportSeperateBrsar
-
-		#Applied Custom Songs
-		appliedCustomSongs = []
-		if(os.path.isfile(GamePath+'/GeckoCodes.ini')) and ():
-			codes = open(GamePath+'/GeckoCodes.ini')
-			textlines = codes.readlines()
-			codes.close()
-			for text in textlines:
-				if('[WiiMusicEditor]' in text) and ('Style' not in text):
-					appliedCustomSongs.append(text[1:len(text)-29:1])
+			#Applied Custom Songs
+			appliedCustomSongs = []
+			if(os.path.isfile(GamePath+'/GeckoCodes.ini')) and ():
+				codes = open(GamePath+'/GeckoCodes.ini')
+				textlines = codes.readlines()
+				codes.close()
+				for text in textlines:
+					if('[WiiMusicEditor]' in text) and ('Style' not in text):
+						appliedCustomSongs.append(text[1:len(text)-29:1])
+		else:
+			appliedCustomSongs = []
 
 		#Song List
-		LowestSong = -1
 		PrintSectionTitle('Song List')
 
 		for num in range(len(Songs)):
@@ -1151,15 +1179,13 @@ while True:
 			AddPatch('Rapper Crash Fix','043B0BBB 881C0090\n043B0BBF 7C090000\n043B0BC3 4081FFBC\n043B0BC7 881C00D6\n')
 			print("\nPatch Complete!")
 			time.sleep(0.5)
-			if(DefaultReplaceSongNames != 'No') and (not os.path.isfile(DefaultImportSeperateBrsar)) and (Songs[SongSelected].SongType != SongTypeValue.Menu) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
+			if(DefaultReplaceSongNames != 'No') and (not liteMode) and (Songs[SongSelected].SongType != SongTypeValue.Menu) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
 				ChangeName(SongSelected,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 				print("\nEditing Successful!\n")
 			else: print('')
 		else:
 			print("Aborted...")
-		if(os.path.isfile(DefaultImportSeperateBrsar)):
-			BrsarPath = normalBrsar
-	elif(Selection == 2): #////////////////////////////////////////Change Song Names
+	elif(Selection == 2) and (not liteMode): #////////////////////////////////////////Change Song Names
 		#Load Files
 		FindGameFolder()
 
@@ -1178,7 +1204,7 @@ while True:
 		
 		ChangeName(Selection,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 		print("\nEditing Successful!\n")
-	elif(Selection == 3): #////////////////////////////////////////Change Style
+	elif(Selection == 3) and (not liteMode): #////////////////////////////////////////Change Style
 		FindDolphinSave()
 		MenuStyles = 5
 		columnSplit = 4
@@ -1276,7 +1302,7 @@ while True:
 		print("\nPatch Complete!")
 		time.sleep(0.5)
 		print("")
-	elif(Selection == 4): #////////////////////////////////////////Advanced Tools
+	elif(Selection == 4) and (not liteMode): #////////////////////////////////////////Advanced Tools
 		while True:
 			PrintSectionTitle('Advanced Tools')
 			print("(#0) Back to Main Menu")
@@ -1544,7 +1570,7 @@ while True:
 					copytree(ModPath+'/'+ModName.replace(' ',''),letter+':/'+ModName.replace(' ',''))
 					print('\nSuccessfully Copied!')
 			else: break
-	elif(Selection == 5): #////////////////////////////////////////Run Game
+	elif(Selection == 5) and (not liteMode): #////////////////////////////////////////Run Game
 		FindGameFolder()
 		FindDolphin()
 		PrintSectionTitle("Running Dolphin")
@@ -1554,7 +1580,7 @@ while True:
 		subprocess.Popen('\"'+DolphinPath+'\" -b -e \"'+GamePath+'/sys/main.dol\"')
 		time.sleep(1)
 		print("")
-	elif(Selection == 6): #////////////////////////////////////////Revert Changes
+	elif(Selection == 6) and (not liteMode): #////////////////////////////////////////Revert Changes
 		while True:
 			PrintSectionTitle('Revert Changes')
 			print("(#0) Back to Main Menu")
@@ -1625,7 +1651,7 @@ while True:
 
 					if(Selection != 5): break
 			else: break
-	elif(Selection == 7): #////////////////////////////////////////100% Save File
+	elif(Selection == 7) and (not liteMode): #////////////////////////////////////////100% Save File
 		FindDolphinSave()
 		if(input("\nAre You Sure You Want To Overwrite Your Save Data? [y/n] ") == 'y'):
 			subprocess.run('robocopy \"'+ProgramPath+'/Helper/WiiMusicSave\" \"'+SaveDataPath+'\" /MIR /E',capture_output=True)
@@ -1676,7 +1702,10 @@ while True:
 		while True:
 			PrintSectionTitle("Settings")
 			print("(#0) Back To Main Menu")
-			print("(#1) Change File Paths")
+			if(liteMode):
+				print(Fore.RED+"(Unavailable in Lite Mode) Change File Paths"+Style.RESET_ALL)
+			else:
+				print("(#1) Change File Paths")
 			print("(#2) Other Settings")
 			print("(#3) Updates")
 			if(unsafeMode):
@@ -1687,56 +1716,48 @@ while True:
 			Selection = MakeSelection(['Which Setting Do You Want to Change',0,4])
 
 			if(Selection == 1):
-				while True:
-					PrintSectionTitle('Path Editor')
-					print("(#0) Back To Settings")
-					print("(#1) Game Path (Current Path: "+GamePath+')')
-					print("(#2) Dolphin Path (Current Path: "+DolphinPath+')')
-					print("(#3) Dolphin Save Path (Current Path: "+DolphinSaveData+')')
-					Selection = MakeSelection(['Which Path Do You Want to Change',0,3])
-					if(Selection == 1):
-						GamePath = ''
-						FindGameFolder()
-						print("")
-					elif(Selection == 2):
-						DolphinPath = ''
-						FindDolphin()
-						print("")
-					elif(Selection == 3):
-						DolphinSaveData = ''
-						FindDolphinSave()
-						print("")
-					else: break
+				if(not liteMode):
+					while True:
+						PrintSectionTitle('Path Editor')
+						print("(#0) Back To Settings")
+						print("(#1) Game Path (Current Path: "+GamePath+')')
+						print("(#2) Dolphin Path (Current Path: "+DolphinPath+')')
+						print("(#3) Dolphin Save Path (Current Path: "+DolphinSaveData+')')
+						Selection = MakeSelection(['Which Path Do You Want to Change',0,3])
+						if(Selection == 1):
+							GamePath = ''
+							FindGameFolder()
+							print("")
+						elif(Selection == 2):
+							DolphinPath = ''
+							FindDolphin()
+							print("")
+						elif(Selection == 3):
+							DolphinSaveData = ''
+							FindDolphinSave()
+							print("")
+						else: break
+				else: print('\nNot Available in Lite Mode')
 			elif(Selection == 2):
 				while True:
 					PrintSectionTitle('Specific Settings')
 					print("(#0) Back To Settings")
 					print("(#1) Replace Song and Score Files Seperatly: "+DefaultLoadSongScore)
-					print("(#2) Load Single Brsar When Changing Songs: "+DefaultImportSeperateBrsar)
-					print("(#3) Replace Song Warnings: "+DefaultWantToReplaceSong)
-					print("(#4) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
-					print("(#5) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
-					print("(#6) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
+					print("(#2) Replace Song Warnings: "+DefaultWantToReplaceSong)
+					print("(#3) Warm User When Replacing Already Replaced Song: "+DefaultReplacingReplacedSong)
+					print("(#4) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
+					print("(#5) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
 
 					Selection = MakeSelection(['Choose an Option',0,6])
 					if(Selection == 1):
 						DefaultLoadSongScore = ChangeDefaultAnswer(['Yes','No'],['Load Song And Score',DefaultLoadSongScore])
 					elif(Selection == 2):
-						while True:
-							DefaultImportSeperateBrsar = input("\nDrag Brsar to Use (Or Type Nothing to Load from Disk Folder): ").replace('&', '').replace('\'', '').replace('\"', '').strip()
-							if((os.path.isfile(DefaultImportSeperateBrsar)) and (pathlib.Path(DefaultImportSeperateBrsar).suffix == '.brsar')) or (DefaultImportSeperateBrsar == ''):
-								if(DefaultImportSeperateBrsar == ''): DefaultImportSeperateBrsar = 'None Selected'
-								break
-							else:
-								print("\nERROR: Not A Valid File!")
-						SaveSetting('Default Answers','Seperate Brsar',DefaultImportSeperateBrsar)
-					elif(Selection == 3):
 						DefaultWantToReplaceSong = ChangeDefaultAnswer(['Yes','No'],['Want To Replace Song',DefaultWantToReplaceSong])
-					elif(Selection == 4):
+					elif(Selection == 3):
 						DefaultReplacingReplacedSong = ChangeDefaultAnswer(['Yes','No'],['Replacing Replaced Song',DefaultReplacingReplacedSong])
-					elif(Selection == 5):
+					elif(Selection == 4):
 						DefaultUseAutoLengthTempo = ChangeDefaultAnswer(['Ask','Yes','No'],['Use Auto Length and Tempo'])
-					elif(Selection == 6):
+					elif(Selection == 5):
 						DefaultReplaceSongNames = ChangeDefaultAnswer(['Ask','Yes','No'],['Replace Song Names'])
 					else: break
 			elif(Selection == 3):
@@ -1790,3 +1811,4 @@ while True:
 		print('\n-----Text Extraction Made Possible By:-----')
 		print('- WiiMMS')
 		input('')
+	else: print('\nNot Available in Lite Mode\n')
