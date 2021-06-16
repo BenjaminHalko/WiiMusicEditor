@@ -1067,8 +1067,8 @@ while True:
 					brsar.seek(int('360D0',16))
 					currentSpot = int.from_bytes(brsar.read(4),'big')
 					sizeDifference = 0
-					ReplaceSingleSong(int('36678',16),int('36678',16),1,95)
-					#ReplaceSingleSong(int('36F60',16),int('36678',16),95,105)
+					ReplaceSingleSong(int('36678',16),int('36678',16),1,96)
+					ReplaceSingleSong(int('36F60',16),int('36678',16),96,105)
 					for offset in ['8','360D4','360D8','3705C','37064','370E8','370F0','371F4','371FC',
 					'37340','37348','376CC','376D4','37738','37740','3374C',
 					'37784','3778C','379D0','379D8','37ABC','37AC4','37B48','37B50','37BB4','37BBC','37C20','37C28','37C8C','37C94','37D18','37D20',
