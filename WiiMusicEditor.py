@@ -255,6 +255,10 @@ MainDolOffset = '59C56E'
 
 GctValues = ['00D0C0DE00D0C0DE','F000000000000000']
 
+rseqList = ['3364C','336B8','33744','343F0','343F8','359FC','35A04','35A68','35A70','35AD4','35ADC','35B40','35B48','35BCC','35BD4','35C38','35C40','35CA4','35CAC','35D30','35D38','35DBC','35DC4','35E28','35E30',
+		'35EB4','35EBC','35F20','35F28','35F8C','35F94','36018','36020','36064','3606C','360D0','360D8','3705C','37064','370E8','370F0','371F4','371FC','37340','37348','376CC','376D4','37738','37740',
+		'3374C','37784','3778C','379D0','379D8','37ABC','37AC4','37B48','37B50','37BB4','37BBC','37C20','37C28','37C8C','37C94','37D18','37D20','37D64','37D6C','37E70','37E78','37EBC','37EC4','37F48','37F50']
+
 #Functions
 def AddPatch(PatchName,PatchInfo):
 	global GamePath
@@ -420,30 +424,59 @@ def FindDolphinSave():
 
 def ChangeName(SongToChange,newText):
 	global ProgramPath
-	if(Songs[SongToChange].SongType == SongTypeValue.Regular):
-		TextOffset = ['c8','190','12c']
-	elif(Songs[SongToChange].SongType == SongTypeValue.Maestro):
-		TextOffset = ['fa','1c2','15e']
+	if(type(newText) != str):
+		if(Songs[SongToChange].SongType == SongTypeValue.Regular):
+			TextOffset = ['c8','190','12c']
+		elif(Songs[SongToChange].SongType == SongTypeValue.Maestro):
+			TextOffset = ['fa','1c2','15e']
+	else: TextOffset = ['b200']
 	subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
 	for typeNum in range(3):
 		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
 		textlines = message.readlines()
 		message.close()
-		numberToChange = Songs[SongToChange].MemOrder
-		if(Songs[SongToChange].SongType == SongTypeValue.Maestro):
-			array = [0,4,2,3,1]
-			numberToChange = array[numberToChange]
+		if(type(newText) != str):
+			numberToChange = Songs[SongToChange].MemOrder
+			if(Songs[SongToChange].SongType == SongTypeValue.Maestro):
+				array = [0,4,2,3,1]
+				numberToChange = array[numberToChange]
+		else:
+			array = [3,1,4,2,7,10,11,9,8,6,5]
+			numberToChange = array[SongToChange]
+
 		offset = format(int(TextOffset[typeNum],16)+numberToChange,'x').lower()
-		offset = ' ' * (4-len(offset))+offset+'00 @'
+		if(type(newText) != str):
+			offset = ' ' * (4-len(offset))+offset+'00 @'
+		else:
+			offset = ' ' * (4-len(offset))+offset+' @'
+		for num in range(len(textlines)):
+			if(textlines[num] == b'  b200 @015f /\r\n'):
+				textlines[num] = b'  b200 @015f [/,4b] = Default\r\n'
+				textlines[num+1] = b'  b201 @0160 [/,4b] = Rock\r\n'
+				textlines[num+2] = b'  b202 @0161 [/,4b] = March\r\n'
+				textlines[num+3] = b'  b203 @0162 [/,4b] = Jazz\r\n'
+				textlines[num+4] = b'  b204 @0163 [/,4b] = Latin\r\n'
+				textlines[num+5] = b'  b205 @0164 [/,4b] = Reggae\r\n'
+				textlines[num+6] = b'  b206 @0165 [/,4b] = Hawaiian\r\n'
+				textlines[num+7] = b'  b207 @0166 [/,4b] = Electronic\r\n'
+				textlines[num+8] = b'  b208 @0167 [/,4b] = Classical\r\n'
+				textlines[num+9] = b'  b209 @0168 [/,4b] = Tango\r\n'
+				textlines[num+10] = b'  b20a @0169 [/,4b] = Pop\r\n'
+				textlines[num+11] = b'  b20b @016a [/,4b] = Japanese\r\n'
+				break
 		for num in range(len(textlines)):
 			if offset in str(textlines[num]):
 				while bytes('@','utf-8') not in textlines[num+1]:
 					textlines.pop(num+1)
-				textlines[num] = bytes(offset+str(textlines[num])[10:24:1]+newText[typeNum]+'\r\n','utf-8')
+				if(type(newText) == str):
+					textlines[num] = bytes(offset+str(textlines[num])[10:24:1]+newText+'\r\n','utf-8')
+				else:
+					textlines[num] = bytes(offset+str(textlines[num])[10:24:1]+newText[typeNum]+'\r\n','utf-8')
 				break
 		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','wb')
 		message.writelines(textlines)
 		message.close()
+		if(type(newText) == str): break
 	subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 
 def MessageFolder():
@@ -716,59 +749,113 @@ def ReplaceSong(positionOffset,listOffset,replacementArray,infoArray):
 	brsar = open(BrsarPath, "rb")
 	brsar.seek(positionOffset)
 	currentSpot = int.from_bytes(brsar.read(4),'big')
-	posOffset = []
-	lenOffset = []
-	data = []
-	for num in range(len(replacementArray)-1):
-		brsar.seek(listOffset+24*replacementArray[num])
-		posOffset.append(brsar.read(4))
-		lenOffset.append(brsar.read(4))
-	brsar.seek(0)
-	data.append(brsar.read(currentSpot+int.from_bytes(posOffset[0],'big')))
-	for num in range(len(replacementArray)-2):
-		brsar.seek(currentSpot+int.from_bytes(posOffset[num],'big')+int.from_bytes(lenOffset[num],'big'))
-		data.append(brsar.read(int.from_bytes(posOffset[num+1],'big')-int.from_bytes(posOffset[num],'big')-int.from_bytes(lenOffset[num],'big')))
-	brsar.seek(currentSpot+int.from_bytes(posOffset[len(posOffset)-1],'big')+int.from_bytes(lenOffset[len(lenOffset)-1],'big'))
-	data.append(brsar.read())
+	if(listOffset != -1):
+		posOffset = []
+		lenOffset = []
+		data = []
+		for num in range(len(replacementArray)-1):
+			brsar.seek(listOffset+24*replacementArray[num])
+			posOffset.append(brsar.read(4))
+			lenOffset.append(brsar.read(4))
+		brsar.seek(0)
+		data.append(brsar.read(currentSpot+int.from_bytes(posOffset[0],'big')))
+		for num in range(len(replacementArray)-2):
+			brsar.seek(currentSpot+int.from_bytes(posOffset[num],'big')+int.from_bytes(lenOffset[num],'big'))
+			data.append(brsar.read(int.from_bytes(posOffset[num+1],'big')-int.from_bytes(posOffset[num],'big')-int.from_bytes(lenOffset[num],'big')))
+		brsar.seek(currentSpot+int.from_bytes(posOffset[len(posOffset)-1],'big')+int.from_bytes(lenOffset[len(lenOffset)-1],'big'))
+		data.append(brsar.read())
+		brsar.close()
+		for num in range(len(replacementArray)-1):	
+			if(num == 0):
+				infoToWrite = data[num]+BrseqInfo[infoArray[num]]
+			else:
+				infoToWrite = infoToWrite+data[num]+BrseqInfo[infoArray[num]]
+		infoToWrite = infoToWrite+data[len(replacementArray)-1]
+		brsar = open(BrsarPath, "wb")
+		brsar.write(infoToWrite)
+		brsar.close()
+		brsar = open(BrsarPath, "r+b")
+		for num in range(replacementArray[0],replacementArray[len(replacementArray)-1]):
+			
+			if(sizeDifference != 0):
+				brsar.seek(listOffset+24*num)
+				size = brsar.read(4)
+				brsar.seek(listOffset+24*num)
+				brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+			if (num in replacementArray):
+				brsar.seek(listOffset+4+24*num)
+				sizeDifference += int(BrseqLength[infoArray[replacementArray.index(num)]],16)-int.from_bytes(brsar.read(4),"big")
+				brsar.seek(listOffset+4+24*num)
+				brsar.write(int(BrseqLength[infoArray[replacementArray.index(num)]],16).to_bytes(4, 'big'))
+		for offset in rseqList:
+			if(int(offset,16) > positionOffset):
+				brsar.seek(int(offset,16))
+				size = brsar.read(4)
+				brsar.seek(int(offset,16))
+				brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+				brsar.seek(int(offset,16)+(int.from_bytes(size,"big")+sizeDifference))
+		for offset in [8,positionOffset+4]:
+			brsar.seek(offset)
+			size = brsar.read(4)
+			brsar.seek(offset)
+			brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+	else:
+		data = []
+		brsar.seek(0)
+		data.append(brsar.read(currentSpot))
+		brsar.seek(positionOffset+4)
+		brsar.seek(currentSpot+int.from_bytes(brsar.read(4),'big'))
+		data.append(brsar.read())
+		brsar.close()
+		brsar = open(BrsarPath, "wb")
+		brsar.write(data[0]+BrseqInfo[infoArray]+data[1])
+		brsar.close()
+		brsar = open(BrsarPath, "r+b")
+		brsar.seek(positionOffset+4)
+		sizeDifference = int(BrseqLength[infoArray],16)-int.from_bytes(brsar.read(4),"big")
+		for offset in rseqList:
+			if(int(offset,16) > positionOffset):
+				brsar.seek(int(offset,16))
+				size = brsar.read(4)
+				brsar.seek(int(offset,16))
+				brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+				brsar.seek(int(offset,16)+(int.from_bytes(size,"big")+sizeDifference))
+		for offset in [8,positionOffset+4]:
+			brsar.seek(offset)
+			size = brsar.read(4)
+			brsar.seek(offset)
+			brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+			brsar.seek(offset+(int.from_bytes(size,"big")+sizeDifference))
 	brsar.close()
-	for num in range(len(replacementArray)-1):	
-		if(num == 0):
-			infoToWrite = data[num]+BrseqInfo[infoArray[num]]
+
+def ReplaceEverything(startOffset):
+	brsar = open(BrsarPath, "rb")
+	brsar.seek(startOffset)
+	brsar.seek(int.from_bytes(brsar.read(4),'big'))
+	if(brsar.read(4).hex() == '52534551'):
+		brsar.seek(startOffset-20)
+		if(brsar.read(4).hex() != 'ffffffff'):
+			brsar.seek(startOffset+24)
+			number = int.from_bytes(brsar.read(4),'big')
+			listOffset = startOffset+32
+			temp = -1
+			while(temp != bytes(6)):
+				listOffset += 4
+				brsar.seek(listOffset)
+				temp = brsar.read(6)
+			brsar.close()
+			temp = []
+			for num in range(number+1):
+				temp.append(num)
+			print(str(startOffset)+' - Normal')
+			ReplaceSong(startOffset,listOffset,temp,[0]*number)
 		else:
-			infoToWrite = infoToWrite+data[num]+BrseqInfo[infoArray[num]]
-	infoToWrite = infoToWrite+data[len(replacementArray)-1]
-	brsar = open(BrsarPath, "wb")
-	brsar.write(infoToWrite)
-	brsar.close()
-	brsar = open(BrsarPath, "r+b")
-	for num in range(replacementArray[0],replacementArray[len(replacementArray)-1]):
-		if(sizeDifference != 0):
-			brsar.seek(listOffset+24*num)
-			size = brsar.read(4)
-			brsar.seek(listOffset+24*num)
-			brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
-			brsar.seek(listOffset+24*num+(int.from_bytes(size,"big")+sizeDifference))
-		if (num in replacementArray):
-			brsar.seek(listOffset+4+24*num)
-			sizeDifference += int(BrseqLength[infoArray[replacementArray.index(num)]],16)-int.from_bytes(brsar.read(4),"big")
-			brsar.seek(listOffset+4+24*num)
-			brsar.write(int(BrseqLength[infoArray[replacementArray.index(num)]],16).to_bytes(4, 'big'))
-	for offset in ['343F0','343F8','359FC','35A04','35A68','35A70','35AD4','35ADC','35B40','35B48','35BCC','35BD4','35C38','35C40','35CA4','35CAC','35D30','35D38','35DBC','35DC4','35E28','35E30',
-	'35EB4','35EBC','35F20','35F28','35F8C','35F94','36018','36020','36064','3606C','360D0','360D8','3705C','37064','370E8','370F0','371F4','371FC','37340','37348','376CC','376D4','37738','37740',
-	'3374C','37784','3778C','379D0','379D8','37ABC','37AC4','37B48','37B50','37BB4','37BBC','37C20','37C28','37C8C','37C94','37D18','37D20','37D64','37D6C','37E70','37E78','37EBC','37EC4','37F48','37F50']:
-		if(int(offset,16) > positionOffset):
-			brsar.seek(int(offset,16))
-			size = brsar.read(4)
-			brsar.seek(int(offset,16))
-			brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
-			brsar.seek(int(offset,16)+(int.from_bytes(size,"big")+sizeDifference))
-	for offset in [8,positionOffset+4]:
-		brsar.seek(offset)
-		size = brsar.read(4)
-		brsar.seek(offset)
-		brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
-		brsar.seek(offset+(int.from_bytes(size,"big")+sizeDifference))
-	brsar.close()
+			print(str(startOffset)+' - Single')
+			brsar.close()
+			ReplaceSong(startOffset,-1,-1,0)
+	else:
+		print(str(startOffset)+' - Skipped')
+		brsar.close()
 	
 #Default Paths
 ProgramPath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
@@ -1030,8 +1117,8 @@ while True:
 			if(Songs[SongSelected].SongType == SongTypeValue.Regular):
 				ReplaceSong(0x033744,0x033A84,[Songs[SongSelected].MemOrder*2,Songs[SongSelected].MemOrder*2+1,100],[0,1])
 				if(Songs[SongSelected].Name == 'Do-Re-Mi'):
-					ReplaceSong(0x0343F0,0x034B38,[0,1,112,136,137,138,139,140,141,142,143,157],[0,0,0,0,0,0,0,0,0,0,0])
-					ReplaceSong(0x0360D0,0x036678,[0,1,95,104],[0,0,0])
+					ReplaceSong(0x0343F0,0x034988,[18,19,113,155,156,157,158,159,160,161,162,175],[0,1,0,0,0,0,0,0,0,0,0])
+					ReplaceSong(0x0360D0,0x0364C8,[18,19,113,123],[0,1,0])
 				AddPatch(Songs[SongSelected].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
 			elif(Songs[SongSelected].SongType == SongTypeValue.Menu):
 				ReplaceSong(0x037D64,0x037DBC,[0,1,2,3,4,5,6,7],[0,1,1,1,1,1,1])
@@ -1163,6 +1250,8 @@ while True:
 		print("\nPatch Complete!")
 		time.sleep(0.5)
 		print("")
+		if(Selection < 11) and (input('Would you like to change the style name? [y/n] ') == 'y'):
+			ChangeName(Selection,input('\nType new name: '))
 	elif(Selection == 4) and (not liteMode): #////////////////////////////////////////Advanced Tools
 		while True:
 			PrintSectionTitle('Advanced Tools')
@@ -1182,7 +1271,27 @@ while True:
 				
 				#Run Notepad
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
-				time.sleep(0.5)
+				txt = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
+				textlines = txt.readlines()
+				txt.close()
+				for num in range(len(textlines)):
+					if(textlines[num] == b'  b200 @015f /\r\n'):
+						textlines[num] = b'  b200 @015f [/,4b] = Default\r\n'
+						textlines[num+1] = b'  b201 @0160 [/,4b] = Rock\r\n'
+						textlines[num+2] = b'  b202 @0161 [/,4b] = March\r\n'
+						textlines[num+3] = b'  b203 @0162 [/,4b] = Jazz\r\n'
+						textlines[num+4] = b'  b204 @0163 [/,4b] = Latin\r\n'
+						textlines[num+5] = b'  b205 @0164 [/,4b] = Reggae\r\n'
+						textlines[num+6] = b'  b206 @0165 [/,4b] = Hawaiian\r\n'
+						textlines[num+7] = b'  b207 @0166 [/,4b] = Electronic\r\n'
+						textlines[num+8] = b'  b208 @0167 [/,4b] = Classical\r\n'
+						textlines[num+9] = b'  b209 @0168 [/,4b] = Tango\r\n'
+						textlines[num+10] = b'  b20a @0169 [/,4b] = Pop\r\n'
+						textlines[num+11] = b'  b20b @016a [/,4b] = Japanese\r\n'
+						break
+				txt = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','wb')
+				txt.writelines(textlines)
+				txt.close()
 				print("\nWaiting for Notepad to close...")
 				subprocess.run('notepad \"'+MessageFolder().replace('\"','')+'/message.d/new_music_message.txt\"',capture_output=True)
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
