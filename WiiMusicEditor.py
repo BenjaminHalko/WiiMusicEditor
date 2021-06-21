@@ -115,13 +115,13 @@ SongClass(SongTypeValue.Regular,'Wii Music','025a0730','015D','015E',4),
 SongClass(SongTypeValue.Regular,'Wii Sports','025a26c4','01B3','01B4',47),
 SongClass(SongTypeValue.Regular,'Woman','025a23d4','01AB','01AC',43),
 SongClass(SongTypeValue.Regular,'Yankee Doodle','025a0dcc','016F','0170',13),
-SongClass(SongTypeValue.Maestro,'Twinkle Twinkle Little Star [Mii Maestro]','-1','-1','-1',2),
-SongClass(SongTypeValue.Maestro,'Carmen [Mii Maestro]','-1','-1','-1',0),
-SongClass(SongTypeValue.Maestro,'The Four Seaons - Spring [Mii Maestro]','-1','-1','-1',4),
-SongClass(SongTypeValue.Maestro,'Ode To Joy [Mii Maestro]','-1','-1','-1',3),
-SongClass(SongTypeValue.Maestro,'The Legend of Zelda [Mii Maestro]','-1','-1','-1',1),
+SongClass(SongTypeValue.Maestro,'Twinkle Twinkle Little Star (Mii Maestro)','025a3e1c','-1','-1',2),
+SongClass(SongTypeValue.Maestro,'Carmen (Mii Maestro)','025a3d80','-1','-1',0),
+SongClass(SongTypeValue.Maestro,'The Four Seaons - Spring (Mii Maestro)','025a3f54','-1','-1',4),
+SongClass(SongTypeValue.Maestro,'Ode To Joy (Mii Maestro)','025a3ff0','-1','-1',3),
+SongClass(SongTypeValue.Maestro,'The Legend of Zelda (Mii Maestro)','025a3eb8','-1','-1',1),
 SongClass(SongTypeValue.Menu,'Menu Song',['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1,-1,-1)]
-#'19AF7A0',['19ABD00','19B1A00','19B4360','19B69A0','19B9360','19BBF20'],'2260',['3AA0','2960','2640','29C0','2BC0','29A0']
+
 Styles = [
 StyleClass(StyleTypeValue.Global,'Jazz','0659A65C'),
 StyleClass(StyleTypeValue.Global,'Rock','0659A680'),
@@ -984,7 +984,7 @@ while True:
 
 			#Applied Custom Songs
 			appliedCustomSongs = []
-			if(os.path.isfile(GamePath+'/GeckoCodes.ini')) and ():
+			if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
 				codes = open(GamePath+'/GeckoCodes.ini')
 				textlines = codes.readlines()
 				codes.close()
@@ -1067,7 +1067,7 @@ while True:
 		
 
 		#Length, Tempo, Time Signature Patch
-		if(Songs[SongSelected].SongType == SongTypeValue.Regular):
+		if(Songs[SongSelected].SongType != SongTypeValue.Menu):
 			#Brseq Info
 			PrintSectionTitle("File Info")
 			print("Number of Beats: "+Length)
@@ -1124,6 +1124,7 @@ while True:
 				ReplaceSong(0x037D64,0x037DBC,[0,1,2,3,4,5,6,7],[0,1,1,1,1,1,1])
 			elif(Songs[SongSelected].SongType == SongTypeValue.Maestro):
 				ReplaceSong(0x0370E8,0x037140,[Songs[SongSelected].MemOrder+2,7],[0])
+				AddPatch(Songs[SongSelected].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
 			AddPatch('Rapper Crash Fix','043B0BBB 881C0090\n043B0BBF 7C090000\n043B0BC3 4081FFBC\n043B0BC7 881C00D6\n')
 			print("\nPatch Complete!")
 			time.sleep(0.5)
@@ -1252,6 +1253,7 @@ while True:
 		print("")
 		if(Selection < 11) and (input('Would you like to change the style name? [y/n] ') == 'y'):
 			ChangeName(Selection,input('\nType new name: '))
+			print('')
 	elif(Selection == 4) and (not liteMode): #////////////////////////////////////////Advanced Tools
 		while True:
 			PrintSectionTitle('Advanced Tools')
