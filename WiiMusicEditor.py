@@ -40,10 +40,11 @@ class SongClass:
 		self.MemOrder = MemOrder
 
 class StyleClass:
-	def __init__(self,StyleType,Name,MemOffset):
+	def __init__(self,StyleType,Name,MemOffset,StyleId):
 		self.StyleType = StyleType
 		self.Name = Name
 		self.MemOffset = MemOffset
+		self.StyleId = StyleId
 
 class InstrumentClass:
 	def __init__(self,Name,Number,InMenu):
@@ -123,63 +124,63 @@ SongClass(SongTypeValue.Maestro,'The Legend of Zelda (Mii Maestro)','025a3eb8','
 SongClass(SongTypeValue.Menu,'Menu Song',['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1,-1,-1)]
 
 Styles = [
-StyleClass(StyleTypeValue.Global,'Jazz','0659A65C'),
-StyleClass(StyleTypeValue.Global,'Rock','0659A680'),
-StyleClass(StyleTypeValue.Global,'Latin','0659A6A4'),
-StyleClass(StyleTypeValue.Global,'March','0659A6C8'),
-StyleClass(StyleTypeValue.Global,'Electronic','0659A6EC'),
-StyleClass(StyleTypeValue.Global,'Pop','0659A710'),
-StyleClass(StyleTypeValue.Global,'Japanese','0659A724'),
-StyleClass(StyleTypeValue.Global,'Tango','0659A758'),
-StyleClass(StyleTypeValue.Global,'Classical','0659A77C'),
-StyleClass(StyleTypeValue.Global,'Hawaiian','0659A7A0'),
-StyleClass(StyleTypeValue.Global,'Reggae','0659A7C4'),
-StyleClass(StyleTypeValue.SongSpecific,'A Little Night Music','0659AB00'),
-StyleClass(StyleTypeValue.SongSpecific,'Animal Crossing','0659AA28'),
-StyleClass(StyleTypeValue.SongSpecific,'Animal Crossing K.K. Blues','0659AB48'),
-StyleClass(StyleTypeValue.SongSpecific,'Carmen','0659A878'),
-StyleClass(StyleTypeValue.SongSpecific,'Chariots of Fire','0659A908'),
-StyleClass(StyleTypeValue.SongSpecific,'Every Breath You Take','0659A8E4'),
-StyleClass(StyleTypeValue.SongSpecific,'From Santurtzi to Bilbao','0659AADC'),
-StyleClass(StyleTypeValue.SongSpecific,'Happy Birthday to You','0659AA94'),
-StyleClass(StyleTypeValue.SongSpecific,'I\'ll Be There','0659A974'),
-StyleClass(StyleTypeValue.SongSpecific,'I\'ve Never Been to Me','0659A9BC'),
-StyleClass(StyleTypeValue.SongSpecific,'La Cucaracha','0659AAB8'),
-StyleClass(StyleTypeValue.SongSpecific,'Material Girl','0659A950'),
-StyleClass(StyleTypeValue.SongSpecific,'Minuet in G Major','0659AA4C'),
-StyleClass(StyleTypeValue.SongSpecific,'O-Christmas Tree','0659A89C'),
-StyleClass(StyleTypeValue.SongSpecific,'Oh My Darling Clementine','0659A830'),
-StyleClass(StyleTypeValue.SongSpecific,'Over The Waves','0659A8C0'),
-StyleClass(StyleTypeValue.SongSpecific,'Scarborough Fair','0659A854'),
-StyleClass(StyleTypeValue.SongSpecific,'September','0659A92C'),
-StyleClass(StyleTypeValue.SongSpecific,'Super Mario Bros','0659AC8C'),
-StyleClass(StyleTypeValue.SongSpecific,'The Blue Danube','0659AB24'),
-StyleClass(StyleTypeValue.SongSpecific,'The Entertainer','0659AA70'),
-StyleClass(StyleTypeValue.SongSpecific,'The Legend of Zelda','0659A9E0'),
-StyleClass(StyleTypeValue.SongSpecific,'Twinkle Twinkle Little Star','0659A7E8'),
-StyleClass(StyleTypeValue.SongSpecific,'Wii Sports','0659AA04'),
-StyleClass(StyleTypeValue.SongSpecific,'Wii Music','0659AB6C'),
-StyleClass(StyleTypeValue.SongSpecific,'Woman','0659A998'),
-StyleClass(StyleTypeValue.SongSpecific,'Yankee Doodle','0659A80C'),
-StyleClass(StyleTypeValue.QuickJam,'A Capella','0659AC20'),
-StyleClass(StyleTypeValue.QuickJam,'Acoustic','0659AB93'),
-StyleClass(StyleTypeValue.QuickJam,'African Electronic','0659AB93'),
-StyleClass(StyleTypeValue.QuickJam,'Animals!','0659AC68'),
-StyleClass(StyleTypeValue.QuickJam,'Calypso','0659AC44'),
-StyleClass(StyleTypeValue.QuickJam,'Exotic','0659ABFC'),
-StyleClass(StyleTypeValue.QuickJam,'Flamenco','0659AB90'),
-StyleClass(StyleTypeValue.QuickJam,'Galactic','0659ADD0'),
-StyleClass(StyleTypeValue.QuickJam,'Handbell','0659AB93'),
-StyleClass(StyleTypeValue.QuickJam,'Karate','0659ABB4'),
-StyleClass(StyleTypeValue.QuickJam,'Orchestral','0659AD64'),
-StyleClass(StyleTypeValue.QuickJam,'Parade','0659ABD8'),
-StyleClass(StyleTypeValue.QuickJam,'Rapper','0659ADF4'),
-StyleClass(StyleTypeValue.QuickJam,'Samba','0659AE18'),
-StyleClass(StyleTypeValue.Menu,'Menu Style Main','0659ACB0'),
-StyleClass(StyleTypeValue.Menu,'Menu Style Electronic','0659ACD4'),
-StyleClass(StyleTypeValue.Menu,'Menu Style Japanese','0659ACF8'),
-StyleClass(StyleTypeValue.Menu,'Menu Style March','0659AD1C'),
-StyleClass(StyleTypeValue.Menu,'Menu Style A Capella','0659AD40')]
+StyleClass(StyleTypeValue.Global,'Jazz','0659A65C','00'),
+StyleClass(StyleTypeValue.Global,'Rock','0659A680','01'),
+StyleClass(StyleTypeValue.Global,'Latin','0659A6A4','02'),
+StyleClass(StyleTypeValue.Global,'March','0659A6C8','03'),
+StyleClass(StyleTypeValue.Global,'Electronic','0659A6EC','04'),
+StyleClass(StyleTypeValue.Global,'Pop','0659A710','05'),
+StyleClass(StyleTypeValue.Global,'Japanese','0659A724','06'),
+StyleClass(StyleTypeValue.Global,'Tango','0659A758','07'),
+StyleClass(StyleTypeValue.Global,'Classical','0659A77C','08'),
+StyleClass(StyleTypeValue.Global,'Hawaiian','0659A7A0','09'),
+StyleClass(StyleTypeValue.Global,'Reggae','0659A7C4','0A'),
+StyleClass(StyleTypeValue.SongSpecific,'A Little Night Music','0659AB00','21'),
+StyleClass(StyleTypeValue.SongSpecific,'Animal Crossing','0659AA28','1B'),
+StyleClass(StyleTypeValue.SongSpecific,'Animal Crossing K.K. Blues','0659AB48','23'),
+StyleClass(StyleTypeValue.SongSpecific,'Carmen','0659A878','0F'),
+StyleClass(StyleTypeValue.SongSpecific,'Chariots of Fire','0659A908','13'),
+StyleClass(StyleTypeValue.SongSpecific,'Every Breath You Take','0659A8E4','12'),
+StyleClass(StyleTypeValue.SongSpecific,'From Santurtzi to Bilbao','0659AADC','20'),
+StyleClass(StyleTypeValue.SongSpecific,'Happy Birthday to You','0659AA94','1E'),
+StyleClass(StyleTypeValue.SongSpecific,'I\'ll Be There','0659A974','16'),
+StyleClass(StyleTypeValue.SongSpecific,'I\'ve Never Been to Me','0659A9BC','18'),
+StyleClass(StyleTypeValue.SongSpecific,'La Cucaracha','0659AAB8','1F'),
+StyleClass(StyleTypeValue.SongSpecific,'Material Girl','0659A950','15'),
+StyleClass(StyleTypeValue.SongSpecific,'Minuet in G Major','0659AA4C','1C'),
+StyleClass(StyleTypeValue.SongSpecific,'O-Christmas Tree','0659A89C','10'),
+StyleClass(StyleTypeValue.SongSpecific,'Oh My Darling Clementine','0659A830','0D'),
+StyleClass(StyleTypeValue.SongSpecific,'Over The Waves','0659A8C0','11'),
+StyleClass(StyleTypeValue.SongSpecific,'Scarborough Fair','0659A854','0E'),
+StyleClass(StyleTypeValue.SongSpecific,'September','0659A92C','14'),
+StyleClass(StyleTypeValue.SongSpecific,'Super Mario Bros','0659AC8C','2C'),
+StyleClass(StyleTypeValue.SongSpecific,'The Blue Danube','0659AB24','22'),
+StyleClass(StyleTypeValue.SongSpecific,'The Entertainer','0659AA70','1D'),
+StyleClass(StyleTypeValue.SongSpecific,'The Legend of Zelda','0659A9E0','19'),
+StyleClass(StyleTypeValue.SongSpecific,'Twinkle Twinkle Little Star','0659A7E8','0B'),
+StyleClass(StyleTypeValue.SongSpecific,'Wii Sports','0659AA04','1A'),
+StyleClass(StyleTypeValue.SongSpecific,'Wii Music','0659AB6C','24'),
+StyleClass(StyleTypeValue.SongSpecific,'Woman','0659A998','17'),
+StyleClass(StyleTypeValue.SongSpecific,'Yankee Doodle','0659A80C','0C'),
+StyleClass(StyleTypeValue.QuickJam,'A Capella','0659AC20','29'),
+StyleClass(StyleTypeValue.QuickJam,'Acoustic','0659AB93','38'),
+StyleClass(StyleTypeValue.QuickJam,'African Electronic','0659AB93','3C'),
+StyleClass(StyleTypeValue.QuickJam,'Animals!','0659AC68','2B'),
+StyleClass(StyleTypeValue.QuickJam,'Calypso','0659AC44','2A'),
+StyleClass(StyleTypeValue.QuickJam,'Exotic','0659ABFC','28'),
+StyleClass(StyleTypeValue.QuickJam,'Flamenco','0659AB90','25'),
+StyleClass(StyleTypeValue.QuickJam,'Galactic','0659ADD0','35'),
+StyleClass(StyleTypeValue.QuickJam,'Handbell','0659AB93','43'),
+StyleClass(StyleTypeValue.QuickJam,'Karate','0659ABB4','26'),
+StyleClass(StyleTypeValue.QuickJam,'Orchestral','0659AD64','32'),
+StyleClass(StyleTypeValue.QuickJam,'Parade','0659ABD8','27'),
+StyleClass(StyleTypeValue.QuickJam,'Rap','0659ADF4','36'),
+StyleClass(StyleTypeValue.QuickJam,'Samba','0659AE18','37'),
+StyleClass(StyleTypeValue.Menu,'Menu Style Main','0659ACB0','2D'),
+StyleClass(StyleTypeValue.Menu,'Menu Style Electronic','0659ACD4','2E'),
+StyleClass(StyleTypeValue.Menu,'Menu Style Japanese','0659ACF8','2F'),
+StyleClass(StyleTypeValue.Menu,'Menu Style March','0659AD1C','30'),
+StyleClass(StyleTypeValue.Menu,'Menu Style A Capella','0659AD40','31')]
 
 Instruments = [
 InstrumentClass('Piano',0,True),
@@ -1313,8 +1314,7 @@ while True:
 
 				StyleSelected = MakeSelection(['Please Select a Style',0,51])
 
-				num = format(StyleSelected,'x')
-				AddPatch(Songs[SongSelected].Name+' Default Style Patch','0'+format(int(Songs[SongSelected].MemOffset,16)+42,'x')+' '+'0'*(8-len(num))+num+'\n')
+				AddPatch(Songs[SongSelected].Name+' Default Style Patch','0'+format(int(Songs[SongSelected].MemOffset,16)+42,'x')+' 000000'+Styles[StyleSelected].StyleId+'\n')
 				print('\nPatch Successful')
 			elif(Selection == 3): #////////////////////////////////////////Remove Song
 				FindGameFolder()
