@@ -1259,13 +1259,14 @@ while True:
 			PrintSectionTitle('Advanced Tools')
 			print("(#0) Back to Main Menu")
 			print("(#1) Change All Wii Music Text")
-			print("(#2) Remove Song")
-			print("(#3) Import/Export Files")
-			print("(#4) Extract/Pack Wii Music ROM")
-			print("(#5) Patch Main.dol With Gecko Codes")
-			print("(#6) Create Riivolution Patch")
+			print("(#2) Change Default Styles")
+			print("(#3) Remove Song")
+			print("(#4) Import/Export Files")
+			print("(#5) Extract/Pack Wii Music ROM")
+			print("(#6) Patch Main.dol With Gecko Codes")
+			print("(#7) Create Riivolution Patch")
 
-			Selection = MakeSelection(['Please Select an Option',0,6])
+			Selection = MakeSelection(['Please Select an Option',0,7])
 
 			if(Selection == 1): #////////////////////////////////////////Change Text
 				#Load Files
@@ -1298,7 +1299,24 @@ while True:
 				subprocess.run('notepad \"'+MessageFolder().replace('\"','')+'/message.d/new_music_message.txt\"',capture_output=True)
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 				print("\nEditing Successful!\n")
-			elif(Selection == 2): #////////////////////////////////////////Remove Song
+			elif(Selection == 2): #////////////////////////////////////////Change Default Style
+				print('')
+				for num in range(50):
+					print('(#'+str(num)+') '+Songs[num].Name)
+					time.sleep(0.005)
+
+				SongSelected = MakeSelection(['Please Select a Song',0,49])
+				print('')
+				for num in range(52):
+					print('(#'+str(num)+') '+Styles[num].Name)
+					time.sleep(0.005)
+
+				StyleSelected = MakeSelection(['Please Select a Style',0,51])
+
+				num = format(StyleSelected,'x')
+				AddPatch(Songs[SongSelected].Name+' Default Style Patch','0'+format(int(Songs[SongSelected].MemOffset,16)+42,'x')+' '+'0'*(8-len(num))+num+'\n')
+				print('\nPatch Successful')
+			elif(Selection == 3): #////////////////////////////////////////Remove Song
 				FindGameFolder()
 				FindDolphinSave()
 				PrintSectionTitle('Remove Song')
@@ -1338,7 +1356,7 @@ while True:
 					if(Selection != len(Songs)-1): break
 
 				print('\nEradication Complete!')
-			elif(Selection == 3): #////////////////////////////////////////Import/Export Files
+			elif(Selection == 4): #////////////////////////////////////////Import/Export Files
 				while True:
 					PrintSectionTitle('Import/Export Files')
 					print("(#0) Back To Main Menu")
@@ -1418,7 +1436,7 @@ while True:
 							zipObj.close()
 							name = name+'.zip'
 						print('\nExport Complete!\nSaved to: '+name)
-			elif(Selection == 4): #////////////////////////////////////////Extract/Pack Wii Music ROM
+			elif(Selection == 5): #////////////////////////////////////////Extract/Pack Wii Music ROM
 				while True:
 					PrintSectionTitle('Extract/Pack Wii Music ROM')
 					print("(#0) Back To Advanced Tools")
@@ -1470,7 +1488,7 @@ while True:
 							subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+DiskName+'.iso\" --iso')
 					else: break
 					print('')
-			elif(Selection == 5): #////////////////////////////////////////Patch Main.dol
+			elif(Selection == 6): #////////////////////////////////////////Patch Main.dol
 				FindGameFolder()
 				FindDolphinSave()
 				if(input('\nAre you sure you want to patch Main.dol? [y/n] ') == 'y'):
@@ -1483,7 +1501,7 @@ while True:
 						print('\nPatch Successful!')
 					else:
 						print('\nNo Gecko Codes Found')
-			elif(Selection == 6): #////////////////////////////////////////Riivolution Patch
+			elif(Selection == 7): #////////////////////////////////////////Riivolution Patch
 				PrintSectionTitle('Riivolution Patch')
 				FindGameFolder()
 				FindDolphinSave()
