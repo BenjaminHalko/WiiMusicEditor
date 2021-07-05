@@ -31,12 +31,10 @@ init(convert=True)
 time.sleep(0.05)
 
 class SongClass:
-	def __init__(self,SongType,Name,MemOffset,SongId,ScoreId,MemOrder):
+	def __init__(self,SongType,Name,MemOffset,MemOrder):
 		self.SongType = SongType
 		self.Name = Name
 		self.MemOffset = MemOffset
-		self.SongId = SongId
-		self.ScoreId = ScoreId
 		self.MemOrder = MemOrder
 
 class StyleClass:
@@ -56,6 +54,7 @@ class SongTypeValue:
 	Regular = 0
 	Menu = 1
 	Maestro = 2
+	Handbell = 3
 
 class StyleTypeValue:
 	Global = 0
@@ -66,62 +65,67 @@ class StyleTypeValue:
 NumberOfStyleTypes = 5
 
 Songs = [
-SongClass(SongTypeValue.Regular,'A Little Night Music','025a08a8','0161','0162',6),
-SongClass(SongTypeValue.Regular,'American Patrol','025a0c54','016B','016C',11),
-SongClass(SongTypeValue.Regular,'Animal Crossing','025a2780','01B5','01B6',48),
-SongClass(SongTypeValue.Regular,'Animal Crossing K.K. Blues','025a1758','0189','018A',26),
-SongClass(SongTypeValue.Regular,'Bridal Chorus','025a04fc','0157','0158',1),
-SongClass(SongTypeValue.Regular,'Carmen','025a0674','015B','015C',3),
-SongClass(SongTypeValue.Regular,'Chariots of Fire','025a1df4','019B','019C',35),
-SongClass(SongTypeValue.Regular,'Daydream Believer','025a1c7c','0197','0198',33),
-SongClass(SongTypeValue.Regular,'Do-Re-Mi','025a0adc','0167','0168',9),
-SongClass(SongTypeValue.Regular,'Every Breath You Take','025a1d38','0199','019A',34),
-SongClass(SongTypeValue.Regular,'F-Zero','025a283c','01B7','01B8',49),
-SongClass(SongTypeValue.Regular,'Frere Jacques','025a1468','0181','0182',22),
-SongClass(SongTypeValue.Regular,'From Santurtzi to Bilbao','025a1814','018B','018C',27),
-SongClass(SongTypeValue.Regular,'From the New World','025a1000','0175','0176',16),
-SongClass(SongTypeValue.Regular,'Happy Birthday to You','025a0a20','0165','0166',8),
-SongClass(SongTypeValue.Regular,'Ill Be There','025a21a0','01A5','01A6',40),
-SongClass(SongTypeValue.Regular,'Ive Never Been to Me','025a2490','01AD','01AE',44),
-SongClass(SongTypeValue.Regular,'Jingle Bell Rock','025a2318','01A7','01A8',41),
-SongClass(SongTypeValue.Regular,'La Bamba','025a10bc','0177','0178',17),
-SongClass(SongTypeValue.Regular,'La Cucaracha','025a198c','018F','0190',29),
-SongClass(SongTypeValue.Regular,'Little Hans','025a169c','0187','0188',25),
-SongClass(SongTypeValue.Regular,'Long Long Ago','025a1234','017B','017C',19),
-SongClass(SongTypeValue.Regular,'Material Girl','025a2028','01A1','01A2',38),
-SongClass(SongTypeValue.Regular,'Minuet in G Major','025a0964','0163','0164',7),
-SongClass(SongTypeValue.Regular,'My Grandfathers Clock','025a0f44','0173','0174',15),
-SongClass(SongTypeValue.Regular,'O-Christmas Tree','025a15e0','0185','0186',24),
-SongClass(SongTypeValue.Regular,'Ode To Joy','025a0440','0155','0156',0),
-SongClass(SongTypeValue.Regular,'Oh My Darling Clementine','025a0e88','0171','0172',14),
-SongClass(SongTypeValue.Regular,'Over the Waves','025a1a48','0191','0192',30),
-SongClass(SongTypeValue.Regular,'Please Mr. Postman','025a1f6c','019F','01A0',37),
-SongClass(SongTypeValue.Regular,'Sakura Sakura','025a1b04','0193','0194',31),
-SongClass(SongTypeValue.Regular,'Scarborough Fair','025a1178','0179','017A',18),
-SongClass(SongTypeValue.Regular,'September','025a1eb0','019D','019E',36),
-SongClass(SongTypeValue.Regular,'Sukiyaki','025a1bc0','0195','0196',32),
-SongClass(SongTypeValue.Regular,'Super Mario Bros','025a254c','01AF','01B0',45),
-SongClass(SongTypeValue.Regular,'Sur le Pont d Avignon','025a13ac','017F','0180',21),
-SongClass(SongTypeValue.Regular,'Swan Lake','025a05b8','0159','015A',2),
-SongClass(SongTypeValue.Regular,'The Blue Danube','025a07ec','015F','0160',5),
-SongClass(SongTypeValue.Regular,'The Entertainer','025a0b98','0169','016A',10),
-SongClass(SongTypeValue.Regular,'The Flea Waltz','025a1524','0183','0184',23),
-SongClass(SongTypeValue.Regular,'The Legend of Zelda','025a2608','01B1','01B2',46),
-SongClass(SongTypeValue.Regular,'The Loco Motion','025a20e4','01A3','01A4',39),
-SongClass(SongTypeValue.Regular,'Troika','025a18d0','018D','018E',28),
-SongClass(SongTypeValue.Regular,'Turkey in the Straw','025a0d10','016D','016E',12),
-SongClass(SongTypeValue.Regular,'Twinkle Twinkle Little Star','025a12f0','017D','017E',20),
-SongClass(SongTypeValue.Regular,'Wake Me Up Before You Go-Go','025a23d4','01A9','01AA',42),
-SongClass(SongTypeValue.Regular,'Wii Music','025a0730','015D','015E',4),
-SongClass(SongTypeValue.Regular,'Wii Sports','025a26c4','01B3','01B4',47),
-SongClass(SongTypeValue.Regular,'Woman','025a23d4','01AB','01AC',43),
-SongClass(SongTypeValue.Regular,'Yankee Doodle','025a0dcc','016F','0170',13),
-SongClass(SongTypeValue.Maestro,'Twinkle Twinkle Little Star (Mii Maestro)','025a3e1c','-1','-1',2),
-SongClass(SongTypeValue.Maestro,'Carmen (Mii Maestro)','025a3d80','-1','-1',0),
-SongClass(SongTypeValue.Maestro,'The Four Seaons - Spring (Mii Maestro)','025a3f54','-1','-1',4),
-SongClass(SongTypeValue.Maestro,'Ode To Joy (Mii Maestro)','025a3ff0','-1','-1',3),
-SongClass(SongTypeValue.Maestro,'The Legend of Zelda (Mii Maestro)','025a3eb8','-1','-1',1),
-SongClass(SongTypeValue.Menu,'Menu Song',['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1,-1,-1)]
+SongClass(SongTypeValue.Regular,'A Little Night Music','025a08a8',6),
+SongClass(SongTypeValue.Regular,'American Patrol','025a0c54',11),
+SongClass(SongTypeValue.Regular,'Animal Crossing','025a2780',48),
+SongClass(SongTypeValue.Regular,'Animal Crossing K.K. Blues','025a1758',26),
+SongClass(SongTypeValue.Regular,'Bridal Chorus','025a04fc',1),
+SongClass(SongTypeValue.Regular,'Carmen','025a0674',3),
+SongClass(SongTypeValue.Regular,'Chariots of Fire','025a1df4',35),
+SongClass(SongTypeValue.Regular,'Daydream Believer','025a1c7c',33),
+SongClass(SongTypeValue.Regular,'Do-Re-Mi','025a0adc',9),
+SongClass(SongTypeValue.Regular,'Every Breath You Take','025a1d38',34),
+SongClass(SongTypeValue.Regular,'F-Zero','025a283c',49),
+SongClass(SongTypeValue.Regular,'Frere Jacques','025a1468',22),
+SongClass(SongTypeValue.Regular,'From Santurtzi to Bilbao','025a1814',27),
+SongClass(SongTypeValue.Regular,'From the New World','025a1000',16),
+SongClass(SongTypeValue.Regular,'Happy Birthday to You','025a0a20',8),
+SongClass(SongTypeValue.Regular,'Ill Be There','025a21a0',40),
+SongClass(SongTypeValue.Regular,'Ive Never Been to Me','025a2490',44),
+SongClass(SongTypeValue.Regular,'Jingle Bell Rock','025a2318',41),
+SongClass(SongTypeValue.Regular,'La Bamba','025a10bc',17),
+SongClass(SongTypeValue.Regular,'La Cucaracha','025a198c',29),
+SongClass(SongTypeValue.Regular,'Little Hans','025a169c',25),
+SongClass(SongTypeValue.Regular,'Long Long Ago','025a1234',19),
+SongClass(SongTypeValue.Regular,'Material Girl','025a2028',38),
+SongClass(SongTypeValue.Regular,'Minuet in G Major','025a0964',7),
+SongClass(SongTypeValue.Regular,'My Grandfathers Clock','025a0f44',15),
+SongClass(SongTypeValue.Regular,'O-Christmas Tree','025a15e0',24),
+SongClass(SongTypeValue.Regular,'Ode To Joy','025a0440',0),
+SongClass(SongTypeValue.Regular,'Oh My Darling Clementine','025a0e88',14),
+SongClass(SongTypeValue.Regular,'Over the Waves','025a1a48',30),
+SongClass(SongTypeValue.Regular,'Please Mr. Postman','025a1f6c',37),
+SongClass(SongTypeValue.Regular,'Sakura Sakura','025a1b04',31),
+SongClass(SongTypeValue.Regular,'Scarborough Fair','025a1178',18),
+SongClass(SongTypeValue.Regular,'September','025a1eb0',36),
+SongClass(SongTypeValue.Regular,'Sukiyaki','025a1bc0',32),
+SongClass(SongTypeValue.Regular,'Super Mario Bros','025a254c',45),
+SongClass(SongTypeValue.Regular,'Sur le Pont d Avignon','025a13ac',21),
+SongClass(SongTypeValue.Regular,'Swan Lake','025a05b8',2),
+SongClass(SongTypeValue.Regular,'The Blue Danube','025a07ec',5),
+SongClass(SongTypeValue.Regular,'The Entertainer','025a0b98',10),
+SongClass(SongTypeValue.Regular,'The Flea Waltz','025a1524',23),
+SongClass(SongTypeValue.Regular,'The Legend of Zelda','025a2608',46),
+SongClass(SongTypeValue.Regular,'The Loco Motion','025a20e4',39),
+SongClass(SongTypeValue.Regular,'Troika','025a18d0',28),
+SongClass(SongTypeValue.Regular,'Turkey in the Straw','025a0d10',12),
+SongClass(SongTypeValue.Regular,'Twinkle Twinkle Little Star','025a12f0',20),
+SongClass(SongTypeValue.Regular,'Wake Me Up Before You Go-Go','025a23d4',42),
+SongClass(SongTypeValue.Regular,'Wii Music','025a0730',4),
+SongClass(SongTypeValue.Regular,'Wii Sports','025a26c4',47),
+SongClass(SongTypeValue.Regular,'Woman','025a23d4',43),
+SongClass(SongTypeValue.Regular,'Yankee Doodle','025a0dcc',13),
+SongClass(SongTypeValue.Maestro,'Twinkle Twinkle Little Star (Mii Maestro)','025a3e1c',2),
+SongClass(SongTypeValue.Maestro,'Carmen (Mii Maestro)','025a3d80',0),
+SongClass(SongTypeValue.Maestro,'The Four Seaons - Spring (Mii Maestro)','025a3f54',4),
+SongClass(SongTypeValue.Maestro,'Ode To Joy (Mii Maestro)','025a3ff0',3),
+SongClass(SongTypeValue.Maestro,'The Legend of Zelda (Mii Maestro)','025a3eb8',1),
+SongClass(SongTypeValue.Handbell,'O Christmas Tree (Handbell Harmony)','025a3e1c',0),
+SongClass(SongTypeValue.Handbell,'Hum, Hum, Hum (Handbell Harmony)','025a3d80',2),
+SongClass(SongTypeValue.Handbell,'My Grandfather\'s Clock (Handbell Harmony)','025a3f54',3),
+SongClass(SongTypeValue.Handbell,'Do-Re-Mi (Handbell Harmony)','025a3ff0',1),
+SongClass(SongTypeValue.Handbell,'Sukiyaki (Handbell Harmony)','025a3eb8',4),
+SongClass(SongTypeValue.Menu,'Menu Song',['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1)]
 
 Styles = [
 StyleClass(StyleTypeValue.Global,'Jazz','0659A65C','00'),
@@ -430,6 +434,8 @@ def ChangeName(SongToChange,newText):
 			TextOffset = ['c8','190','12c']
 		elif(Songs[SongToChange].SongType == SongTypeValue.Maestro):
 			TextOffset = ['fa','1c2','15e']
+		elif(Songs[SongToChange].SongType == SongTypeValue.Handbell):
+			TextOffset = ['ff','1c7','163']
 	else: TextOffset = ['b200']
 	subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
 	for typeNum in range(3):
@@ -440,6 +446,9 @@ def ChangeName(SongToChange,newText):
 			numberToChange = Songs[SongToChange].MemOrder
 			if(Songs[SongToChange].SongType == SongTypeValue.Maestro):
 				array = [0,4,2,3,1]
+				numberToChange = array[numberToChange]
+			elif(Songs[SongToChange].SongType == SongTypeValue.Handbell):
+				array = [0,2,3,1,4]
 				numberToChange = array[numberToChange]
 		else:
 			array = [3,1,4,2,7,10,11,9,8,6,5]
@@ -777,7 +786,6 @@ def ReplaceSong(positionOffset,listOffset,replacementArray,infoArray):
 		brsar.close()
 		brsar = open(BrsarPath, "r+b")
 		for num in range(replacementArray[0],replacementArray[len(replacementArray)-1]):
-			
 			if(sizeDifference != 0):
 				brsar.seek(listOffset+24*num)
 				size = brsar.read(4)
@@ -794,7 +802,6 @@ def ReplaceSong(positionOffset,listOffset,replacementArray,infoArray):
 				size = brsar.read(4)
 				brsar.seek(int(offset,16))
 				brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
-				brsar.seek(int(offset,16)+(int.from_bytes(size,"big")+sizeDifference))
 		for offset in [8,positionOffset+4]:
 			brsar.seek(offset)
 			size = brsar.read(4)
@@ -820,13 +827,11 @@ def ReplaceSong(positionOffset,listOffset,replacementArray,infoArray):
 				size = brsar.read(4)
 				brsar.seek(int(offset,16))
 				brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
-				brsar.seek(int(offset,16)+(int.from_bytes(size,"big")+sizeDifference))
 		for offset in [8,positionOffset+4]:
 			brsar.seek(offset)
 			size = brsar.read(4)
 			brsar.seek(offset)
 			brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
-			brsar.seek(offset+(int.from_bytes(size,"big")+sizeDifference))
 	brsar.close()
 
 def ReplaceEverything(startOffset):
@@ -974,7 +979,7 @@ while True:
 		print("(#10) Settings")
 		print("(#11) Credits")
 
-	Selection = MakeSelection(['Please Select an Option',1,11])
+	Selection = MakeSelection(['Please Select an Option',1,12])
 	
 
 	if(Selection == 1): #////////////////////////////////////////Add Custom Song
@@ -1025,7 +1030,7 @@ while True:
 		for num in range(2):
 			while True:
 				extraString = ''
-				if(DefaultLoadSongScore == 'Yes'):
+				if(DefaultLoadSongScore == 'Yes') and (Songs[SongSelected].SongType == SongTypeValue.Regular):
 					extraString = ' [SONG]'
 					if(num == 1): extraString = ' [SCORE]'
 				BrseqPath = input("\nDrag File to Batch (MIDIs, BRSEQ, & RSEQ Files only)"+extraString+": ").replace('&', '').replace('\'', '').replace('\"', '').strip()
@@ -1060,15 +1065,18 @@ while True:
 				BrseqInfo.append(Brseq.read())
 				Brseq.close()
 				BrseqLength.append(format(os.stat(directory+"/z.brseq").st_size,'x').upper())
-			if((num == 0) and (DefaultLoadSongScore != 'Yes')) or (Songs[SongSelected].SongType == SongTypeValue.Maestro):
-				BrseqInfo.append(BrseqInfo[0])
-				BrseqLength.append(BrseqLength[0])
-				break
+			if(num == 0):
+				if(Songs[SongSelected].SongType == SongTypeValue.Maestro): break
+				elif(Songs[SongSelected].SongType == SongTypeValue.Handbell): break
+				elif(DefaultLoadSongScore != 'Yes'):
+					BrseqInfo.append(BrseqInfo[0])
+					BrseqLength.append(BrseqLength[0])
+					break
 
 		
 
 		#Length, Tempo, Time Signature Patch
-		if(Songs[SongSelected].SongType != SongTypeValue.Menu):
+		if(Songs[SongSelected].SongType != SongTypeValue.Menu) and (Songs[SongSelected].SongType != SongTypeValue.Handbell):
 			#Brseq Info
 			PrintSectionTitle("File Info")
 			print("Number of Beats: "+Length)
@@ -1126,6 +1134,9 @@ while True:
 			elif(Songs[SongSelected].SongType == SongTypeValue.Maestro):
 				ReplaceSong(0x0370E8,0x037140,[Songs[SongSelected].MemOrder+2,7],[0])
 				AddPatch(Songs[SongSelected].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
+			elif(Songs[SongSelected].SongType == SongTypeValue.Handbell):
+					ReplaceSong(0x037340,0x037438,[Songs[SongSelected].MemOrder*5+2,Songs[SongSelected].MemOrder*5+3,Songs[SongSelected].MemOrder*5+6,27],[0,0,0])
+				#AddPatch(Songs[SongSelected].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
 			AddPatch('Rapper Crash Fix','043B0BBB 881C0090\n043B0BBF 7C090000\n043B0BC3 4081FFBC\n043B0BC7 881C00D6\n')
 			print("\nPatch Complete!")
 			time.sleep(0.5)
@@ -1155,7 +1166,18 @@ while True:
 		ChangeName(Selection,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 		print("\nEditing Successful!\n")
 	elif(Selection == 3) and (not liteMode): #////////////////////////////////////////Change Style
+		FindGameFolder()
 		FindDolphinSave()
+
+		#Applied Custom Songs
+		appliedCustomSongs = []
+		if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+			codes = open(GamePath+'/GeckoCodes.ini')
+			textlines = codes.readlines()
+			codes.close()
+			for text in textlines:
+				if('[WiiMusicEditor]' in text) and (' Style' in text):
+					appliedCustomSongs.append(text[1:len(text)-30:1])
 		MenuStyles = 5
 		columnSplit = 4
 		MaxStyles = []
@@ -1172,7 +1194,10 @@ while True:
 			MaxStyles[array][number] += 1
 			if(MaxStyles[array][number] >= len(StyleTable[array])):
 				StyleTable[array].append(['']*min(columnSplit,NumberOfStyleTypes-array*columnSplit))
-			StyleTable[array][MaxStyles[array][number]][number] = '(#'+str(num)+') '+Styles[num].Name
+			if(Styles[num].Name in appliedCustomSongs):
+				StyleTable[array][MaxStyles[array][number]][number] = Fore.YELLOW+'(#'+str(num)+') '+Styles[num].Name+Style.RESET_ALL
+			else:
+				StyleTable[array][MaxStyles[array][number]][number] = '(#'+str(num)+') '+Styles[num].Name
 		while(len(StyleTable[floor(NumberOfStyleTypes/columnSplit)]) <= 2):
 			StyleTable[floor(NumberOfStyleTypes/columnSplit)].append(['']*(NumberOfStyleTypes-floor(NumberOfStyleTypes/columnSplit)*columnSplit))
 		StyleTable[floor(NumberOfStyleTypes/columnSplit)][1][NumberOfStyleTypes-floor(NumberOfStyleTypes/columnSplit)*columnSplit-1] = '(#'+str(len(Styles))+') Replace All Non-Menu Styles'
@@ -1621,12 +1646,14 @@ while True:
 							codes = open(GamePath+'/GeckoCodes.ini')
 							textlines = codes.readlines()
 							codes.close()
-							for linenum in range(len(textlines)):
-								if(linenum < len(textlines)):
-									if('Style' in textlines[linenum]):
+							linenum = 0
+							while linenum < len(textlines):
+								if('Style' in textlines[linenum]):
+									textlines.pop(linenum)
+									while(len(textlines) > linenum) and (textlines[linenum][0].isnumeric() or textlines[linenum][0].isalpha()):
 										textlines.pop(linenum)
-										while(len(textlines) > linenum) and (textlines[linenum][0].isnumeric() or textlines[linenum][0].isalpha()):
-											textlines.pop(linenum)
+								else:
+									linenum = linenum+1
 							codes = open(GamePath+'/GeckoCodes.ini','w')
 							codes.writelines(textlines)
 							codes.close()
@@ -1801,4 +1828,4 @@ while True:
 		print('\n-----Text Extraction Made Possible By:-----')
 		print('- WiiMMS')
 		input('')
-	else: print('\nNot Available in Lite Mode\n')
+	elif(liteMode): print('\nNot Available in Lite Mode\n')
