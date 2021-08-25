@@ -261,7 +261,7 @@ rseqList = ['3364C','336B8','33744','343F0','343F8','359FC','35A04','35A68','35A
 		'35EB4','35EBC','35F20','35F28','35F8C','35F94','36018','36020','36064','3606C','360D0','360D8','3705C','37064','370E8','370F0','371F4','371FC','37340','37348','376CC','376D4','37738','37740',
 		'3374C','37784','3778C','379D0','379D8','37ABC','37AC4','37B48','37B50','37BB4','37BBC','37C20','37C28','37C8C','37C94','37D18','37D20','37D64','37D6C','37E70','37E78','37EBC','37EC4','37F48','37F50']
 
-regions = ["US","EN","JP"]
+regions = ["US","EN","JP","KR"]
 
 #Functions
 def AddPatch(PatchName,PatchInfo):
@@ -345,14 +345,14 @@ def GetGameId(path):
 	return gameIds[0]
 
 def GetSaveDataPath(path):
-	gameIds = ["00010000/52363445","00010000/52363450","00010000/5236344a"]
+	gameIds = ["00010000/52363445","00010000/52363450","00010000/5236344a","00010000/5236344b"]
 	for i in range(len(regions)):
 		if(os.path.isfile(path+'/files/'+regions[i]+'/Message/message.carc')):
 			return gameIds[i]
 	return gameIds[0]
 
 def GetSongRegionOffset():
-	gameIds = [0,0x200,-0x35F0]
+	gameIds = [0,0x200,-0x35F0,-0x428E8]
 	for i in range(len(regions)):
 		if(os.path.isfile(GamePath+'/files/'+regions[i]+'/Message/message.carc')):
 			return gameIds[i]
@@ -363,6 +363,8 @@ def FindGameFolder():
 	global BrsarPath
 	global MessagePath
 	global WiiDiskFolder
+	global CodePath
+	global SaveDataPath
 	if(not os.path.isdir(GamePath+'/files')):
 		ExceptedFileExtensions = ['.iso','.wbfs']
 		while True:
@@ -375,6 +377,8 @@ def FindGameFolder():
 				SaveSetting('Paths','GamePath',GamePath)
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 				MessagePath = GetMessagePath(GamePath)
+				CodePath = DolphinSaveData+"/GameSettings/"+GetGameId(GamePath)+".ini"
+				SaveDataPath = DolphinSaveData+"/Wii/title/"+GetSaveDataPath(GamePath)+"/data"
 				FindWiiDiskFolder()
 				break
 			elif(os.path.isfile(GamePath)) and (pathlib.Path(GamePath).suffix in ExceptedFileExtensions):
@@ -386,6 +390,8 @@ def FindGameFolder():
 				SaveSetting('Paths','GamePath',GamePath)
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
 				MessagePath = GetMessagePath(GamePath)
+				CodePath = DolphinSaveData+"/GameSettings/"+GetGameId(GamePath)+".ini"
+				SaveDataPath = DolphinSaveData+"/Wii/title/"+GetSaveDataPath(GamePath)+"/data"
 				FindWiiDiskFolder()
 				break
 			else:
