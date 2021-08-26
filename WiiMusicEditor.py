@@ -1,5 +1,4 @@
 import os
-import sys
 import getpass
 import time
 import subprocess
@@ -8,9 +7,7 @@ import pathlib
 import tempfile
 from shutil import copyfile, rmtree, copytree
 from math import floor, ceil
-from typing import ByteString
 import webbrowser
-import hashlib
 import zipfile
 
 #Special Imports
@@ -31,23 +28,18 @@ init(convert=True)
 time.sleep(0.05)
 
 class SongClass:
-	def __init__(self,SongType,Name,SongOffset,ScoreOffset,SongLength,ScoreLength,MemOffset,SongId,ScoreId,MemOrder):
+	def __init__(self,SongType,Name,MemOffset,MemOrder):
 		self.SongType = SongType
 		self.Name = Name
-		self.SongOffset = SongOffset
-		self.ScoreOffset = ScoreOffset
-		self.SongLength = SongLength
-		self.ScoreLength = ScoreLength
 		self.MemOffset = MemOffset
-		self.SongId = SongId
-		self.ScoreId = ScoreId
 		self.MemOrder = MemOrder
 
 class StyleClass:
-	def __init__(self,StyleType,Name,MemOffset):
+	def __init__(self,StyleType,Name,MemOffset,StyleId):
 		self.StyleType = StyleType
 		self.Name = Name
 		self.MemOffset = MemOffset
+		self.StyleId = StyleId
 
 class InstrumentClass:
 	def __init__(self,Name,Number,InMenu):
@@ -58,6 +50,8 @@ class InstrumentClass:
 class SongTypeValue:
 	Regular = 0
 	Menu = 1
+	Maestro = 2
+	Handbell = 3
 
 class StyleTypeValue:
 	Global = 0
@@ -68,116 +62,126 @@ class StyleTypeValue:
 NumberOfStyleTypes = 5
 
 Songs = [
-SongClass(SongTypeValue.Regular,'A Little Night Music','60A700','60C660','1F50','1920','025a08a8','0161','0162',6),
-SongClass(SongTypeValue.Regular,'American Patrol','6185A0','61A540','1FA0','1B60','025a0c54','016B','016C',11),
-SongClass(SongTypeValue.Regular,'Animal Crossing','680780','681AE0','1360','D80','025a2780','01B5','01B6',48),
-SongClass(SongTypeValue.Regular,'Animal Crossing K.K. Blues','63DD00','63F240','1540','1C40','025a1758','0189','018A',26),
-SongClass(SongTypeValue.Regular,'Bridal Chorus','5F9500','5FAFE0','1AE0','12A0','025a04fc','0157','0158',1),
-SongClass(SongTypeValue.Regular,'Carmen','5FEBA0','600CE0','2140','2000','025a0674','015B','015C',3),
-SongClass(SongTypeValue.Regular,'Chariots of Fire','656CE0','658640','19C0','1BC0','025a1df4','019B','019C',35),
-SongClass(SongTypeValue.Regular,'Daydream Believer','652180','653600','1480','1100','025a1c7c','0197','0198',33),
-SongClass(SongTypeValue.Regular,'Do-Re-Mi','612AC0','613FC0','1500','E80','025a0adc','0167','0168',9),
-SongClass(SongTypeValue.Regular,'Every Breath You Take','654700','655A80','1380','1260','025a1d38','0199','019A',34),
-SongClass(SongTypeValue.Regular,'F-Zero','682860','684040','17E0','19E0','025a283c','01B7','01B8',49),
-SongClass(SongTypeValue.Regular,'Frere Jacques','635240','636320','10E0','D20','025a1468','0181','0182',22),
-SongClass(SongTypeValue.Regular,'From Santurtzi to Bilbao','640E80','642720','18A0','1AC0','025a1814','018B','018C',27),
-SongClass(SongTypeValue.Regular,'From the New World','627F20','6295E0','16C0','1120','025a1000','0175','0176',16),
-SongClass(SongTypeValue.Regular,'Happy Birthday to You','610AE0','611C40','1160','E80','025a0a20','0165','0166',8),
-SongClass(SongTypeValue.Regular,'Ill Be There','665E60','6675C0','1760','1600','025a21a0','01A5','01A6',40),
-SongClass(SongTypeValue.Regular,'Ive Never Been to Me','672200','673500','1300','1620','025a2490','01AD','01AE',44),
-SongClass(SongTypeValue.Regular,'Jingle Bell Rock','0','0','0','0','025a2318','01A7','01A8',41),
-SongClass(SongTypeValue.Regular,'La Bamba','62A700','62B740','1040','1260','025a10bc','0177','0178',17),
-SongClass(SongTypeValue.Regular,'La Cucaracha','646960','648480','1B20','18A0','025a198c','018F','0190',29),
-SongClass(SongTypeValue.Regular,'Little Hans','63B940','63CD40','1400','FC0','025a169c','0187','0188',25),
-SongClass(SongTypeValue.Regular,'Long Long Ago','62EB60','62FFC0','1460','11E0','025a1234','017B','017C',19),
-SongClass(SongTypeValue.Regular,'Material Girl','6601A0','661900','1760','1880','025a2028','01A1','01A2',38),
-SongClass(SongTypeValue.Regular,'Minuet in G Major','60DF80','60F8A0','1920','1240','025a0964','0163','0164',7),
-SongClass(SongTypeValue.Regular,'My Grandfathers Clock','625440','626B00','16C0','1420','025a0f44','0173','0174',15),
-SongClass(SongTypeValue.Regular,'O-Christmas Tree','639B00','63AAC0','FC0','E80','025a15e0','0185','0186',24),
-SongClass(SongTypeValue.Regular,'Ode To Joy','5F6620','5F7F60','1940','15A0','025a0440','0155','0156',0),
-SongClass(SongTypeValue.Regular,'Oh My Darling Clementine','6227E0','623F20','1740','1520','025a0e88','0171','0172',14),
-SongClass(SongTypeValue.Regular,'Over the Waves','649D20','64B640','1920','1A00','025a1a48','0191','0192',30),
-SongClass(SongTypeValue.Regular,'Please Mr. Postman','65CE20','65EA80','1C60','1720','025a1f6c','019F','01A0',37),
-SongClass(SongTypeValue.Regular,'Sakura Sakura','64D040','64E261','1220','113F','025a1b04','0193','0194',31),
-SongClass(SongTypeValue.Regular,'Scarborough Fair','62C9A0','62DB80','11E0','FE0','025a1178','0179','017A',18),
-SongClass(SongTypeValue.Regular,'September','65A200','65B900','1700','1520','025a1eb0','019D','019E',36),
-SongClass(SongTypeValue.Regular,'Sukiyaki','64F3A0','650E80','1AE0','1300','025a1bc0','0195','0196',32),
-SongClass(SongTypeValue.Regular,'Super Mario Bros','674B20','676C00','20E0','20E0','025a254c','01AF','01B0',45),
-SongClass(SongTypeValue.Regular,'Sur le Pont d Avignon','632F20','6340C0','11A0','1180','025a13ac','017F','0180',21),
-SongClass(SongTypeValue.Regular,'Swan Lake','5FC280','5FD780','1500','1420','025a05b8','0159','015A',2),
-SongClass(SongTypeValue.Regular,'The Blue Danube','6073A0','608B00','17C0','1C00','025a07ec','015F','0160',5),
-SongClass(SongTypeValue.Regular,'The Entertainer','614E40','616CC0','1E80','18E0','025a0b98','0169','016A',10),
-SongClass(SongTypeValue.Regular,'The Flea Waltz','637040','6387C0','1780','1340','025a1524','0183','0184',23),
-SongClass(SongTypeValue.Regular,'The Legend of Zelda','678CE0','67AD80','20A0','25E0','025a2608','01B1','01B2',46),
-SongClass(SongTypeValue.Regular,'The Loco Motion','663180','664900','1780','1560','025a20e4','01A3','01A4',39),
-SongClass(SongTypeValue.Regular,'Troika','6441E0','645840','1660','1120','025a18d0','018D','018E',28),
-SongClass(SongTypeValue.Regular,'Turkey in the Straw','61C0A0','61DB80','1AE0','1AA0','025a0d10','016D','016E',12),
-SongClass(SongTypeValue.Regular,'Twinkle Twinkle Little Star','6311A0','632260','10C0','C00','025a12f0','017D','017E',20),
-SongClass(SongTypeValue.Regular,'Wake Me Up Before You Go-Go','66C1E0','66DEA0','1CC0','18E0','025a23d4','01A9','01AA',42),
-SongClass(SongTypeValue.Regular,'Wii Music','602CE0','605520','2840','1E80','025a0730','015D','015E',4),
-SongClass(SongTypeValue.Regular,'Wii Sports','67D360','67EE40','1AE0','1940','025a26c4','01B3','01B4',47),
-SongClass(SongTypeValue.Regular,'Woman','66F780','670FC0','1840','1240','025a23d4','01AB','01AC',43),
-SongClass(SongTypeValue.Regular,'Yankee Doodle','61F620','620F60','1940','1880','025a0dcc','016F','0170',13)]
-#SongClass(SongTypeValue.Menu,'Menu Song','19AF7A0',['19ABD00','19B1A00','19B4360','19B69A0','19B9360','19BBF20'],'2260',['3AA0','2960','2640','29C0','2BC0','29A0'],['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1,-1,-1)]
+SongClass(SongTypeValue.Regular,'A Little Night Music','025a08a8',6),
+SongClass(SongTypeValue.Regular,'American Patrol','025a0c54',11),
+SongClass(SongTypeValue.Regular,'Animal Crossing','025a2780',48),
+SongClass(SongTypeValue.Regular,'Animal Crossing K.K. Blues','025a1758',26),
+SongClass(SongTypeValue.Regular,'Bridal Chorus','025a04fc',1),
+SongClass(SongTypeValue.Regular,'Carmen','025a0674',3),
+SongClass(SongTypeValue.Regular,'Chariots of Fire','025a1df4',35),
+SongClass(SongTypeValue.Regular,'Daydream Believer','025a1c7c',33),
+SongClass(SongTypeValue.Regular,'Do-Re-Mi','025a0adc',9),
+SongClass(SongTypeValue.Regular,'Every Breath You Take','025a1d38',34),
+SongClass(SongTypeValue.Regular,'F-Zero','025a283c',49),
+SongClass(SongTypeValue.Regular,'Frere Jacques','025a1468',22),
+SongClass(SongTypeValue.Regular,'From Santurtzi to Bilbao','025a1814',27),
+SongClass(SongTypeValue.Regular,'From the New World','025a1000',16),
+SongClass(SongTypeValue.Regular,'Happy Birthday to You','025a0a20',8),
+SongClass(SongTypeValue.Regular,'Ill Be There','025a21a0',40),
+SongClass(SongTypeValue.Regular,'Ive Never Been to Me','025a2490',44),
+SongClass(SongTypeValue.Regular,'Jingle Bell Rock','025a2318',41),
+SongClass(SongTypeValue.Regular,'La Bamba','025a10bc',17),
+SongClass(SongTypeValue.Regular,'La Cucaracha','025a198c',29),
+SongClass(SongTypeValue.Regular,'Little Hans','025a169c',25),
+SongClass(SongTypeValue.Regular,'Long Long Ago','025a1234',19),
+SongClass(SongTypeValue.Regular,'Material Girl','025a2028',38),
+SongClass(SongTypeValue.Regular,'Minuet in G Major','025a0964',7),
+SongClass(SongTypeValue.Regular,'My Grandfathers Clock','025a0f44',15),
+SongClass(SongTypeValue.Regular,'O-Christmas Tree','025a15e0',24),
+SongClass(SongTypeValue.Regular,'Ode To Joy','025a0440',0),
+SongClass(SongTypeValue.Regular,'Oh My Darling Clementine','025a0e88',14),
+SongClass(SongTypeValue.Regular,'Over the Waves','025a1a48',30),
+SongClass(SongTypeValue.Regular,'Please Mr. Postman','025a1f6c',37),
+SongClass(SongTypeValue.Regular,'Sakura Sakura','025a1b04',31),
+SongClass(SongTypeValue.Regular,'Scarborough Fair','025a1178',18),
+SongClass(SongTypeValue.Regular,'September','025a1eb0',36),
+SongClass(SongTypeValue.Regular,'Sukiyaki','025a1bc0',32),
+SongClass(SongTypeValue.Regular,'Super Mario Bros','025a254c',45),
+SongClass(SongTypeValue.Regular,'Sur le Pont d Avignon','025a13ac',21),
+SongClass(SongTypeValue.Regular,'Swan Lake','025a05b8',2),
+SongClass(SongTypeValue.Regular,'The Blue Danube','025a07ec',5),
+SongClass(SongTypeValue.Regular,'The Entertainer','025a0b98',10),
+SongClass(SongTypeValue.Regular,'The Flea Waltz','025a1524',23),
+SongClass(SongTypeValue.Regular,'The Legend of Zelda','025a2608',46),
+SongClass(SongTypeValue.Regular,'The Loco Motion','025a20e4',39),
+SongClass(SongTypeValue.Regular,'Troika','025a18d0',28),
+SongClass(SongTypeValue.Regular,'Turkey in the Straw','025a0d10',12),
+SongClass(SongTypeValue.Regular,'Twinkle Twinkle Little Star','025a12f0',20),
+SongClass(SongTypeValue.Regular,'Wake Me Up Before You Go-Go','025a23d4',42),
+SongClass(SongTypeValue.Regular,'Wii Music','025a0730',4),
+SongClass(SongTypeValue.Regular,'Wii Sports','025a26c4',47),
+SongClass(SongTypeValue.Regular,'Woman','025a23d4',43),
+SongClass(SongTypeValue.Regular,'Yankee Doodle','025a0dcc',13),
+SongClass(SongTypeValue.Maestro,'Twinkle Twinkle Little Star (Mii Maestro)','025a3e1c',2),
+SongClass(SongTypeValue.Maestro,'Carmen (Mii Maestro)','025a3d80',0),
+SongClass(SongTypeValue.Maestro,'The Four Seaons - Spring (Mii Maestro)','025a3f54',4),
+SongClass(SongTypeValue.Maestro,'Ode To Joy (Mii Maestro)','025a3ff0',3),
+SongClass(SongTypeValue.Maestro,'The Legend of Zelda (Mii Maestro)','025a3eb8',1),
+SongClass(SongTypeValue.Handbell,'O Christmas Tree (Handbell Harmony)','02566D5A',0),
+SongClass(SongTypeValue.Handbell,'Hum, Hum, Hum (Handbell Harmony)','02566E0A',2),
+SongClass(SongTypeValue.Handbell,'My Grandfather\'s Clock (Handbell Harmony)','02566E62',3),
+SongClass(SongTypeValue.Handbell,'Do-Re-Mi (Handbell Harmony)','02566DB2',1),
+SongClass(SongTypeValue.Handbell,'Sukiyaki (Handbell Harmony)','02566EBA',4),
+SongClass(SongTypeValue.Menu,'Menu Song',['0259ACB0','0259ACD4','0259ACF8','0259AD1C','0259AD40'],-1)]
 
 Styles = [
-StyleClass(StyleTypeValue.Global,'Jazz','0659A65C'),
-StyleClass(StyleTypeValue.Global,'Rock','0659A680'),
-StyleClass(StyleTypeValue.Global,'Latin','0659A6A4'),
-StyleClass(StyleTypeValue.Global,'March','0659A6C8'),
-StyleClass(StyleTypeValue.Global,'Electronic','0659A6EC'),
-StyleClass(StyleTypeValue.Global,'Pop','0659A710'),
-StyleClass(StyleTypeValue.Global,'Japanese','0659A724'),
-StyleClass(StyleTypeValue.Global,'Tango','0659A758'),
-StyleClass(StyleTypeValue.Global,'Classical','0659A77C'),
-StyleClass(StyleTypeValue.Global,'Hawaiian','0659A7A0'),
-StyleClass(StyleTypeValue.Global,'Reggae','0659A7C4'),
-StyleClass(StyleTypeValue.SongSpecific,'A Little Night Music','0659AB00'),
-StyleClass(StyleTypeValue.SongSpecific,'Animal Crossing','0659AA28'),
-StyleClass(StyleTypeValue.SongSpecific,'Animal Crossing K.K. Blues','0659AB48'),
-StyleClass(StyleTypeValue.SongSpecific,'Carmen','0659A878'),
-StyleClass(StyleTypeValue.SongSpecific,'Chariots of Fire','0659A908'),
-StyleClass(StyleTypeValue.SongSpecific,'Every Breath You Take','0659A8E4'),
-StyleClass(StyleTypeValue.SongSpecific,'From Santurtzi to Bilbao','0659AADC'),
-StyleClass(StyleTypeValue.SongSpecific,'Happy Birthday to You','0659AA94'),
-StyleClass(StyleTypeValue.SongSpecific,'I\'ll Be There','0659A974'),
-StyleClass(StyleTypeValue.SongSpecific,'I\'ve Never Been to Me','0659A9BC'),
-StyleClass(StyleTypeValue.SongSpecific,'La Cucaracha','0659AAB8'),
-StyleClass(StyleTypeValue.SongSpecific,'Material Girl','0659A950'),
-StyleClass(StyleTypeValue.SongSpecific,'Minuet in G Major','0659AA4C'),
-StyleClass(StyleTypeValue.SongSpecific,'O-Christmas Tree','0659A89C'),
-StyleClass(StyleTypeValue.SongSpecific,'Oh My Darling Clementine','0659A830'),
-StyleClass(StyleTypeValue.SongSpecific,'Over The Waves','0659A8C0'),
-StyleClass(StyleTypeValue.SongSpecific,'Scarborough Fair','0659A854'),
-StyleClass(StyleTypeValue.SongSpecific,'September','0659A92C'),
-StyleClass(StyleTypeValue.SongSpecific,'Super Mario Bros','0659AC8C'),
-StyleClass(StyleTypeValue.SongSpecific,'The Blue Danube','0659AB24'),
-StyleClass(StyleTypeValue.SongSpecific,'The Entertainer','0659AA70'),
-StyleClass(StyleTypeValue.SongSpecific,'The Legend of Zelda','0659A9E0'),
-StyleClass(StyleTypeValue.SongSpecific,'Twinkle Twinkle Little Star','0659A7E8'),
-StyleClass(StyleTypeValue.SongSpecific,'Wii Sports','0659AA04'),
-StyleClass(StyleTypeValue.SongSpecific,'Wii Music','0659AB6C'),
-StyleClass(StyleTypeValue.SongSpecific,'Woman','0659A998'),
-StyleClass(StyleTypeValue.SongSpecific,'Yankee Doodle','0659A80C'),
-StyleClass(StyleTypeValue.QuickJam,'A Capella','0659AC20'),
-StyleClass(StyleTypeValue.QuickJam,'Acoustic','0659AB93'),
-StyleClass(StyleTypeValue.QuickJam,'African Electronic','0659AB93'),
-StyleClass(StyleTypeValue.QuickJam,'Animals!','0659AC68'),
-StyleClass(StyleTypeValue.QuickJam,'Calypso','0659AC44'),
-StyleClass(StyleTypeValue.QuickJam,'Exotic','0659ABFC'),
-StyleClass(StyleTypeValue.QuickJam,'Flamenco','0659AB90'),
-StyleClass(StyleTypeValue.QuickJam,'Galactic','0659ADD0'),
-StyleClass(StyleTypeValue.QuickJam,'Handbell','0659AB93'),
-StyleClass(StyleTypeValue.QuickJam,'Karate','0659ABB4'),
-StyleClass(StyleTypeValue.QuickJam,'Orchestral','0659AD64'),
-StyleClass(StyleTypeValue.QuickJam,'Parade','0659ABD8'),
-StyleClass(StyleTypeValue.QuickJam,'Rapper','0659ADF4'),
-StyleClass(StyleTypeValue.QuickJam,'Samba','0659AE18'),
-StyleClass(StyleTypeValue.Menu,'Menu Style Main','0659ACB0'),
-StyleClass(StyleTypeValue.Menu,'Menu Style Electronic','0659ACD4'),
-StyleClass(StyleTypeValue.Menu,'Menu Style Japanese','0659ACF8'),
-StyleClass(StyleTypeValue.Menu,'Menu Style March','0659AD1C'),
-StyleClass(StyleTypeValue.Menu,'Menu Style A Capella','0659AD40')]
+StyleClass(StyleTypeValue.Global,'Jazz','0659A65C','00'),
+StyleClass(StyleTypeValue.Global,'Rock','0659A680','01'),
+StyleClass(StyleTypeValue.Global,'Latin','0659A6A4','02'),
+StyleClass(StyleTypeValue.Global,'March','0659A6C8','03'),
+StyleClass(StyleTypeValue.Global,'Electronic','0659A6EC','04'),
+StyleClass(StyleTypeValue.Global,'Pop','0659A710','05'),
+StyleClass(StyleTypeValue.Global,'Japanese','0659A724','06'),
+StyleClass(StyleTypeValue.Global,'Tango','0659A758','07'),
+StyleClass(StyleTypeValue.Global,'Classical','0659A77C','08'),
+StyleClass(StyleTypeValue.Global,'Hawaiian','0659A7A0','09'),
+StyleClass(StyleTypeValue.Global,'Reggae','0659A7C4','0A'),
+StyleClass(StyleTypeValue.SongSpecific,'A Little Night Music','0659AB00','21'),
+StyleClass(StyleTypeValue.SongSpecific,'Animal Crossing','0659AA28','1B'),
+StyleClass(StyleTypeValue.SongSpecific,'Animal Crossing K.K. Blues','0659AB48','23'),
+StyleClass(StyleTypeValue.SongSpecific,'Carmen','0659A878','0F'),
+StyleClass(StyleTypeValue.SongSpecific,'Chariots of Fire','0659A908','13'),
+StyleClass(StyleTypeValue.SongSpecific,'Every Breath You Take','0659A8E4','12'),
+StyleClass(StyleTypeValue.SongSpecific,'From Santurtzi to Bilbao','0659AADC','20'),
+StyleClass(StyleTypeValue.SongSpecific,'Happy Birthday to You','0659AA94','1E'),
+StyleClass(StyleTypeValue.SongSpecific,'I\'ll Be There','0659A974','16'),
+StyleClass(StyleTypeValue.SongSpecific,'I\'ve Never Been to Me','0659A9BC','18'),
+StyleClass(StyleTypeValue.SongSpecific,'La Cucaracha','0659AAB8','1F'),
+StyleClass(StyleTypeValue.SongSpecific,'Material Girl','0659A950','15'),
+StyleClass(StyleTypeValue.SongSpecific,'Minuet in G Major','0659AA4C','1C'),
+StyleClass(StyleTypeValue.SongSpecific,'O-Christmas Tree','0659A89C','10'),
+StyleClass(StyleTypeValue.SongSpecific,'Oh My Darling Clementine','0659A830','0D'),
+StyleClass(StyleTypeValue.SongSpecific,'Over The Waves','0659A8C0','11'),
+StyleClass(StyleTypeValue.SongSpecific,'Scarborough Fair','0659A854','0E'),
+StyleClass(StyleTypeValue.SongSpecific,'September','0659A92C','14'),
+StyleClass(StyleTypeValue.SongSpecific,'Super Mario Bros','0659AC8C','2C'),
+StyleClass(StyleTypeValue.SongSpecific,'The Blue Danube','0659AB24','22'),
+StyleClass(StyleTypeValue.SongSpecific,'The Entertainer','0659AA70','1D'),
+StyleClass(StyleTypeValue.SongSpecific,'The Legend of Zelda','0659A9E0','19'),
+StyleClass(StyleTypeValue.SongSpecific,'Twinkle Twinkle Little Star','0659A7E8','0B'),
+StyleClass(StyleTypeValue.SongSpecific,'Wii Sports','0659AA04','1A'),
+StyleClass(StyleTypeValue.SongSpecific,'Wii Music','0659AB6C','24'),
+StyleClass(StyleTypeValue.SongSpecific,'Woman','0659A998','17'),
+StyleClass(StyleTypeValue.SongSpecific,'Yankee Doodle','0659A80C','0C'),
+StyleClass(StyleTypeValue.QuickJam,'A Capella','0659AC20','29'),
+StyleClass(StyleTypeValue.QuickJam,'Acoustic','0659AB93','38'),
+StyleClass(StyleTypeValue.QuickJam,'African Electronic','0659AB93','3C'),
+StyleClass(StyleTypeValue.QuickJam,'Animals!','0659AC68','2B'),
+StyleClass(StyleTypeValue.QuickJam,'Calypso','0659AC44','2A'),
+StyleClass(StyleTypeValue.QuickJam,'Exotic','0659ABFC','28'),
+StyleClass(StyleTypeValue.QuickJam,'Flamenco','0659AB90','25'),
+StyleClass(StyleTypeValue.QuickJam,'Galactic','0659ADD0','35'),
+StyleClass(StyleTypeValue.QuickJam,'Handbell','0659AB93','43'),
+StyleClass(StyleTypeValue.QuickJam,'Karate','0659ABB4','26'),
+StyleClass(StyleTypeValue.QuickJam,'Orchestral','0659AD64','32'),
+StyleClass(StyleTypeValue.QuickJam,'Parade','0659ABD8','27'),
+StyleClass(StyleTypeValue.QuickJam,'Rap','0659ADF4','36'),
+StyleClass(StyleTypeValue.QuickJam,'Samba','0659AE18','37'),
+StyleClass(StyleTypeValue.Menu,'Menu Style Main','0659ACB0','2D'),
+StyleClass(StyleTypeValue.Menu,'Menu Style Electronic','0659ACD4','2E'),
+StyleClass(StyleTypeValue.Menu,'Menu Style Japanese','0659ACF8','2F'),
+StyleClass(StyleTypeValue.Menu,'Menu Style March','0659AD1C','30'),
+StyleClass(StyleTypeValue.Menu,'Menu Style A Capella','0659AD40','31')]
 
 Instruments = [
 InstrumentClass('Piano',0,True),
@@ -253,6 +257,12 @@ MainDolOffset = '59C56E'
 
 GctValues = ['00D0C0DE00D0C0DE','F000000000000000']
 
+rseqList = ['3364C','336B8','33744','343F0','343F8','359FC','35A04','35A68','35A70','35AD4','35ADC','35B40','35B48','35BCC','35BD4','35C38','35C40','35CA4','35CAC','35D30','35D38','35DBC','35DC4','35E28','35E30',
+		'35EB4','35EBC','35F20','35F28','35F8C','35F94','36018','36020','36064','3606C','360D0','360D8','3705C','37064','370E8','370F0','371F4','371FC','37340','37348','376CC','376D4','37738','37740',
+		'3374C','37784','3778C','379D0','379D8','37ABC','37AC4','37B48','37B50','37BB4','37BBC','37C20','37C28','37C8C','37C94','37D18','37D20','37D64','37D6C','37E70','37E78','37EBC','37EC4','37F48','37F50']
+
+regions = ["US","EN","JP","KR"]
+
 #Functions
 def AddPatch(PatchName,PatchInfo):
 	global GamePath
@@ -318,11 +328,43 @@ def AddPatch(PatchName,PatchInfo):
 		if(os.path.isfile(CodePath)): os.remove(CodePath)
 		copyfile(codePathInGamePath,CodePath)
 
+def GetMessagePath(path):
+	return path+'/files/'+GetRegion(path)+'/Message/message.carc'
+
+def GetRegion(path):
+	for i in range(len(regions)):
+		if(os.path.isfile(path+'/files/'+regions[i]+'/Message/message.carc')):
+			return regions[i]
+	return regions[0]
+
+def GetGameId(path):
+	gameIds = ["R64E01","R64P01","R64J01","R64K01"]
+	for i in range(len(regions)):
+		if(os.path.isfile(path+'/files/'+regions[i]+'/Message/message.carc')):
+			return gameIds[i]
+	return gameIds[0]
+
+def GetSaveDataPath(path):
+	gameIds = ["00010000/52363445","00010000/52363450","00010000/5236344a","00010000/5236344b"]
+	for i in range(len(regions)):
+		if(os.path.isfile(path+'/files/'+regions[i]+'/Message/message.carc')):
+			return gameIds[i]
+	return gameIds[0]
+
+def GetSongRegionOffset():
+	gameIds = [0,0x200,-0x35F0,-0x428E8]
+	for i in range(len(regions)):
+		if(os.path.isfile(GamePath+'/files/'+regions[i]+'/Message/message.carc')):
+			return gameIds[i]
+	return gameIds[0]
+
 def FindGameFolder():
 	global GamePath
 	global BrsarPath
 	global MessagePath
 	global WiiDiskFolder
+	global CodePath
+	global SaveDataPath
 	if(not os.path.isdir(GamePath+'/files')):
 		ExceptedFileExtensions = ['.iso','.wbfs']
 		while True:
@@ -334,15 +376,22 @@ def FindGameFolder():
 					GamePath = os.path.dirname(GamePath+'/files').replace('\\','/')
 				SaveSetting('Paths','GamePath',GamePath)
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
-				MessagePath = GamePath+'/files/US/Message/message.carc'
+				MessagePath = GetMessagePath(GamePath)
+				CodePath = DolphinSaveData+"/GameSettings/"+GetGameId(GamePath)+".ini"
+				SaveDataPath = DolphinSaveData+"/Wii/title/"+GetSaveDataPath(GamePath)+"/data"
 				FindWiiDiskFolder()
 				break
 			elif(os.path.isfile(GamePath)) and (pathlib.Path(GamePath).suffix in ExceptedFileExtensions):
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp --fst \"'+GamePath+'\" \"'+os.path.dirname(GamePath)+"/"+os.path.splitext(os.path.basename(GamePath))[0]+'\"')
-				GamePath = os.path.dirname(GamePath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(GamePath))[0]+'/DATA'
+				if(os.path.isdir(os.path.dirname(GamePath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(GamePath))[0]+'/DATA')):
+					GamePath = os.path.dirname(GamePath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(GamePath))[0]+'/DATA'
+				else:
+					GamePath = os.path.dirname(GamePath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(GamePath))[0]
 				SaveSetting('Paths','GamePath',GamePath)
 				BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
-				MessagePath = GamePath+'/files/US/Message/message.carc'
+				MessagePath = GetMessagePath(GamePath)
+				CodePath = DolphinSaveData+"/GameSettings/"+GetGameId(GamePath)+".ini"
+				SaveDataPath = DolphinSaveData+"/Wii/title/"+GetSaveDataPath(GamePath)+"/data"
 				FindWiiDiskFolder()
 				break
 			else:
@@ -383,8 +432,9 @@ def FindDolphin():
 				DolphinSaveData = DolphinPath[0:len(DolphinPath)-11:1]+'User'
 				if(not os.path.isdir(DolphinSaveData)): os.mkdir(DolphinSaveData)
 				if(not os.path.isdir(DolphinSaveData+'/Wii')): os.mkdir(DolphinSaveData+'/Wii')
-				CodePath = DolphinSaveData+"/GameSettings/R64E01.ini"
-				SaveDataPath = DolphinSaveData+"/Wii/title/00010000/52363445/data"
+				CodePath = DolphinSaveData+"/GameSettings/"+GetGameId(GamePath)+".ini"
+				
+				SaveDataPath = DolphinSaveData+"/Wii/title/"+GetSaveDataPath(GamePath)+"/data"
 				SaveSetting('Paths','DolphinSaveData',DolphinSaveData)
 
 def FindDolphinSave():
@@ -396,8 +446,8 @@ def FindDolphinSave():
 			DolphinSaveData = input("\nDrag Dolphin Config Directory to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isdir(DolphinSaveData+'/Wii')):
 				DolphinSaveData = DolphinSaveData.replace('\\','/')
-				CodePath = DolphinSaveData+"/GameSettings/R64E01.ini"
-				SaveDataPath = DolphinSaveData+"/Wii/title/00010000/52363445/data"
+				CodePath = DolphinSaveData+"/GameSettings/"+GetGameId(GamePath)+".ini"
+				SaveDataPath = DolphinSaveData+"/Wii/title/"+GetSaveDataPath(GamePath)+"/data"
 				SaveSetting('Paths','DolphinSaveData',DolphinSaveData)
 				break
 			else:
@@ -405,23 +455,64 @@ def FindDolphinSave():
 
 def ChangeName(SongToChange,newText):
 	global ProgramPath
-	TextOffset = ['c8','190','12c']
+	if(type(newText) != str):
+		if(Songs[SongToChange].SongType == SongTypeValue.Regular):
+			TextOffset = ['c8','190','12c']
+		elif(Songs[SongToChange].SongType == SongTypeValue.Maestro):
+			TextOffset = ['fa','1c2','15e']
+		elif(Songs[SongToChange].SongType == SongTypeValue.Handbell):
+			TextOffset = ['ff','1c7','163']
+	else: TextOffset = ['b200']
 	subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
 	for typeNum in range(3):
 		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
 		textlines = message.readlines()
 		message.close()
-		offset = format(int(TextOffset[typeNum],16)+Songs[SongToChange].MemOrder,'x').lower()
-		offset = ' ' * (4-len(offset))+offset+'00 @'
+		if(type(newText) != str):
+			numberToChange = Songs[SongToChange].MemOrder
+			if(Songs[SongToChange].SongType == SongTypeValue.Maestro):
+				array = [0,4,2,3,1]
+				numberToChange = array[numberToChange]
+			elif(Songs[SongToChange].SongType == SongTypeValue.Handbell):
+				array = [0,2,3,1,4]
+				numberToChange = array[numberToChange]
+		else:
+			array = [3,1,4,2,7,10,11,9,8,6,5]
+			numberToChange = array[SongToChange]
+
+		offset = format(int(TextOffset[typeNum],16)+numberToChange,'x').lower()
+		if(type(newText) != str):
+			offset = ' ' * (4-len(offset))+offset+'00 @'
+		else:
+			offset = ' ' * (4-len(offset))+offset+' @'
+		for num in range(len(textlines)):
+			if(textlines[num] == b'  b200 @015f /\r\n'):
+				textlines[num] = b'  b200 @015f [/,4b] = Default\r\n'
+				textlines[num+1] = b'  b201 @0160 [/,4b] = Rock\r\n'
+				textlines[num+2] = b'  b202 @0161 [/,4b] = March\r\n'
+				textlines[num+3] = b'  b203 @0162 [/,4b] = Jazz\r\n'
+				textlines[num+4] = b'  b204 @0163 [/,4b] = Latin\r\n'
+				textlines[num+5] = b'  b205 @0164 [/,4b] = Reggae\r\n'
+				textlines[num+6] = b'  b206 @0165 [/,4b] = Hawaiian\r\n'
+				textlines[num+7] = b'  b207 @0166 [/,4b] = Electronic\r\n'
+				textlines[num+8] = b'  b208 @0167 [/,4b] = Classical\r\n'
+				textlines[num+9] = b'  b209 @0168 [/,4b] = Tango\r\n'
+				textlines[num+10] = b'  b20a @0169 [/,4b] = Pop\r\n'
+				textlines[num+11] = b'  b20b @016a [/,4b] = Japanese\r\n'
+				break
 		for num in range(len(textlines)):
 			if offset in str(textlines[num]):
 				while bytes('@','utf-8') not in textlines[num+1]:
 					textlines.pop(num+1)
-				textlines[num] = bytes(offset+str(textlines[num])[10:24:1]+newText[typeNum]+'\r\n','utf-8')
+				if(type(newText) == str):
+					textlines[num] = bytes(offset+str(textlines[num])[10:24:1]+newText+'\r\n','utf-8')
+				else:
+					textlines[num] = bytes(offset+str(textlines[num])[10:24:1]+newText[typeNum]+'\r\n','utf-8')
 				break
 		message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','wb')
 		message.writelines(textlines)
 		message.close()
+		if(type(newText) == str): break
 	subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 
 def MessageFolder():
@@ -571,7 +662,7 @@ def CreateGct():
 		if(text[0].isalpha() or text[0].isnumeric()):
 			codes = codes + text.replace(' ','').strip()
 	codes = codes+GctValues[1]
-	patch = open(ProgramPath+'/R64E01.gct','wb')
+	patch = open(ProgramPath+'/'+GetGameId(GamePath)+'.gct','wb')
 	patch.write(bytes.fromhex(codes))
 	patch.close()
 
@@ -588,52 +679,18 @@ def LoadNormalFiles():
 				TempPath = os.path.dirname(TempPath+'/DATA/files').replace('\\','/')
 			else:
 				TempPath = os.path.dirname(TempPath+'/files').replace('\\','/')
-			if(CheckFiles(TempPath)):
-				CopyUnalteredFiles(TempPath)
-				break
-			else:
-				if(TempPath != GamePath): print("Not an Unaltered Wii Music Directory")
-				
+			CopyUnalteredFiles(TempPath)
+			break	
 		elif(os.path.isfile(TempPath)) and (pathlib.Path(TempPath).suffix in ExceptedFileExtensions):
 			if(os.path.isdir(ProgramPath+"/Disk")): rmtree(ProgramPath+"/Disk")
 			subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp --fst \"'+TempPath+'\" \"'+ProgramPath+'/Disk/\"')
 			TempPath = ProgramPath+'/Disk/DATA'
-			if(CheckFiles(TempPath)):
-				CopyUnalteredFiles(TempPath)
-				allowBreak = True
-			else:
-				if(TempPath != GamePath):
-					print("Not an Unaltered Wii Music Directory")
-				allowBreak = False
+			CopyUnalteredFiles(TempPath)
 			rmtree(ProgramPath+"/Disk")
-			if(allowBreak): break
+			break
 		else:
 			if(TempPath != GamePath): print("\nERROR: Unable to Locate Valid Wii Music Directory")
 		TempPath = ""
-
-def CheckFiles(directory):
-	global brsarChecksum
-	global messageChecksum
-	global mainDolChecksum
-	md5_hash = hashlib.md5()
-	a_file = open(directory+'/files/Sound/MusicStatic/rp_Music_sound.brsar', "rb")
-	content = a_file.read()
-	a_file.close()
-	md5_hash.update(content)
-	currentBrsarChecksum = md5_hash.hexdigest()
-	md5_hash = hashlib.md5()
-	a_file = open(directory+'/files/US/Message/message.carc', "rb")
-	content = a_file.read()
-	a_file.close()
-	md5_hash.update(content)
-	currentMessageChecksum = md5_hash.hexdigest()
-	md5_hash = hashlib.md5()
-	a_file = open(directory+'/sys/main.dol', "rb")
-	content = a_file.read()
-	a_file.close()
-	md5_hash.update(content)
-	currentMainDolChecksum = md5_hash.hexdigest()
-	return (currentBrsarChecksum == brsarChecksum) and (currentMessageChecksum == messageChecksum) and (currentMainDolChecksum == mainDolChecksum)
 
 def CopyUnalteredFiles(dir):
 	global ProgramPath
@@ -641,7 +698,7 @@ def CopyUnalteredFiles(dir):
 	if(not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')):
 		copyfile(dir+'/files/Sound/MusicStatic/rp_Music_sound.brsar',ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')
 	if(not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')):
-		copyfile(dir+'/files/US/Message/message.carc',ProgramPath+'/Helper/Backup/message.carc')
+		copyfile(GetMessagePath(dir),ProgramPath+'/Helper/Backup/message.carc')
 	if(not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol')):
 		copyfile(dir+'/sys/main.dol',ProgramPath+'/Helper/Backup/main.dol')
 
@@ -664,7 +721,7 @@ def LoadNewFile(dir):
 			CopyFileSafe(file,GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar')
 			print('\nImported .brsar')
 		elif(file.endswith('.carc')):
-			CopyFileSafe(file,GamePath+'/files/US/Message/message.carc')
+			CopyFileSafe(file,GetMessagePath(GamePath))
 			print('\nImported .carc')
 		elif(file.endswith('.dol')):
 			CopyFileSafe(file,GamePath+'/sys/main.dol')
@@ -689,31 +746,126 @@ def LoadNewFile(dir):
 			CopyFileSafe(geckoCodeFile,GamePath+'/GeckoCodes.ini')
 			print('\nImported .ini')
 
-def EditBrsarOffset(offset):
-	global sizeDifference
-	global brsar
-	brsar.seek(offset)
-	size = brsar.read(4)
-	brsar.seek(offset)
-	brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
-	brsar.seek(int('5F6620',16)+int.from_bytes(size,"big")+sizeDifference)
+def ReplaceSong(positionOffset,listOffset,replacementArray,infoArray):
+	sizeDifference = 0
+	brsar = open(BrsarPath, "rb")
+	brsar.seek(positionOffset)
+	currentSpot = int.from_bytes(brsar.read(4),'big')
+	if(listOffset != -1):
+		posOffset = []
+		lenOffset = []
+		data = []
+		for num in range(len(replacementArray)-1):
+			brsar.seek(listOffset+24*replacementArray[num])
+			posOffset.append(brsar.read(4))
+			lenOffset.append(brsar.read(4))
+		brsar.seek(0)
+		data.append(brsar.read(currentSpot+int.from_bytes(posOffset[0],'big')))
+		for num in range(len(replacementArray)-2):
+			brsar.seek(currentSpot+int.from_bytes(posOffset[num],'big')+int.from_bytes(lenOffset[num],'big'))
+			data.append(brsar.read(int.from_bytes(posOffset[num+1],'big')-int.from_bytes(posOffset[num],'big')-int.from_bytes(lenOffset[num],'big')))
+		brsar.seek(currentSpot+int.from_bytes(posOffset[len(posOffset)-1],'big')+int.from_bytes(lenOffset[len(lenOffset)-1],'big'))
+		data.append(brsar.read())
+		brsar.close()
+		for num in range(len(replacementArray)-1):	
+			if(num == 0):
+				infoToWrite = data[num]+BrseqInfo[infoArray[num]]
+			else:
+				infoToWrite = infoToWrite+data[num]+BrseqInfo[infoArray[num]]
+		infoToWrite = infoToWrite+data[len(replacementArray)-1]
+		brsar = open(BrsarPath, "wb")
+		brsar.write(infoToWrite)
+		brsar.close()
+		brsar = open(BrsarPath, "r+b")
+		for num in range(replacementArray[0],replacementArray[len(replacementArray)-1]):
+			if(sizeDifference != 0):
+				brsar.seek(listOffset+24*num)
+				size = brsar.read(4)
+				brsar.seek(listOffset+24*num)
+				brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+			if (num in replacementArray):
+				brsar.seek(listOffset+4+24*num)
+				sizeDifference += int(BrseqLength[infoArray[replacementArray.index(num)]],16)-int.from_bytes(brsar.read(4),"big")
+				brsar.seek(listOffset+4+24*num)
+				brsar.write(int(BrseqLength[infoArray[replacementArray.index(num)]],16).to_bytes(4, 'big'))
+		for offset in rseqList:
+			if(int(offset,16) > positionOffset):
+				brsar.seek(int(offset,16))
+				size = brsar.read(4)
+				brsar.seek(int(offset,16))
+				brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+		for offset in [8,positionOffset+4]:
+			brsar.seek(offset)
+			size = brsar.read(4)
+			brsar.seek(offset)
+			brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+	else:
+		data = []
+		brsar.seek(0)
+		data.append(brsar.read(currentSpot))
+		brsar.seek(positionOffset+4)
+		brsar.seek(currentSpot+int.from_bytes(brsar.read(4),'big'))
+		data.append(brsar.read())
+		brsar.close()
+		brsar = open(BrsarPath, "wb")
+		brsar.write(data[0]+BrseqInfo[infoArray]+data[1])
+		brsar.close()
+		brsar = open(BrsarPath, "r+b")
+		brsar.seek(positionOffset+4)
+		sizeDifference = int(BrseqLength[infoArray],16)-int.from_bytes(brsar.read(4),"big")
+		for offset in rseqList:
+			if(int(offset,16) > positionOffset):
+				brsar.seek(int(offset,16))
+				size = brsar.read(4)
+				brsar.seek(int(offset,16))
+				brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+		for offset in [8,positionOffset+4]:
+			brsar.seek(offset)
+			size = brsar.read(4)
+			brsar.seek(offset)
+			brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+	brsar.close()
 
+def ReplaceEverything(startOffset):
+	brsar = open(BrsarPath, "rb")
+	brsar.seek(startOffset)
+	brsar.seek(int.from_bytes(brsar.read(4),'big'))
+	if(brsar.read(4).hex() == '52534551'):
+		brsar.seek(startOffset-20)
+		if(brsar.read(4).hex() != 'ffffffff'):
+			brsar.seek(startOffset+24)
+			number = int.from_bytes(brsar.read(4),'big')
+			listOffset = startOffset+32
+			temp = -1
+			while(temp != bytes(6)):
+				listOffset += 4
+				brsar.seek(listOffset)
+				temp = brsar.read(6)
+			brsar.close()
+			temp = []
+			for num in range(number+1):
+				temp.append(num)
+			print(str(startOffset)+' - Normal')
+			ReplaceSong(startOffset,listOffset,temp,[0]*number)
+		else:
+			print(str(startOffset)+' - Single')
+			brsar.close()
+			ReplaceSong(startOffset,-1,-1,0)
+	else:
+		print(str(startOffset)+' - Skipped')
+		brsar.close()
+	
 #Default Paths
 ProgramPath = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
 GamePath = LoadSetting('Paths','GamePath','None')
 BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
-MessagePath = GamePath+'/files/US/Message/message.carc'
+MessagePath = GetMessagePath(GamePath)
 DolphinSaveData = LoadSetting('Paths','DolphinSaveData',"C:/Users/"+getpass.getuser()+"/Documents/Dolphin Emulator")
-CodePath = DolphinSaveData+"/GameSettings/R64E01.ini"
-SaveDataPath = DolphinSaveData+"/Wii/title/00010000/52363445/data"
+CodePath = DolphinSaveData+"/GameSettings/"+GetGameId(GamePath)+".ini"
+SaveDataPath = DolphinSaveData+"/Wii/title/"+GetSaveDataPath(GamePath)+"/data"
 DolphinPath = LoadSetting('Paths','DolphinPath','None')
 WiiDiskFolder = ''
 FindWiiDiskFolder()
-
-#Checksums
-brsarChecksum = "e1f24f2363ed9accddc5c21d6a4b8149"
-messageChecksum = "dcb17927eaa761648d4a8639973cc13a"
-mainDolChecksum = "b72505b4877a4d55435a597fa2544a77"
 
 #Update
 beta = int(LoadSetting('Updates', 'Branch', '0'))
@@ -730,6 +882,7 @@ DefaultReplacingReplacedSong = LoadSetting('Default Answers', 'Replacing Replace
 DefaultReplaceSongNames = LoadSetting('Default Answers', 'Replace Song Names', 'Ask')
 DefaultUseAutoLengthTempo = LoadSetting('Default Answers', 'Use Auto Length and Tempo', 'Ask')
 DefaultLoadSongScore = LoadSetting('Default Answers', 'Load Song And Score', 'No')
+DefaultImportSeperateBrsar = LoadSetting('Default Answers', 'Seperate Brsar', 'None Selected')
 
 #Unsafe Mode
 unsafeMode = bool(int(LoadSetting('Unsafe Mode','Unsafe Mode','0')))
@@ -773,11 +926,11 @@ while True:
 		print('\nThanks for Downloading the Wii Music Editor!')
 		print('\nLet\'s Setup Some File Paths for You!')
 		FindGameFolder()
-		if(not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol')):
+		if((not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol'))):
 			LoadNormalFiles()
 		if(input('\nWould You Like to Specify a Dolphin Directory? [y/n] ') == 'y'):
 			FindDolphin()
-	elif(not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol')):
+	elif((not os.path.isfile(ProgramPath+'/Helper/Backup/rp_Music_sound.brsar')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/message.carc')) or (not os.path.isfile(ProgramPath+'/Helper/Backup/main.dol'))):
 		LoadNormalFiles()
 
 	#Options
@@ -795,11 +948,45 @@ while True:
 	print("(#11) Credits")
 
 	Selection = MakeSelection(['Please Select an Option',1,11])
+	
 
 	if(Selection == 1): #////////////////////////////////////////Add Custom Song
 		#Load Files
 		FindGameFolder()
 		FindDolphinSave()
+
+		#Applied Custom Songs
+		appliedCustomSongs = []
+		if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+			codes = open(GamePath+'/GeckoCodes.ini')
+			textlines = codes.readlines()
+			codes.close()
+			for text in textlines:
+				if('[WiiMusicEditor]' in text) and ('Style' not in text):
+					appliedCustomSongs.append(text[1:len(text)-29:1])
+
+		#Song List
+		PrintSectionTitle('Song List')
+
+		for num in range(len(Songs)):
+			if(Songs[num].Name in appliedCustomSongs):
+				print(Fore.YELLOW+'(#'+str(num)+') '+str(Songs[num].Name)+' ~[Already Replaced]~'+Style.RESET_ALL)
+			else:
+				print('(#'+str(num)+') '+str(Songs[num].Name))
+			time.sleep(0.005)
+
+		#Song Selection
+		PrintSectionTitle('Song Selection')
+		while True:
+			SongSelected = input("Enter the Song Number you want to Replace: ")
+			if(SongSelected.isnumeric()) and (int(SongSelected) < len(Songs)):
+				SongSelected = int(SongSelected)
+				if(Songs[SongSelected].Name not in appliedCustomSongs) or (DefaultReplacingReplacedSong == 'No') or (input('\nWARNING: You Have Already Replaced this Song Before! Are You Sure You Want to Replace this Song [y/n] ') == 'y'):
+					break
+				else:
+					print('Aborted...\n')
+			else:
+				print("\nERROR: Not a Valid Number\n")
 
 		#Load Brseq
 		ExceptedSongExtensions = ['.midi','.mid','.brseq','.rseq']
@@ -808,7 +995,7 @@ while True:
 		for num in range(2):
 			while True:
 				extraString = ''
-				if(DefaultLoadSongScore == 'Yes'):
+				if(DefaultLoadSongScore == 'Yes') and (Songs[SongSelected].SongType == SongTypeValue.Regular):
 					extraString = ' [SONG]'
 					if(num == 1): extraString = ' [SCORE]'
 				BrseqPath = input("\nDrag File to Batch (MIDIs, BRSEQ, & RSEQ Files only)"+extraString+": ").replace('&', '').replace('\'', '').replace('\"', '').strip()
@@ -843,53 +1030,23 @@ while True:
 				BrseqInfo.append(Brseq.read())
 				Brseq.close()
 				BrseqLength.append(format(os.stat(directory+"/z.brseq").st_size,'x').upper())
-			if(num == 0) and (DefaultLoadSongScore != 'Yes'):
-				BrseqInfo.append(BrseqInfo[0])
-				BrseqLength.append(BrseqLength[0])
-				print('cheese')
-				break
-
-		#Applied Custom Songs
-		appliedCustomSongs = []
-		if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
-			codes = open(GamePath+'/GeckoCodes.ini')
-			textlines = codes.readlines()
-			codes.close()
-			for text in textlines:
-				if('[WiiMusicEditor]' in text) and ('Style' not in text):
-					appliedCustomSongs.append(text[1:len(text)-29:1])
-
-		#Song List
-		LowestSong = -1
-		PrintSectionTitle('Song List')
-
-		for num in range(len(Songs)):
-			if(Songs[num].Name in appliedCustomSongs):
-				print(Fore.YELLOW+'(#'+str(num)+') '+str(Songs[num].Name)+' ~[Already Replaced]~'+Style.RESET_ALL)
-			else:
-				print('(#'+str(num)+') '+str(Songs[num].Name))
-			time.sleep(0.005)
-
-		#Brseq Info
-		PrintSectionTitle("File Info")
-		print("Number of Beats: "+Length)
-		print("Tempo: "+Tempo)
-
-		#Song Selection
-		PrintSectionTitle('Song Selection')
-		while True:
-			SongSelected = input("Enter the Song Number you want to Replace: ")
-			if(SongSelected.isnumeric()) and (int(SongSelected) < len(Songs)):
-				SongSelected = int(SongSelected)
-				if(Songs[SongSelected].Name not in appliedCustomSongs) or (DefaultReplacingReplacedSong == 'No') or (input('\nWARNING: You Have Already Replaced this Song Before! Are You Sure You Want to Replace this Song [y/n] ') == 'y'):
+			if(num == 0):
+				if(Songs[SongSelected].SongType == SongTypeValue.Maestro): break
+				elif(Songs[SongSelected].SongType == SongTypeValue.Handbell): break
+				elif(DefaultLoadSongScore != 'Yes'):
+					BrseqInfo.append(BrseqInfo[0])
+					BrseqLength.append(BrseqLength[0])
 					break
-				else:
-					print('Aborted...\n')
-			else:
-				print("\nERROR: Not a Valid Number\n")
+
+		
 
 		#Length, Tempo, Time Signature Patch
-		if(SongSelected != 50):
+		if(Songs[SongSelected].SongType != SongTypeValue.Menu):
+			#Brseq Info
+			PrintSectionTitle("File Info")
+			print("Number of Beats: "+Length)
+			print("Tempo: "+Tempo)
+
 			PrintSectionTitle("Length, Tempo, Time Signature Patch")
 			AutoFill = 'n'
 			if((Tempo != 'Could Not Locate') or ((Length != '0') and (Length != 'Could Not Locate'))) and (DefaultUseAutoLengthTempo != 'No'):
@@ -925,52 +1082,33 @@ while True:
 				Length = format(int(Length) * int(TimeSignature),'x').upper()
 			
 			#Final Writting
-			LengthCode = '0'+format(int(Songs[SongSelected].MemOffset,16)+6,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
-			TempoCode = '0'+format(int(Songs[SongSelected].MemOffset,16)+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
-			TimeCode = Songs[SongSelected].MemOffset+' 00000'+TimeSignature+'00\n'
+			LengthCode = '0'+format(int(Songs[SongSelected].MemOffset,16)+GetSongRegionOffset()+6,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
+			TempoCode = '0'+format(int(Songs[SongSelected].MemOffset,16)+GetSongRegionOffset()+10,'x').lower()+' '+'0'*(8-len(Tempo))+Tempo+'\n'
+			TimeCode = '0'+format(int(Songs[SongSelected].MemOffset,16)+GetSongRegionOffset(),'x').lower()+' 00000'+TimeSignature+'00\n'
 
 		if(DefaultWantToReplaceSong != 'No') or (input('\nAre You Sure You Want to Override '+Songs[SongSelected].Name+'?\nYou CANNOT restore the song if you don\'t have a backup! [y/n] ') == 'y'):
 			#Brsar Writing
-			brsar = open(BrsarPath, "rb")
-			brsar.seek(int('33A84',16)+24*Songs[SongSelected].MemOrder*2)
-			offset1 = brsar.read(4)
-			offset2 = brsar.read(4)
-			brsar.seek(int('33A84',16)+24*(Songs[SongSelected].MemOrder*2+1))
-			offset3 = brsar.read(4)
-			offset4 = brsar.read(4)
-			brsar.seek(0)
-			data1 = brsar.read(int('5F6620',16)+int.from_bytes(offset1,'big'))
-			brsar.seek(int('5F6620',16)+int.from_bytes(offset1,'big')+int.from_bytes(offset2,'big'))
-			data2 = brsar.read(int.from_bytes(offset3,'big')-int.from_bytes(offset1,'big')-int.from_bytes(offset2,'big'))
-			brsar.seek(int('5F6620',16)+int.from_bytes(offset3,'big')+int.from_bytes(offset4,'big'))
-			data3 = brsar.read()
-			brsar.close()
-			brsar = open(BrsarPath, "wb")
-			brsar.write(data1+BrseqInfo[0]+data2+BrseqInfo[1]+data3)
-			brsar.close()
-			brsar = open(BrsarPath, "r+b")
-			brsar.seek(int('33A88',16)+24*Songs[SongSelected].MemOrder*2)
-			sizeDifference = int(BrseqLength[0],16)-int.from_bytes(brsar.read(4),"big")
-			brsar.seek(int('33A88',16)+24*Songs[SongSelected].MemOrder*2)
-			brsar.write(int(BrseqLength[0],16).to_bytes(4, 'big'))
-			EditBrsarOffset(int('33A84',16)+24*(Songs[SongSelected].MemOrder*2+1))
-			brsar.seek(int('33A88',16)+24*(Songs[SongSelected].MemOrder*2+1))
-			sizeDifference += int(BrseqLength[1],16)-int.from_bytes(brsar.read(4),"big")
-			brsar.seek(int('33A88',16)+24*(Songs[SongSelected].MemOrder*2+1))
-			brsar.write(int(BrseqLength[1],16).to_bytes(4, 'big'))
-			#Resize All Song Offsets
-			for num in range((Songs[SongSelected].MemOrder+1)*2,100):
-				EditBrsarOffset(int('33A84',16)+24*num)
-			for offset in ['8','33748','343F0','359FC','35A68','35AD4','35B40','35BCC','35C38','35CA4','35D30','35DBC','35E28','35EB4','35F20','35F8C','36018','36064','360D0','3705C','370E8','371F4',
-			'37340','376CC','37738','37784','379D0','37ABC','37B48','37BB4','37C20','37C8C','37D18','37D64','37E70','37EBC','37F48','3374C','343F8','35A04','35A70','35ADC','35B48','35BD4','35C40','35CAC',
-			'35D38','35DC4','35E30','35EBC','35F28','35F94','36020','3606C','360D8','37064','370F0','371FC','37348','376D4','37740','3778C','379D8','37AC4','37B50','37BBC','37C28','37C94','37D20',
-			'37D6C','37E78','37EC4','37F50']:
-				EditBrsarOffset(int(offset,16))
-			brsar.close()
-			if(SongSelected != 50): AddPatch(Songs[SongSelected].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
+			if(Songs[SongSelected].SongType == SongTypeValue.Regular):
+				ReplaceSong(0x033744,0x033A84,[Songs[SongSelected].MemOrder*2,Songs[SongSelected].MemOrder*2+1,100],[0,1])
+				if(Songs[SongSelected].Name == 'Do-Re-Mi'):
+					ReplaceSong(0x0343F0,0x034988,[18,19,113,155,156,157,158,159,160,161,162,175],[0,1,0,0,0,0,0,0,0,0,0])
+					ReplaceSong(0x0360D0,0x0364C8,[18,19,113,123],[0,1,0])
+				AddPatch(Songs[SongSelected].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
+			elif(Songs[SongSelected].SongType == SongTypeValue.Menu):
+				ReplaceSong(0x037D64,0x037DBC,[0,1,2,3,4,5,6,7],[0,1,1,1,1,1,1])
+			elif(Songs[SongSelected].SongType == SongTypeValue.Maestro):
+				ReplaceSong(0x0370E8,0x037140,[Songs[SongSelected].MemOrder+2,7],[0])
+				AddPatch(Songs[SongSelected].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
+			elif(Songs[SongSelected].SongType == SongTypeValue.Handbell):
+				ReplaceSong(0x037340,0x037438,[Songs[SongSelected].MemOrder*5+2,Songs[SongSelected].MemOrder*5+3,Songs[SongSelected].MemOrder*5+4,Songs[SongSelected].MemOrder*5+5,Songs[SongSelected].MemOrder*5+6,27],[0,0,0,0,0])
+				LengthCode = '0'+format(int(Songs[SongSelected].MemOffset,16)+GetSongRegionOffset(),'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
+				LengthCode2 = '0'+format(int(Songs[SongSelected].MemOffset,16)+GetSongRegionOffset()+4,'x').lower()+' '+'0'*(8-len(Length))+Length+'\n'
+				MeasureCode = '0'+format(int(Songs[SongSelected].MemOffset,16)+GetSongRegionOffset()+24,'x').lower()+' '+'00000000\n'
+				AddPatch(Songs[SongSelected].Name+' Song Patch',LengthCode+LengthCode2+MeasureCode)
+			AddPatch('Rapper Crash Fix','043B0BBB 881C0090\n043B0BBF 7C090000\n043B0BC3 4081FFBC\n043B0BC7 881C00D6\n')
 			print("\nPatch Complete!")
 			time.sleep(0.5)
-			if(DefaultReplaceSongNames != 'No') and (SongSelected != 50) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
+			if(DefaultReplaceSongNames != 'No') and (Songs[SongSelected].SongType != SongTypeValue.Menu) and ((DefaultReplaceSongNames == 'Yes') or (input('\nWould you like to change the Song Text? [y/n] ') == 'y')):
 				ChangeName(SongSelected,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 				print("\nEditing Successful!\n")
 			else: print('')
@@ -982,18 +1120,32 @@ while True:
 
 		#Song List
 		PrintSectionTitle("Song List")
+		maxNumber = 0
 		for num in range(len(Songs)):
-			print('(#'+str(num)+') '+str(Songs[num].Name))
-			time.sleep(0.005)
+			if(Songs[num].SongType != SongTypeValue.Menu):
+				print('(#'+str(num)+') '+str(Songs[num].Name))
+				time.sleep(0.005)
+				maxNumber += 1
 
 		#Song Selection
 		PrintSectionTitle("Song Selection")
-		Selection = MakeSelection(['\nWhich Song Do You Want To Change The Name Of',0,len(Songs)-1])
+		Selection = MakeSelection(['Which Song Do You Want To Change The Name Of',0,maxNumber-1])
 		
 		ChangeName(Selection,[input('\nWhat\'s the title of your Song: '),input('\nWhat\'s the description of your Song (Use \\n for new lines): '),input('\nWhat\'s the genre of your Song: ')])
 		print("\nEditing Successful!\n")
 	elif(Selection == 3): #////////////////////////////////////////Change Style
+		FindGameFolder()
 		FindDolphinSave()
+
+		#Applied Custom Songs
+		appliedCustomSongs = []
+		if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
+			codes = open(GamePath+'/GeckoCodes.ini')
+			textlines = codes.readlines()
+			codes.close()
+			for text in textlines:
+				if('[WiiMusicEditor]' in text) and (' Style' in text):
+					appliedCustomSongs.append(text[1:len(text)-30:1])
 		MenuStyles = 5
 		columnSplit = 4
 		MaxStyles = []
@@ -1010,7 +1162,10 @@ while True:
 			MaxStyles[array][number] += 1
 			if(MaxStyles[array][number] >= len(StyleTable[array])):
 				StyleTable[array].append(['']*min(columnSplit,NumberOfStyleTypes-array*columnSplit))
-			StyleTable[array][MaxStyles[array][number]][number] = '(#'+str(num)+') '+Styles[num].Name
+			if(Styles[num].Name in appliedCustomSongs):
+				StyleTable[array][MaxStyles[array][number]][number] = Fore.YELLOW+'(#'+str(num)+') '+Styles[num].Name+Style.RESET_ALL
+			else:
+				StyleTable[array][MaxStyles[array][number]][number] = '(#'+str(num)+') '+Styles[num].Name
 		while(len(StyleTable[floor(NumberOfStyleTypes/columnSplit)]) <= 2):
 			StyleTable[floor(NumberOfStyleTypes/columnSplit)].append(['']*(NumberOfStyleTypes-floor(NumberOfStyleTypes/columnSplit)*columnSplit))
 		StyleTable[floor(NumberOfStyleTypes/columnSplit)][1][NumberOfStyleTypes-floor(NumberOfStyleTypes/columnSplit)*columnSplit-1] = '(#'+str(len(Styles))+') Replace All Non-Menu Styles'
@@ -1075,27 +1230,30 @@ while True:
 			PatchInfo = []
 			for num in range(len(Styles)-MenuStyles):
 				PatchName.append(Styles[num].Name+' Style Patch')
-				PatchInfo.append(Styles[num].MemOffset+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+				PatchInfo.append("0"+format(int(Styles[num].MemOffset,16)+GetSongRegionOffset(),'x').lower()+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 			AddPatch(PatchName,PatchInfo)
 		elif(Selection >= len(Styles)-MenuStyles):
 			PatchName = []
 			PatchInfo = []
 			for num in range(len(Styles)-MenuStyles,len(Styles)):
 				PatchName.append(Styles[num].Name+' Style Patch')
-				PatchInfo.append(Styles[num].MemOffset+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+				PatchInfo.append("0"+format(int(Styles[num].MemOffset,16)+GetSongRegionOffset(),'x').lower()+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 			AddPatch(PatchName,PatchInfo)
 		else:
-			AddPatch(Styles[Selection].Name+' Style Patch',Styles[Selection].MemOffset+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
+			AddPatch(Styles[Selection].Name+' Style Patch',"0"+format(int(Styles[Selection].MemOffset,16)+GetSongRegionOffset(),'x').lower()+' 00000018\n'+Melody+' '+Harmony+'\n'+Chord+' '+Bass+'\n'+Perc1+' '+Perc2+'\n')
 
 		print("\nPatch Complete!")
 		time.sleep(0.5)
 		print("")
+		if(Selection < 11) and (input('Would you like to change the style name? [y/n] ') == 'y'):
+			ChangeName(Selection,input('\nType new name: '))
+			print('')
 	elif(Selection == 4): #////////////////////////////////////////Advanced Tools
 		while True:
 			PrintSectionTitle('Advanced Tools')
 			print("(#0) Back to Main Menu")
 			print("(#1) Change All Wii Music Text")
-			print("(#2) Swap Songs")
+			print("(#2) Change Default Styles")
 			print("(#3) Remove Song")
 			print("(#4) Import/Export Files")
 			print("(#5) Extract/Pack Wii Music ROM")
@@ -1110,70 +1268,62 @@ while True:
 				
 				#Run Notepad
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
-				time.sleep(0.5)
+				txt = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
+				textlines = txt.readlines()
+				txt.close()
+				for num in range(len(textlines)):
+					if(textlines[num] == b'  b200 @015f /\r\n'):
+						textlines[num] = b'  b200 @015f [/,4b] = Default\r\n'
+						textlines[num+1] = b'  b201 @0160 [/,4b] = Rock\r\n'
+						textlines[num+2] = b'  b202 @0161 [/,4b] = March\r\n'
+						textlines[num+3] = b'  b203 @0162 [/,4b] = Jazz\r\n'
+						textlines[num+4] = b'  b204 @0163 [/,4b] = Latin\r\n'
+						textlines[num+5] = b'  b205 @0164 [/,4b] = Reggae\r\n'
+						textlines[num+6] = b'  b206 @0165 [/,4b] = Hawaiian\r\n'
+						textlines[num+7] = b'  b207 @0166 [/,4b] = Electronic\r\n'
+						textlines[num+8] = b'  b208 @0167 [/,4b] = Classical\r\n'
+						textlines[num+9] = b'  b209 @0168 [/,4b] = Tango\r\n'
+						textlines[num+10] = b'  b20a @0169 [/,4b] = Pop\r\n'
+						textlines[num+11] = b'  b20b @016a [/,4b] = Japanese\r\n'
+						break
+				txt = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','wb')
+				txt.writelines(textlines)
+				txt.close()
 				print("\nWaiting for Notepad to close...")
 				subprocess.run('notepad \"'+MessageFolder().replace('\"','')+'/message.d/new_music_message.txt\"',capture_output=True)
 				subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
 				print("\nEditing Successful!\n")
-			elif(Selection == 2): #////////////////////////////////////////Swap Songs
-				PrintSectionTitle('Swap Songs')
-				for num in range(len(Songs)-1):
-					print('(#'+str(num)+') '+str(Songs[num].Name))
+			elif(Selection == 2): #////////////////////////////////////////Change Default Style
+				print('')
+				for num in range(50):
+					print('(#'+str(num)+') '+Songs[num].Name)
 					time.sleep(0.005)
-				print('(#'+str(len(Songs)-1)+') All Songs')
-				SongToReplace = MakeSelection(['Choose a Song You Want to Replace',0,len(Songs)-1])
-				Selection = MakeSelection(['What will the song get replaced with',0,len(Songs)-2])
-				patch = open(GamePath+'/GeckoCodes.ini')
-				textlines = patch.readlines()
-				patch.close()
-				codes = [0,0,0]
-						
-				for num in range(len(textlines)):
-					if(Songs[Selection].Name in textlines[num]):
-						if('[WiiMusicEditor]' in textlines[num]):
-							for number in range(3):
-								codes[number] = textlines[num+number+1][8:len(textlines[num+number+1]):1]
-							break
 
-				if(Selection == len(Songs)-1):
-					appliedCustomSongs = []
-					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
-						codes = open(GamePath+'/GeckoCodes.ini')
-						textlines = codes.readlines()
-						codes.close()
-						for text in textlines:
-							if('[WiiMusicEditor]' in text) and ('Style' not in text):
-								appliedCustomSongs.append(text[1:len(text)-29:1])
+				SongSelected = MakeSelection(['Please Select a Song',0,49])
+				print('')
+				for num in range(52):
+					print('(#'+str(num)+') '+Styles[num].Name)
+					time.sleep(0.005)
 
-				dol = open(GamePath+'/sys/main.dol','r+b')
-				patchCode = ""
-				name = ""
-				replaceSongPatch = input('Would you like to copy the song patch? [y/n] ')
-				for num in range(len(Songs)-1):
-					song = num
-					if(SongToReplace != len(Songs)-1): song = SongToReplace
-					if(song != Selection) and ((Selection != len(Songs)-1) or (Songs[song].Name not in appliedCustomSongs)):
-						dol.seek(int(MainDolOffset,16)+int("BC",16)*Songs[song].MemOrder)
-						dol.write(bytes.fromhex(Songs[Selection].SongId+'0000'+Songs[Selection].ScoreId))
-						if(replaceSongPatch == 'y'):
-							LengthCode = '0'+format(int(Songs[song].MemOffset,16)+6,'x').lower()+codes[0]
-							TempoCode = '0'+format(int(Songs[Selection].MemOffset,16)+10,'x').lower()+codes[1]
-							TimeCode = Songs[song].MemOffset+codes[2]
-							AddPatch(Songs[song].Name+' Song Patch',LengthCode+TempoCode+TimeCode)
-					if(SongToReplace != len(Songs)-1): break
-				dol.close()
+				StyleSelected = MakeSelection(['Please Select a Style',0,51])
+
+				AddPatch(Songs[SongSelected].Name+' Default Style Patch','0'+format(int(Songs[SongSelected].MemOffset,16)+GetSongRegionOffset()+42,'x')+' 000000'+Styles[StyleSelected].StyleId+'\n')
+				print('\nPatch Successful')
 			elif(Selection == 3): #////////////////////////////////////////Remove Song
 				FindGameFolder()
 				FindDolphinSave()
 				PrintSectionTitle('Remove Song')
+				maxNumber = 0
 				for num in range(len(Songs)-1):
-					print('(#'+str(num)+') '+str(Songs[num].Name))
-					time.sleep(0.005)
-				print('(#'+str(len(Songs)-1)+') Remove All Non-Custom Songs')
+					if(Songs[num].SongType == SongTypeValue.Regular):
+						print('(#'+str(num)+') '+str(Songs[num].Name))
+						time.sleep(0.005)
+						maxNumber += 1
+				print('(#'+str(maxNumber)+') Remove All Non-Custom Songs')
 				
-				Selection = MakeSelection(['Please Select a Song to Remove',0,len(Songs)-1])
+				Selection = MakeSelection(['Please Select a Song to Remove',0,maxNumber])
 
-				if(Selection == len(Songs)-1):
+				if(Selection == maxNumber):
 					appliedCustomSongs = []
 					if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
 						codes = open(GamePath+'/GeckoCodes.ini')
@@ -1183,13 +1333,15 @@ while True:
 							if('[WiiMusicEditor]' in text) and ('Style' not in text):
 								appliedCustomSongs.append(text[1:len(text)-29:1])
 				
-				for number in range(len(Songs)-2):
-					if(Selection != len(Songs)-1):
+				for number in range(maxNumber-1):
+					if(Selection != maxNumber):
 						number = Selection
 					
-					if((Selection != len(Songs)-1) or (Songs[number].Name not in appliedCustomSongs)):
+					if((Selection != maxNumber) or (Songs[number].Name not in appliedCustomSongs)):
 						#Brsar Writing
 						brsar = open(GamePath+'/sys/main.dol', "r+b")
+						if(Songs[number].SongType == SongTypeValue.Regular):
+							MainDolOffset = '59C56E'
 						brsar.seek(int(MainDolOffset,16)+6+int("BC",16)*Songs[number].MemOrder)
 						brsar.write(bytes.fromhex('ffffffffffff'))
 						brsar.close()
@@ -1232,36 +1384,14 @@ while True:
 						name = name+number
 						if(Selection == 3) and (not os.path.isdir(name)): os.mkdir(name)
 						if(Selection == 2): zipObj = zipfile.ZipFile(name+'.zip', 'w')
-						md5_hash = hashlib.md5()
-						a_file = open(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar', "rb")
-						content = a_file.read()
-						a_file.close()
-						md5_hash.update(content)
-						if(brsarChecksum != md5_hash.hexdigest()):
-							if(Selection == 3):
-								copyfile(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar',name+'/rp_Music_sound.brsar')
-							else:
-								zipObj.write(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar','rp_Music_sound.brsar')
-						md5_hash = hashlib.md5()
-						a_file = open(GamePath+'/files/US/Message/message.carc', "rb")
-						content = a_file.read()
-						a_file.close()
-						md5_hash.update(content)
-						if(messageChecksum != md5_hash.hexdigest()):
-							if(Selection == 3):
-								copyfile(GamePath+'/files/US/Message/message.carc',name+'/message.carc')
-							else:
-								zipObj.write(GamePath+'/files/US/Message/message.carc','message.carc')
-						md5_hash = hashlib.md5()
-						a_file = open(GamePath+'/sys/main.dol', "rb")
-						content = a_file.read()
-						a_file.close()
-						md5_hash.update(content)
-						if(mainDolChecksum != md5_hash.hexdigest()):
-							if(Selection == 3):
-								copyfile(GamePath+'/sys/main.dol',name+'/main.dol')
-							else:
-								zipObj.write(GamePath+'/sys/main.dol','main.dol')
+						if(Selection == 3):
+							copyfile(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar',name+'/rp_Music_sound.brsar')
+							copyfile(GetMessagePath(GamePath),name+'/message.carc')
+							copyfile(GamePath+'/sys/main.dol',name+'/main.dol')
+						else:
+							zipObj.write(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar','rp_Music_sound.brsar')
+							zipObj.write(GetMessagePath(GamePath),'message.carc')
+							zipObj.write(GamePath+'/sys/main.dol','main.dol')
 						if(os.path.isfile(GamePath+'/GeckoCodes.ini')):
 							if(Selection == 3):
 								copyfile(GamePath+'/GeckoCodes.ini',name+'/GeckoCodes.ini')
@@ -1269,10 +1399,10 @@ while True:
 								zipObj.write(GamePath+'/GeckoCodes.ini','GeckoCodes.ini')
 							CreateGct()
 							if(Selection == 3):
-								os.rename(ProgramPath+'/R64E01.gct',name+'/R64E01.gct')
+								os.rename(ProgramPath+'/'+GetGameId(GamePath)+'.gct',name+'/'+GetGameId(GamePath)+'.gct')
 							else:
-								zipObj.write(ProgramPath+'/R64E01.gct','R64E01.gct')
-								os.remove(ProgramPath+'/R64E01.gct')
+								zipObj.write(ProgramPath+'/'+GetGameId(GamePath)+'.gct',GetGameId(GamePath)+'.gct')
+								os.remove(ProgramPath+'/'+GetGameId(GamePath)+'.gct')
 						if(Selection == 2):
 							zipObj.close()
 							name = name+'.zip'
@@ -1298,7 +1428,7 @@ while True:
 						if(input('\nWould You Like to Set This Path as the Current Game Path? [y/n] ') == 'y'):
 							GamePath = os.path.dirname(DiskPath).replace('\\','/')+'/'+os.path.splitext(os.path.basename(DiskPath))[0]+'/DATA'
 							BrsarPath = GamePath+'/files/sound/MusicStatic/rp_Music_sound.brsar'
-							MessagePath = GamePath+'/files/US/Message/message.carc'
+							MessagePath = GetMessagePath(GamePath)
 							SaveSetting('Paths','GamePath',GamePath)
 					elif(Selection == 2) or (Selection == 3):
 						if(input('\nUse Game Path as Disk Directory? [y/n] ') != 'y'):
@@ -1337,8 +1467,8 @@ while True:
 						print('\nCreating Gct...')
 						CreateGct()
 						print('\nPatching Main.dol...')
-						subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section \"'+ProgramPath+'/R64E01.gct\"',capture_output=True)
-						os.remove(ProgramPath+'/R64E01.gct')
+						subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wstrt.exe\" patch \"'+GamePath+'/sys/main.dol\" --add-section \"'+ProgramPath+'/'+GetGameId(GamePath)+'.gct --force\"',capture_output=True)
+						os.remove(ProgramPath+'/'+GetGameId(GamePath)+'.gct')
 						print('\nPatch Successful!')
 					else:
 						print('\nNo Gecko Codes Found')
@@ -1363,9 +1493,9 @@ while True:
 				CreateGct()
 				print('\nCopying Files...')
 				copyfile(GamePath+'/files/Sound/MusicStatic/rp_Music_sound.brsar',ModPath+'/'+ModName.replace(' ','')+'/rp_Music_sound.brsar')
-				copyfile(GamePath+'/files/US/Message/message.carc',ModPath+'/'+ModName.replace(' ','')+'/message.carc')
+				copyfile(GetMessagePath(GamePath),ModPath+'/'+ModName.replace(' ','')+'/message.carc')
 				copyfile(ProgramPath+'/Helper/GctFiles/codehandler.bin',ModPath+'/Riivolution/codehandler.bin')
-				os.rename(ProgramPath+'/R64E01.gct',ModPath+'/Riivolution/codes/R64E01.gct')
+				os.rename(ProgramPath+'/'+GetGameId(GamePath)+'.gct',ModPath+'/Riivolution/codes/'+GetGameId(GamePath)+'.gct')
 				print('\nCreating XML file...')
 				linestowrite = [
 				'<wiidisc version="1" root="">\n',
@@ -1381,13 +1511,13 @@ while True:
 				'  </options>\n',
 				'  <patch id="TheMod">\n',
 				'    <file disc="/Sound/MusicStatic/rp_Music_sound.brsar" external="/'+ModName.replace(' ','')+'/rp_Music_sound.brsar" offset="" />\n',
-				'    <file disc="/US/Message/message.carc" external="/'+ModName.replace(' ','')+'/message.carc" offset="" />\n',
+				'    <file disc="/'+GetRegion(GamePath)+'/Message/message.carc" external="/'+ModName.replace(' ','')+'/message.carc" offset="" />\n',
 				'    <memory valuefile="codehandler.bin" offset="0x80001800" />\n',
 				'    <memory value="8000" offset="0x00001CDE" />\n',
 				'    <memory value="28B8" offset="0x00001CE2" />\n',
 				'    <memory value="8000" offset="0x00001F5A" />\n',
 				'    <memory value="28B8" offset="0x00001F5E" />\n',
-				'    <memory valuefile="/codes/R64E01.gct" offset="0x800028B8" />\n',
+				'    <memory valuefile="/codes/'+GetGameId(GamePath)+'.gct" offset="0x800028B8" />\n',
 				'  </patch>\n',
 				'</wiidisc>\n']
 				xml = open(ModPath+'/Riivolution/'+ModName.replace(' ','')+'.xml','w')
@@ -1462,12 +1592,14 @@ while True:
 							codes = open(GamePath+'/GeckoCodes.ini')
 							textlines = codes.readlines()
 							codes.close()
-							for linenum in range(len(textlines)):
-								if(linenum < len(textlines)):
-									if('Style' in textlines[linenum]):
+							linenum = 0
+							while linenum < len(textlines):
+								if('Style' in textlines[linenum]):
+									textlines.pop(linenum)
+									while(len(textlines) > linenum) and (textlines[linenum][0].isnumeric() or textlines[linenum][0].isalpha()):
 										textlines.pop(linenum)
-										while(len(textlines) > linenum) and (textlines[linenum][0].isnumeric() or textlines[linenum][0].isalpha()):
-											textlines.pop(linenum)
+								else:
+									linenum = linenum+1
 							codes = open(GamePath+'/GeckoCodes.ini','w')
 							codes.writelines(textlines)
 							codes.close()
@@ -1515,9 +1647,9 @@ while True:
 		PrintSectionTitle('Help')
 		print("(#0) Back to Main Menu")
 		print("(#1) Open the Wiki")
-		print("(#2) Open Video Guide (No Video Guide Yet")
+		print("(#2) Open Video Guide")
 		
-		Selection = MakeSelection(['What type of help do you want',0,1])
+		Selection = MakeSelection(['What type of help do you want',0,2])
 
 		if(Selection == 1):
 			print('\nOpening Wiki...')
@@ -1526,7 +1658,7 @@ while True:
 		elif(Selection == 2):
 			print('\nOpening Video Guide...')
 			time.sleep(0.5)
-			webbrowser.open('thereisnovideoguideyetbecauseihaventrecordedthevideoyet.com')
+			webbrowser.open('https://youtu.be/EBz9VtBXqEo')
 		print('')
 		time.sleep(0.5)
 	elif(Selection == 10): #////////////////////////////////////////Settings
@@ -1574,7 +1706,7 @@ while True:
 					print("(#4) Use Auto Found Length and Tempo: "+DefaultUseAutoLengthTempo)
 					print("(#5) Replace Song Names After Adding Custom Song: "+DefaultReplaceSongNames)
 
-					Selection = MakeSelection(['Choose an Option',0,5])
+					Selection = MakeSelection(['Choose an Option',0,6])
 					if(Selection == 1):
 						DefaultLoadSongScore = ChangeDefaultAnswer(['Yes','No'],['Load Song And Score',DefaultLoadSongScore])
 					elif(Selection == 2):
