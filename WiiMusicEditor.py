@@ -443,7 +443,7 @@ def FindDolphinSave():
 	global SaveDataPath
 	if(not os.path.isdir(DolphinSaveData+'/Wii')):
 		while True:
-			DolphinSaveData = input("\nDrag Dolphin Config Directory to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+			DolphinSaveData = input("\nDrag Dolphin Save Directory to Window\n(Usually located in Documents\\Dolphin Emulator or Dolphin Folder\\User): ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 			if(os.path.isdir(DolphinSaveData+'/Wii')):
 				DolphinSaveData = DolphinSaveData.replace('\\','/')
 				CodePath = DolphinSaveData+"/GameSettings/"+GetGameId(GamePath)+".ini"
@@ -998,7 +998,7 @@ while True:
 				if(DefaultLoadSongScore == 'Yes') and (Songs[SongSelected].SongType == SongTypeValue.Regular):
 					extraString = ' [SONG]'
 					if(num == 1): extraString = ' [SCORE]'
-				BrseqPath = input("\nDrag File to Batch (MIDIs, BRSEQ, & RSEQ Files only)"+extraString+": ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+				BrseqPath = input("\nDrag File to Window (MIDIs, BRSEQ, & RSEQ Files only)"+extraString+": ").replace('&', '').replace('\'', '').replace('\"', '').strip()
 				if(os.path.isfile(BrseqPath)) and (pathlib.Path(BrseqPath).suffix in ExceptedSongExtensions):
 					break
 				else:
