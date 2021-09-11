@@ -20,6 +20,7 @@ while True:
 		from tabulate import tabulate 
 		break
 	except ImportError:
+		print("Installing Dependencies...\n")
 		subprocess.run('python -m pip install --upgrade pip')
 		subprocess.run('pip install mido requests colorama tqdm tabulate')
 
@@ -826,11 +827,78 @@ def ReplaceSong(positionOffset,listOffset,replacementArray,infoArray):
 			brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
 	brsar.close()
 
+def ReplaceWave(startOffset,replaceNumber):
+	sizeDifference = 0
+	brsar = open(BrsarPath, "r+b")
+	brsar.seek(startOffset)
+	rwarSpot = int.from_bytes(brsar.read(4),'big')
+	brsar.seek(rwarSpot+0x18)
+	dataSection = rwarSpot+int.from_bytes(brsar.read(4),'big')
+	brsar.seek(rwarSpot+0x10)
+	table = rwarSpot+int.from_bytes(brsar.read(4),'big')
+	brsar.seek(table+8)
+	numberOfRwavs = int.from_bytes(brsar.read(4),'big')
+	if(replaceNumber == -1):
+		for i in range(numberOfRwavs):
+			brsar.seek(table+0x10+0xC*i)
+			tempdataSpot = int.from_bytes(brsar.read(4),'big')
+			if(i == 0): dataSpot = tempdataSpot
+			dataSize = int.from_bytes(brsar.read(4),'big')
+			brsar.seek(table+0x10+0xC*i)
+			offset = int.from_bytes(brsar.read(4),'big')
+			brsar.seek(table+0x10+0xC*i)
+			brsar.write((offset+sizeDifference).to_bytes(4, 'big'))
+			brsar.seek(table+0x10+0xC*i)
+			brsar.write((tempdataSpot+sizeDifference).to_bytes(4, 'big'))
+			sizeDifference += rwavSize-dataSize
+			brsar.seek(table+0x10+0xC*i+4)
+			brsar.write(rwavSize.to_bytes(4, 'big'))
+		
+	else:
+		brsar.seek(table+0x10+0xC*replaceNumber)
+		dataSpot = int.from_bytes(brsar.read(4),'big')
+		dataSize = int.from_bytes(brsar.read(4),'big')
+		sizeDifference = rwavSize-dataSize
+		brsar.seek(table+0x10+0xC*replaceNumber+4)
+		brsar.write(rwavSize.to_bytes(4, 'big'))
+		for i in range(replaceNumber+1,numberOfRwavs):
+			brsar.seek(table+0x10+0xC*i)
+			offset = int.from_bytes(brsar.read(4),'big')
+			brsar.seek(table+0x10+0xC*i)
+			brsar.write((offset+sizeDifference).to_bytes(4, 'big'))
+	for offset in [8,startOffset+4,rwarSpot+8]:
+		brsar.seek(offset)
+		size = brsar.read(4)
+		brsar.seek(offset)
+		brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+	for offset in rseqList:
+		if(int(offset,16) > startOffset):
+			brsar.seek(int(offset,16))
+			size = brsar.read(4)
+			brsar.seek(int(offset,16))
+			brsar.write((int.from_bytes(size,"big")+sizeDifference).to_bytes(4, 'big'))
+	brsar.seek(0)
+	if(replaceNumber == -1):
+		data1 = brsar.read(dataSection+dataSpot)
+		brsar.seek(dataSection+dataSpot+rwavSize*numberOfRwavs-sizeDifference)
+		data2 = brsar.read()
+		brsar.close()
+		brsar = open(BrsarPath, "wb")
+		brsar.write(data1+rwavInfo*numberOfRwavs+data2)
+	else:
+		data1 = brsar.read(dataSection+dataSpot)
+		brsar.seek(dataSection+dataSpot+dataSize)
+		data2 = brsar.read()
+		brsar.close()
+		brsar = open(BrsarPath, "wb")
+		brsar.write(data1+rwavInfo+data2)
+	brsar.close()
+
 def ReplaceEverything(startOffset):
 	brsar = open(BrsarPath, "rb")
 	brsar.seek(startOffset)
 	brsar.seek(int.from_bytes(brsar.read(4),'big'))
-	if(brsar.read(4).hex() == '52534551'):
+	if(brsar.read(4).hex() == '52534551') or True:
 		brsar.seek(startOffset-20)
 		if(brsar.read(4).hex() != 'ffffffff'):
 			brsar.seek(startOffset+24)
@@ -1254,13 +1322,15 @@ while True:
 			print("(#0) Back to Main Menu")
 			print("(#1) Change All Wii Music Text")
 			print("(#2) Change Default Styles")
-			print("(#3) Remove Song")
-			print("(#4) Import/Export Files")
-			print("(#5) Extract/Pack Wii Music ROM")
-			print("(#6) Patch Main.dol With Gecko Codes")
-			print("(#7) Create Riivolution Patch")
+			print("(#3) Change Instrument Sound Effect (coming soon to a store near you)")
+			print("(#4) Change Tute Voice")
+			print("(#5) Remove Song")
+			print("(#6) Import/Export Files")
+			print("(#7) Extract/Pack Wii Music ROM")
+			print("(#8) Patch Main.dol With Gecko Codes")
+			print("(#9) Create Riivolution Patch")
 
-			Selection = MakeSelection(['Please Select an Option',0,7])
+			Selection = MakeSelection(['Please Select an Option',0,9])
 
 			if(Selection == 1): #////////////////////////////////////////Change Text
 				#Load Files
@@ -1309,7 +1379,33 @@ while True:
 
 				AddPatch(Songs[SongSelected].Name+' Default Style Patch','0'+format(int(Songs[SongSelected].MemOffset,16)+GetSongRegionOffset()+42,'x')+' 000000'+Styles[StyleSelected].StyleId+'\n')
 				print('\nPatch Successful')
-			elif(Selection == 3): #////////////////////////////////////////Remove Song
+			elif(Selection == 3): #////////////////////////////////////////Replace Instrument Sounds
+				while True:
+					BrseqPath = input("\nDrag .rwav to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+					if(os.path.isfile(BrseqPath)) and (pathlib.Path(BrseqPath).suffix == ".rwav"):
+						break
+					else:
+						print("\nERROR: Not A Valid File!")
+				print("Instrument Sound Effect Replaced! (except it isn't because this feature is ready yet!)\n")
+			elif(Selection == 4): #////////////////////////////////////////Replace Tute Voice
+				while True:
+					BrseqPath = input("\nDrag .rwav to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+					if(os.path.isfile(BrseqPath)) and (pathlib.Path(BrseqPath).suffix == ".rwav"):
+						break
+					else:
+						print("\nERROR: Not A Valid File!")
+
+				Brseq = open(BrseqPath,"rb")
+				rwavInfo = Brseq.read()
+				Brseq.close()
+				rwavSize = os.stat(BrseqPath).st_size
+
+				Selection = MakeSelection(["Enter Voice Line to Replace (1-142) (0 = Replace All)",0,142])
+
+				if(Selection == 0): ReplaceWave(0x37B50,-1)
+				else: ReplaceWave(0x37B50,Selection-1)
+				print("\nVoice Replaced!")
+			elif(Selection == 5): #////////////////////////////////////////Remove Song
 				FindGameFolder()
 				FindDolphinSave()
 				PrintSectionTitle('Remove Song')
@@ -1349,7 +1445,7 @@ while True:
 					if(Selection != len(Songs)-1): break
 
 				print('\nEradication Complete!')
-			elif(Selection == 4): #////////////////////////////////////////Import/Export Files
+			elif(Selection == 6): #////////////////////////////////////////Import/Export Files
 				while True:
 					PrintSectionTitle('Import/Export Files')
 					print("(#0) Back To Main Menu")
@@ -1407,7 +1503,7 @@ while True:
 							zipObj.close()
 							name = name+'.zip'
 						print('\nExport Complete!\nSaved to: '+name)
-			elif(Selection == 5): #////////////////////////////////////////Extract/Pack Wii Music ROM
+			elif(Selection == 7): #////////////////////////////////////////Extract/Pack Wii Music ROM
 				while True:
 					PrintSectionTitle('Extract/Pack Wii Music ROM')
 					print("(#0) Back To Advanced Tools")
@@ -1459,7 +1555,7 @@ while True:
 							subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/wit.exe\" cp \"'+DiskPath+'\" \"'+DiskPath+DiskName+'.iso\" --iso')
 					else: break
 					print('')
-			elif(Selection == 6): #////////////////////////////////////////Patch Main.dol
+			elif(Selection == 8): #////////////////////////////////////////Patch Main.dol
 				FindGameFolder()
 				FindDolphinSave()
 				if(input('\nAre you sure you want to patch Main.dol? [y/n] ') == 'y'):
@@ -1472,7 +1568,7 @@ while True:
 						print('\nPatch Successful!')
 					else:
 						print('\nNo Gecko Codes Found')
-			elif(Selection == 7): #////////////////////////////////////////Riivolution Patch
+			elif(Selection == 9): #////////////////////////////////////////Riivolution Patch
 				PrintSectionTitle('Riivolution Patch')
 				FindGameFolder()
 				FindDolphinSave()
