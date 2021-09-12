@@ -43,10 +43,11 @@ class StyleClass:
 		self.StyleId = StyleId
 
 class InstrumentClass:
-	def __init__(self,Name,Number,InMenu):
+	def __init__(self,Name,Number,InMenu,NumberOfSounds):
 		self.Name = Name
 		self.Number = Number
 		self.InMenu = InMenu
+		self.NumberOfSounds = NumberOfSounds
 
 class SongTypeValue:
 	Regular = 0
@@ -185,74 +186,74 @@ StyleClass(StyleTypeValue.Menu,'Menu Style March','0659AD1C','30'),
 StyleClass(StyleTypeValue.Menu,'Menu Style A Capella','0659AD40','31')]
 
 Instruments = [
-InstrumentClass('Piano',0,True),
-InstrumentClass('Marimba',1,False),
-InstrumentClass('Vibraphone',2,True),
-InstrumentClass('Steel Drum',3,False),
-InstrumentClass('Dulcimer',4,False),
-InstrumentClass('Handbell',5,False),
-InstrumentClass('Harpsichord',6,False),
-InstrumentClass('Timpani',7,False),
-InstrumentClass('Galactic Piano',8,False),
-InstrumentClass('Toy Piano',9,False),
-InstrumentClass('Dog',10,False),
-InstrumentClass('Cat',11,False),
-InstrumentClass('Rapper',12,False),
-InstrumentClass('Guitar',13,False),
-InstrumentClass('Electric Guitar',14,False),
-InstrumentClass('Electric Bass',15,False),
-InstrumentClass('Double Bass',16,False),
-InstrumentClass('Ukulele',17,False),
-InstrumentClass('Banjo',18,False),
-InstrumentClass('Sitar',19,False),
-InstrumentClass('Shamisen',20,True),
-InstrumentClass('Harp',21,False),
-InstrumentClass('Galactic Guitar',22,True),
-InstrumentClass('Galactic Bass',23,True),
-InstrumentClass('Jaw Harp',24,False),
-InstrumentClass('Violin',25,True),
-InstrumentClass('Cello',26,False),
-InstrumentClass('Trumpet',27,False),
-InstrumentClass('Saxophone',28,True),
-InstrumentClass('Flute',29,True),
-InstrumentClass('Clairenet',30,True),
-InstrumentClass('Tuba',31,True),
-InstrumentClass('Accordion',32,False),
-InstrumentClass('Harmonica',33,False),
-InstrumentClass('Bagpipe',34,False),
-InstrumentClass('Recorder',35,False),
-InstrumentClass('Galactic horn',36,False),
-InstrumentClass('Nes',37,False),
-InstrumentClass('Singer',38,True),
-InstrumentClass('Another Singer',39,True),
-InstrumentClass('Basic Drums',40,True),
-InstrumentClass('Rock Drums',41,True),
-InstrumentClass('Jazz Drums',42,False),
-InstrumentClass('Latin Drums',43,True),
-InstrumentClass('Ballad Drums',44,False),
-InstrumentClass('Congas',45,False),
-InstrumentClass('Maracas',46,False),
-InstrumentClass('Tambourine',47,False),
-InstrumentClass('Cuica',48,False),
-InstrumentClass('Cowbell',49,False),
-InstrumentClass('Clap',50,False),
-InstrumentClass('Bells',51,False),
-InstrumentClass('Castanets',52,False),
-InstrumentClass('Guiro',53,False),
-InstrumentClass('Timpales',54,False),
-InstrumentClass('Djembe',55,False),
-InstrumentClass('Taiko Drum',56,True),
-InstrumentClass('Cheerleader',57,False),
-InstrumentClass('Snare Drum',58,True),
-InstrumentClass('Bass Drum',59,False),
-InstrumentClass('Galactic Drums',60,True),
-InstrumentClass('Galactic Congas',61,False),
-InstrumentClass('DJ Turntables',62,True),
-InstrumentClass('Kung Fu Person',63,False),
-InstrumentClass('Reggae Drums',64,False),
-InstrumentClass('Whistle',65,False),
-InstrumentClass('Beatbox',66,True),
-InstrumentClass('None',-1,False)]
+InstrumentClass('Piano',0,True,["C2","G2","D3","A3","E4","B4","F#5","D6","F6"]),
+InstrumentClass('Marimba',1,False,["G3","D4","A4","E5","B5","F#6"]),
+InstrumentClass('Vibraphone',2,True,["F#3","C#4","G#4","D#5","A#5","F6"]),
+InstrumentClass('Steel Drum',3,False,["F#2","A#3","F#4","G4","E4","??(26)","C4"]),
+InstrumentClass('Dulcimer',4,False,["F3","C#4","G4","C5","A4","D6"]),
+InstrumentClass('Handbell',5,False,["G4","G4 (Variation)","G4 (Variation 2)","C7"]),
+InstrumentClass('Harpsichord',6,False,["G2","C4","C5","C6"]),
+InstrumentClass('Timpani',7,False,["F3","F3 (Variation)","F3 (Variation 2)"]),
+InstrumentClass('Galactic Piano',8,False,["G2","D3","A3","E4","B4","F#5"]),
+InstrumentClass('Toy Piano',9,False,["B4","D6"]),
+InstrumentClass('Dog',10,False,["Howl","??(54)","??(55)","??(54)","D5","G5","C#6"]),
+InstrumentClass('Cat',11,False,["G3","C#4","G4","C#5","G5","C#6"]),
+InstrumentClass('Rapper',12,False,["??"]*62),
+InstrumentClass('Guitar',13,False,["G#2","E3","B3","F#4","D5","??(133)"]),
+InstrumentClass('Electric Guitar',14,False,["A2","D3","B3","G4","E5","A5"]),
+InstrumentClass('Electric Bass',15,False,["G1","D2","G2","C3","G#3"]),
+InstrumentClass('Double Bass',16,False,["F1","G#1","G#2","G#3"]),
+InstrumentClass('Ukulele',17,False,["B3","F#4","C#5","G#5"]),
+InstrumentClass('Banjo',18,False,["A#2","F3","C4","G4","D5","A5"]),
+InstrumentClass('Sitar',19,False,["C3","G3","C4","G4"]),
+InstrumentClass('Shamisen',20,True,["D3","A3","D4","A4"]),
+InstrumentClass('Harp',21,False,["C3","C4","E5","B5","G6"]),
+InstrumentClass('Galactic Guitar',22,True,["F2","C3","F3","C4","F4","C5","F5"]),
+InstrumentClass('Galactic Bass',23,True,["A1","C2","F2","A2","C3"]),
+InstrumentClass('Jaw Harp',24,False,["??(184)","??(185)","??(186)","??(187)"]),
+InstrumentClass('Violin',25,True,["C4","A4","E5","B5","F#6"]),
+InstrumentClass('Cello',26,False,["A2","D3","A3","E4","B4"]),
+InstrumentClass('Trumpet',27,False,["F#2","G#3","A3","D4","G4","C5","F5","Bb5","G6"]),
+InstrumentClass('Saxophone',28,True,["F2","B2","F3","E4","Bb4","E5","Bb5","E6"]),
+InstrumentClass('Flute',29,True,["D4","G4","C5","G5","D6","G6","D7"]),
+InstrumentClass('Clairenet',30,True,["Bb2","F3","C4","F4","C5","F5","C6"]),
+InstrumentClass('Tuba',31,True,["??(229)","Eb2","Bb2","A3"]),
+InstrumentClass('Accordion',32,False,["B2","C4"]),
+InstrumentClass('Harmonica',33,False,["B4","A3","E4","D5","B5","A6"]),
+InstrumentClass('Bagpipe',34,False,["C4","F#4","C5","F#5"]),
+InstrumentClass('Recorder',35,False,["G6"]),
+InstrumentClass('Galactic horn',36,False,["G2","C4","C5"]),
+InstrumentClass('Nes',37,False,["Mario Jump","C3","F3","Bb3","G4","C5","C6"]),
+InstrumentClass('Singer',38,True,["C4 (Wii)","G4 (Wii)","C5 (Wii)","G5 (Wii)","C4 (Do)","F#4 (Do)","D5 (Do)","F#5 (Do)","C4 (Ba)","G4 (Ba)","C5 (Ba)","G5 (Ba)"]),
+InstrumentClass('Another Singer',39,True,["D3 (Wii)","G3 (Wii)","C4 (Wii)","G4 (Wii)","C3 (Do)","G3 (Do)","C4 (Do)","G4 (Do)","D3 (Ba)","A3 (Ba)","D4 (Ba)","G4 (Ba)"]),
+InstrumentClass('Basic Drums',40,True,[]),
+InstrumentClass('Rock Drums',41,True,[]),
+InstrumentClass('Jazz Drums',42,False,[]),
+InstrumentClass('Latin Drums',43,True,[]),
+InstrumentClass('Ballad Drums',44,False,[]),
+InstrumentClass('Congas',45,False,[]),
+InstrumentClass('Maracas',46,False,[]),
+InstrumentClass('Tambourine',47,False,[]),
+InstrumentClass('Cuica',48,False,[]),
+InstrumentClass('Cowbell',49,False,[]),
+InstrumentClass('Clap',50,False,[]),
+InstrumentClass('Bells',51,False,[]),
+InstrumentClass('Castanets',52,False,[]),
+InstrumentClass('Guiro',53,False,[]),
+InstrumentClass('Timpales',54,False,[]),
+InstrumentClass('Djembe',55,False,[]),
+InstrumentClass('Taiko Drum',56,True,[]),
+InstrumentClass('Cheerleader',57,False,[]),
+InstrumentClass('Snare Drum',58,True,[]),
+InstrumentClass('Bass Drum',59,False,[]),
+InstrumentClass('Galactic Drums',60,True,[]),
+InstrumentClass('Galactic Congas',61,False,[]),
+InstrumentClass('DJ Turntables',62,True,[]),
+InstrumentClass('Kung Fu Person',63,False,[]),
+InstrumentClass('Reggae Drums',64,False,[]),
+InstrumentClass('Whistle',65,False,[]),
+InstrumentClass('Beatbox',66,True,[]),
+InstrumentClass('None',-1,False,[])]
 
 MainDolOffset = '59C56E'
 
@@ -1355,7 +1356,7 @@ while True:
 			print("(#0) Back to Main Menu")
 			print("(#1) Change All Wii Music Text")
 			print("(#2) Change Default Styles")
-			print("(#3) Change Instrument Sound Effect (Replaces all instruments, normal instrument replacement coming soon)")
+			print("(#3) Change Instrument Sound Effect")
 			print("(#4) Change Tute Voice")
 			print("(#5) Remove Song")
 			print("(#6) Import/Export Files")
@@ -1417,20 +1418,40 @@ while True:
 				AddPatch(Songs[SongSelected].Name+' Default Style Patch','0'+format(int(Songs[SongSelected].MemOffset,16)+GetSongRegionOffset()+42,'x')+' 000000'+Styles[StyleSelected].StyleId+'\n')
 				print('\nPatch Successful')
 			elif(Selection == 3): #////////////////////////////////////////Replace Instrument Sounds
-				while True:
-					BrseqPath = input("\nDrag .rwav to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
-					if(os.path.isfile(BrseqPath)) and (pathlib.Path(BrseqPath).suffix == ".rwav"):
-						break
-					else:
-						print("\nERROR: Not A Valid File!")
+				print()
+				for num in range(40):
+					moreThanOne = ""
+					if(len(Instruments[num].NumberOfSounds) != 1): moreThanOne = "s"
+					print('(#'+str(num)+') '+str(Instruments[num].Name)+" ("+str(len(Instruments[num].NumberOfSounds))+" Sample"+moreThanOne+")")
+					time.sleep(0.005)
 
-				Brseq = open(BrseqPath,"rb")
-				rwavInfo = Brseq.read()
-				Brseq.close()
-				rwavSize = os.stat(BrseqPath).st_size
-				
-				ReplaceWave(0x33654,-1)
-				print("\nInstrument Sound Effect Replaced!")
+				Selection = MakeSelection(["Choose an Instrument to Replace",0,39])
+
+				print("\n(#0) Back")
+				for i in range(len(Instruments[Selection].NumberOfSounds)):
+					print("(#"+str(i+1)+") Replace Note ["+str(Instruments[Selection].NumberOfSounds[i])+"]")
+
+				Option = MakeSelection(["Choose an Option",0,len(Instruments[Selection].NumberOfSounds)])
+
+				if(Option != 0):
+					if(Selection != 0):
+						for i in range(Selection):
+							Option += len(Instruments[i].NumberOfSounds)
+
+					while True:
+						BrseqPath = input("\nDrag .rwav to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
+						if(os.path.isfile(BrseqPath)) and (pathlib.Path(BrseqPath).suffix == ".rwav"):
+							break
+						else:
+							print("\nERROR: Not A Valid File!")
+
+					Brseq = open(BrseqPath,"rb")
+					rwavInfo = Brseq.read()
+					Brseq.close()
+					rwavSize = os.stat(BrseqPath).st_size
+
+					ReplaceWave(0x33654,Option-1)
+					print("\nInstrument Sound Effect Replaced!")
 			elif(Selection == 4): #////////////////////////////////////////Replace Tute Voice
 				while True:
 					BrseqPath = input("\nDrag .rwav to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
