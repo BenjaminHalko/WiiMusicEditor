@@ -66,57 +66,57 @@ Songs = [
 SongClass(SongTypeValue.Regular,'A Little Night Music','025a08a8',6),
 SongClass(SongTypeValue.Regular,'American Patrol','025a0c54',11),
 SongClass(SongTypeValue.Regular,'Animal Crossing','025a2780',48),
-SongClass(SongTypeValue.Regular,'Animal Crossing K.K. Blues','025a1758',26),
+SongClass(SongTypeValue.Regular,'Animal Crossing -- K.K. Blues','025a1758',26),
 SongClass(SongTypeValue.Regular,'Bridal Chorus','025a04fc',1),
 SongClass(SongTypeValue.Regular,'Carmen','025a0674',3),
 SongClass(SongTypeValue.Regular,'Chariots of Fire','025a1df4',35),
 SongClass(SongTypeValue.Regular,'Daydream Believer','025a1c7c',33),
 SongClass(SongTypeValue.Regular,'Do-Re-Mi','025a0adc',9),
 SongClass(SongTypeValue.Regular,'Every Breath You Take','025a1d38',34),
-SongClass(SongTypeValue.Regular,'F-Zero','025a283c',49),
-SongClass(SongTypeValue.Regular,'Frere Jacques','025a1468',22),
+SongClass(SongTypeValue.Regular,'F-Zero -- Mute City Theme','025a283c',49),
+SongClass(SongTypeValue.Regular,'Frère Jacques','025a1468',22),
 SongClass(SongTypeValue.Regular,'From Santurtzi to Bilbao','025a1814',27),
 SongClass(SongTypeValue.Regular,'From the New World','025a1000',16),
 SongClass(SongTypeValue.Regular,'Happy Birthday to You','025a0a20',8),
-SongClass(SongTypeValue.Regular,'Ill Be There','025a21a0',40),
-SongClass(SongTypeValue.Regular,'Ive Never Been to Me','025a2490',44),
+SongClass(SongTypeValue.Regular,'I\'ll Be There','025a21a0',40),
+SongClass(SongTypeValue.Regular,'I\'ve Never Been to Me','025a2490',44),
 SongClass(SongTypeValue.Regular,'Jingle Bell Rock','025a2318',41),
 SongClass(SongTypeValue.Regular,'La Bamba','025a10bc',17),
 SongClass(SongTypeValue.Regular,'La Cucaracha','025a198c',29),
 SongClass(SongTypeValue.Regular,'Little Hans','025a169c',25),
-SongClass(SongTypeValue.Regular,'Long Long Ago','025a1234',19),
+SongClass(SongTypeValue.Regular,'Long, Long Ago','025a1234',19),
 SongClass(SongTypeValue.Regular,'Material Girl','025a2028',38),
 SongClass(SongTypeValue.Regular,'Minuet in G Major','025a0964',7),
-SongClass(SongTypeValue.Regular,'My Grandfathers Clock','025a0f44',15),
-SongClass(SongTypeValue.Regular,'O-Christmas Tree','025a15e0',24),
-SongClass(SongTypeValue.Regular,'Ode To Joy','025a0440',0),
-SongClass(SongTypeValue.Regular,'Oh My Darling Clementine','025a0e88',14),
+SongClass(SongTypeValue.Regular,'My Grandfather\'s Clock','025a0f44',15),
+SongClass(SongTypeValue.Regular,'O Christmas Tree','025a15e0',24),
+SongClass(SongTypeValue.Regular,'Ode to Joy','025a0440',0),
+SongClass(SongTypeValue.Regular,'Oh, My Darling Clementine','025a0e88',14),
 SongClass(SongTypeValue.Regular,'Over the Waves','025a1a48',30),
 SongClass(SongTypeValue.Regular,'Please Mr. Postman','025a1f6c',37),
 SongClass(SongTypeValue.Regular,'Sakura Sakura','025a1b04',31),
 SongClass(SongTypeValue.Regular,'Scarborough Fair','025a1178',18),
 SongClass(SongTypeValue.Regular,'September','025a1eb0',36),
 SongClass(SongTypeValue.Regular,'Sukiyaki','025a1bc0',32),
-SongClass(SongTypeValue.Regular,'Super Mario Bros','025a254c',45),
-SongClass(SongTypeValue.Regular,'Sur le Pont d Avignon','025a13ac',21),
+SongClass(SongTypeValue.Regular,'Super Mario Bros.','025a254c',45),
+SongClass(SongTypeValue.Regular,'Sur le pont d\'Avignon','025a13ac',21),
 SongClass(SongTypeValue.Regular,'Swan Lake','025a05b8',2),
 SongClass(SongTypeValue.Regular,'The Blue Danube','025a07ec',5),
 SongClass(SongTypeValue.Regular,'The Entertainer','025a0b98',10),
 SongClass(SongTypeValue.Regular,'The Flea Waltz','025a1524',23),
 SongClass(SongTypeValue.Regular,'The Legend of Zelda','025a2608',46),
-SongClass(SongTypeValue.Regular,'The Loco Motion','025a20e4',39),
+SongClass(SongTypeValue.Regular,'The Loco-Motion','025a20e4',39),
 SongClass(SongTypeValue.Regular,'Troika','025a18d0',28),
 SongClass(SongTypeValue.Regular,'Turkey in the Straw','025a0d10',12),
-SongClass(SongTypeValue.Regular,'Twinkle Twinkle Little Star','025a12f0',20),
+SongClass(SongTypeValue.Regular,'Twinkle, Twinkle, Little Star','025a12f0',20),
 SongClass(SongTypeValue.Regular,'Wake Me Up Before You Go-Go','025a23d4',42),
 SongClass(SongTypeValue.Regular,'Wii Music','025a0730',4),
 SongClass(SongTypeValue.Regular,'Wii Sports','025a26c4',47),
 SongClass(SongTypeValue.Regular,'Woman','025a23d4',43),
 SongClass(SongTypeValue.Regular,'Yankee Doodle','025a0dcc',13),
-SongClass(SongTypeValue.Maestro,'Twinkle Twinkle Little Star (Mii Maestro)','025a3e1c',2),
+SongClass(SongTypeValue.Maestro,'Twinkle, Twinkle, Little Star (Mii Maestro)','025a3e1c',2),
 SongClass(SongTypeValue.Maestro,'Carmen (Mii Maestro)','025a3d80',0),
-SongClass(SongTypeValue.Maestro,'The Four Seaons - Spring (Mii Maestro)','025a3f54',4),
-SongClass(SongTypeValue.Maestro,'Ode To Joy (Mii Maestro)','025a3ff0',3),
+SongClass(SongTypeValue.Maestro,'The Four Seasons -- Spring (Mii Maestro)','025a3f54',4),
+SongClass(SongTypeValue.Maestro,'Ode to Joy (Mii Maestro)','025a3ff0',3),
 SongClass(SongTypeValue.Maestro,'The Legend of Zelda (Mii Maestro)','025a3eb8',1),
 SongClass(SongTypeValue.Handbell,'O Christmas Tree (Handbell Harmony)','02566D5A',0),
 SongClass(SongTypeValue.Handbell,'Hum, Hum, Hum (Handbell Harmony)','02566E0A',2),
@@ -515,6 +515,33 @@ def ChangeName(SongToChange,newText):
 		message.close()
 		if(type(newText) == str): break
 	subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/encode.bat\" '+MessageFolder(),capture_output=True)
+
+def GetSongNames():
+	words = []
+	subprocess.run('\"'+ProgramPath+'/Helper/Wiimms/decode.bat\" '+MessageFolder(),capture_output=True)
+	message = open(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt','rb')
+	textlines = message.readlines()
+	message.close()
+	os.remove(MessageFolder().replace('\"','')+'/message.d/new_music_message.txt')
+	os.removedirs(MessageFolder().replace('\"','')+'/message.d')
+	for SongToChange in range(len(Songs)-1):
+		TextOffset = 'c8'
+		numberToChange = Songs[SongToChange].MemOrder
+		if(Songs[SongToChange].SongType == SongTypeValue.Maestro):
+			TextOffset = 'fa'
+			array = [0,4,2,3,1]
+			numberToChange = array[numberToChange]
+		elif(Songs[SongToChange].SongType == SongTypeValue.Handbell):
+			TextOffset = 'ff'
+			array = [0,2,3,1,4]
+			numberToChange = array[numberToChange]
+		offset = format(int(TextOffset,16)+numberToChange,'x').lower()
+		offset = ' ' * (4-len(offset))+offset+'00 @'
+		for num in range(len(textlines)):
+			if offset in str(textlines[num]):
+				words.append((textlines[num][22:len(textlines[num])-2:1]).decode("utf-8"))
+				break
+	return words
 
 def MessageFolder():
 	return '\"'+(os.path.dirname(MessagePath))+'\"'
@@ -1017,7 +1044,6 @@ while True:
 
 	Selection = MakeSelection(['Please Select an Option',1,11])
 	
-
 	if(Selection == 1): #////////////////////////////////////////Add Custom Song
 		#Load Files
 		FindGameFolder()
@@ -1035,12 +1061,15 @@ while True:
 
 		#Song List
 		PrintSectionTitle('Song List')
-
+		words = GetSongNames()
 		for num in range(len(Songs)):
+			extra = ""
+			if(Songs[num].SongType != SongTypeValue.Regular or words[num] != Songs[num].Name) and (Songs[num].SongType != SongTypeValue.Maestro or words[num] != Songs[num].Name[0:len(Songs[num].Name)-14:1]) and (Songs[num].SongType != SongTypeValue.Handbell or words[num] != Songs[num].Name[0:len(Songs[num].Name)-19:1]) and (Songs[num].SongType != SongTypeValue.Menu):
+				extra = " ["+words[num]+"]"
 			if(Songs[num].Name in appliedCustomSongs):
-				print(Fore.YELLOW+'(#'+str(num)+') '+str(Songs[num].Name)+' ~[Already Replaced]~'+Style.RESET_ALL)
+				print(Fore.YELLOW+'(#'+str(num)+') '+str(Songs[num].Name)+extra+' ~[Already Replaced]~'+Style.RESET_ALL)
 			else:
-				print('(#'+str(num)+') '+str(Songs[num].Name))
+				print('(#'+str(num)+') '+str(Songs[num].Name)+extra)
 			time.sleep(0.005)
 
 		#Song Selection
@@ -1189,9 +1218,13 @@ while True:
 		#Song List
 		PrintSectionTitle("Song List")
 		maxNumber = 0
+		words = GetSongNames()
 		for num in range(len(Songs)):
 			if(Songs[num].SongType != SongTypeValue.Menu):
-				print('(#'+str(num)+') '+str(Songs[num].Name))
+				extra = ""
+				if(Songs[num].SongType != SongTypeValue.Regular or words[num] != Songs[num].Name) and (Songs[num].SongType != SongTypeValue.Maestro or words[num] != Songs[num].Name[0:len(Songs[num].Name)-14:1]) and (Songs[num].SongType != SongTypeValue.Handbell or words[num] != Songs[num].Name[0:len(Songs[num].Name)-19:1]) and (Songs[num].SongType != SongTypeValue.Menu):
+					extra = " ["+words[num]+"]"
+				print('(#'+str(num)+') '+str(Songs[num].Name)+extra)
 				time.sleep(0.005)
 				maxNumber += 1
 
@@ -1365,8 +1398,12 @@ while True:
 				print("\nEditing Successful!\n")
 			elif(Selection == 2): #////////////////////////////////////////Change Default Style
 				print('')
+				words = GetSongNames()
 				for num in range(50):
-					print('(#'+str(num)+') '+Songs[num].Name)
+					extra = ""
+					if(Songs[num].SongType != SongTypeValue.Regular or words[num] != Songs[num].Name) and (Songs[num].SongType != SongTypeValue.Maestro or words[num] != Songs[num].Name[0:len(Songs[num].Name)-14:1]) and (Songs[num].SongType != SongTypeValue.Handbell or words[num] != Songs[num].Name[0:len(Songs[num].Name)-19:1]) and (Songs[num].SongType != SongTypeValue.Menu):
+						extra = " ["+words[num]+"]"
+					print('(#'+str(num)+') '+Songs[num].Name+extra)
 					time.sleep(0.005)
 
 				SongSelected = MakeSelection(['Please Select a Song',0,49])
@@ -1418,6 +1455,7 @@ while True:
 				PrintSectionTitle('Remove Song')
 				maxNumber = 0
 				for num in range(len(Songs)-1):
+					
 					if(Songs[num].SongType == SongTypeValue.Regular):
 						print('(#'+str(num)+') '+str(Songs[num].Name))
 						time.sleep(0.005)
