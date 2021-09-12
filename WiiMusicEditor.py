@@ -1322,7 +1322,7 @@ while True:
 			print("(#0) Back to Main Menu")
 			print("(#1) Change All Wii Music Text")
 			print("(#2) Change Default Styles")
-			print("(#3) Change Instrument Sound Effect (coming soon to a store near you)")
+			print("(#3) Change Instrument Sound Effect (Replaces all instruments, normal instrument replacement coming soon)")
 			print("(#4) Change Tute Voice")
 			print("(#5) Remove Song")
 			print("(#6) Import/Export Files")
@@ -1386,7 +1386,14 @@ while True:
 						break
 					else:
 						print("\nERROR: Not A Valid File!")
-				print("Instrument Sound Effect Replaced! (except it isn't because this feature is ready yet!)\n")
+
+				Brseq = open(BrseqPath,"rb")
+				rwavInfo = Brseq.read()
+				Brseq.close()
+				rwavSize = os.stat(BrseqPath).st_size
+				
+				ReplaceWave(0x33654,-1)
+				print("\nInstrument Sound Effect Replaced!")
 			elif(Selection == 4): #////////////////////////////////////////Replace Tute Voice
 				while True:
 					BrseqPath = input("\nDrag .rwav to Window: ").replace('&', '').replace('\'', '').replace('\"', '').strip()
